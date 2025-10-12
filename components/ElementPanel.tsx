@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, 'react';
 import { ElementData } from '../types/index';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import ElectronConfigurationViewer from './ElectronConfigurationViewer';
+import IsotopesViewer from './IsotopesViewer';
 
 interface ElementPanelProps {
   element: ElementData | null;
@@ -20,9 +21,9 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode; tooltip?: strin
 );
 
 const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClose, onToggleFavorite }) => {
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
@@ -32,7 +33,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-   useEffect(() => {
+   React.useEffect(() => {
     if (element && panelRef.current) {
         panelRef.current.focus();
         panelRef.current.scrollTop = 0; // Scroll to top when element changes
@@ -91,37 +92,49 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
               </button>
               <button onClick={handleCopySummary} className="px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors">Copy Summary</button>
           </div>
+          
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Properties</h4>
+              <dl>
+                  <InfoRow label="Atomic Mass" value={`${atomicMass} u`} />
+                  <InfoRow label="Phase at STP" value={<span className="capitalize">{element.stateAtSTP}</span>} />
+                  <InfoRow label="Density" value={element.density_g_cm3 ? `${element.density_g_cm3} g/cm³` : 'N/A'} />
+                  <InfoRow label="Melting Point" value={`${KtoC(element.meltingPointK)} °C / ${element.meltingPointK || 'N/A'} K`} />
+                  <InfoRow label="Boiling Point" value={`${KtoC(element.boilingPointK)} °C / ${element.boilingPointK || 'N/A'} K`} />
+                  <InfoRow label="Electronegativity" value={element.electronegativity} tooltip="Pauling scale" />
+                  <InfoRow label="Oxidation States" value={element.oxidationStates?.join(', ')} />
+              </dl>
+            </div>
+          
+            <div>
+              <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Discovery</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{element.discovery_story}</p>
+            </div>
 
-          <dl>
-              <InfoRow label="Atomic Mass" value={`${atomicMass} u`} />
-              <InfoRow label="Phase at STP" value={<span className="capitalize">{element.stateAtSTP}</span>} />
-              <InfoRow label="Density" value={element.density_g_cm3 ? `${element.density_g_cm3} g/cm³` : 'N/A'} />
-              <InfoRow label="Melting Point" value={`${KtoC(element.meltingPointK)} °C / ${element.meltingPointK || 'N/A'} K`} />
-              <InfoRow label="Boiling Point" value={`${KtoC(element.boilingPointK)} °C / ${element.boilingPointK || 'N/A'} K`} />
-              <InfoRow label="Electronegativity" value={element.electronegativity} tooltip="Pauling scale" />
-              <InfoRow label="Oxidation States" value={element.oxidationStates?.join(', ')} />
-              <InfoRow label="Discovered" value={`${element.discoverer} (${element.discoveryYear || 'Ancient'})`} />
-          </dl>
+            <ElectronConfigurationViewer configuration={element.electronConfiguration} symbol={element.symbol} />
+            
+            {element.isotopes && element.isotopes.length > 0 && (
+                <IsotopesViewer isotopes={element.isotopes} />
+            )}
 
-          <div className="mt-6">
-             <ElectronConfigurationViewer configuration={element.electronConfiguration} symbol={element.symbol} />
-          </div>
+            <div>
+                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>
+                {element.commonUses && element.commonUses.length > 0 &&
+                    <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
+                        {element.commonUses.map((use, index) => <li key={index}>{use}</li>)}
+                    </ul>
+                }
+                <p className="mt-2 text-sm italic bg-gray-100 dark:bg-gray-700 p-3 rounded-md">"{element.everydayExample}"</p>
+            </div>
+            {element.safetyNotes &&
+                 <div>
+                    <h4 className="font-bold text-yellow-600 dark:text-yellow-400 text-lg mb-2">Safety Notes</h4>
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">{element.safetyNotes}</p>
+                </div>
+            }
+        </div>
 
-          <div className="mt-6">
-              <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>
-              {element.commonUses && element.commonUses.length > 0 &&
-                  <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
-                      {element.commonUses.map((use, index) => <li key={index}>{use}</li>)}
-                  </ul>
-              }
-              <p className="mt-2 text-sm italic bg-gray-100 dark:bg-gray-700 p-3 rounded-md">"{element.everydayExample}"</p>
-          </div>
-          {element.safetyNotes &&
-               <div className="mt-6">
-                  <h4 className="font-bold text-yellow-600 dark:text-yellow-400 text-lg mb-2">Safety Notes</h4>
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">{element.safetyNotes}</p>
-              </div>
-          }
       </div>
     </div>
   );

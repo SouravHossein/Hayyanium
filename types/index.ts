@@ -1,4 +1,3 @@
-
 export type ElementCategory = 
   | 'alkali metal'
   | 'alkaline earth metal'
@@ -12,6 +11,13 @@ export type ElementCategory =
   | 'noble gas'
   | 'unknown';
 
+export interface Isotope {
+  mass: number;
+  abundance: string | null;
+  half_life: string;
+  decay_mode: string | null;
+}
+
 export interface ElementData {
   atomicNumber: number;
   symbol: string;
@@ -21,6 +27,8 @@ export interface ElementData {
   period: number;
   group: number;
   atomicMass: number | string;
+  atomicRadius_pm: number | null;
+  firstIonizationEnergy_kJ_mol: number | null;
   stateAtSTP: string;
   electronConfiguration: string;
   electronegativity: number | null;
@@ -29,11 +37,12 @@ export interface ElementData {
   meltingPointK: number | null;
   boilingPointK: number | null;
   discoveryYear: number | string | null;
-  discoverer: string;
+  discovery_story: string;
   commonUses: string[] | null;
   safetyNotes: string | null;
   everydayExample: string;
   xpos: number;
   ypos: number;
   summary: string;
+  isotopes?: Isotope[];
 }
