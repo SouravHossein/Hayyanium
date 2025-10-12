@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ElementData } from './types/index';
 import PeriodicTable from './components/PeriodicTable';
@@ -6,8 +5,10 @@ import ElementPanel from './components/ElementPanel';
 import Legend from './components/Legend';
 import SearchBarAndFilters from './components/SearchBarAndFilters';
 import { useFavorites } from './hooks/useFavorites';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeToggleButton from './components/ThemeToggleButton';
 
-const App = () => {
+const AppContent = () => {
   const [allElements, setAllElements] = useState<ElementData[]>([]);
   const [selectedElement, setSelectedElement] = useState<ElementData | null>(null);
   const [hoveredElement, setHoveredElement] = useState<ElementData | null>(null);
@@ -55,13 +56,16 @@ const App = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen text-gray-900 dark:text-gray-100 font-sans p-4 sm:p-6 lg:p-8">
       <div className="max-w-screen-2xl mx-auto">
-        <header className="text-center mb-6">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+        <header className="relative text-center mb-6">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500">
             Interactive Periodic Table
           </h1>
-          <p className="text-gray-400 mt-2">Explore the building blocks of the universe.</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Explore the building blocks of the universe.</p>
+          <div className="absolute top-0 right-0">
+            <ThemeToggleButton />
+          </div>
         </header>
 
         <main>
@@ -82,9 +86,9 @@ const App = () => {
               onHoverElement={setHoveredElement}
             />
             {hoveredElement && !selectedElement && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 bg-gray-800 border border-cyan-400 p-2 rounded-md shadow-lg text-sm z-20 pointer-events-none">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 bg-white dark:bg-gray-800 border border-cyan-500 dark:border-cyan-400 p-2 rounded-md shadow-lg text-sm z-20 pointer-events-none">
                     <h4 className="font-bold">{hoveredElement.name} ({hoveredElement.symbol})</h4>
-                    <p className="text-xs text-gray-300">{hoveredElement.everydayExample}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">{hoveredElement.everydayExample}</p>
                 </div>
             )}
           </div>
@@ -101,6 +105,14 @@ const App = () => {
       </div>
     </div>
   );
+};
+
+const App = () => {
+    return (
+        <ThemeProvider>
+            <AppContent />
+        </ThemeProvider>
+    );
 };
 
 export default App;

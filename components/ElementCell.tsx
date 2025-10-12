@@ -47,7 +47,7 @@ if (element.xpos >= 1 && element.xpos <= 2) {
       onFocus={() => onHover(element)}
       onBlur={() => onHover(null)}
       aria-label={element.name}
-      className={`relative p-1 rounded-md transition-transform duration-200 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-300 scale-110 z-10' : ''}`}
+      className={`relative p-1 rounded-md transition-transform duration-200 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : ''}`}
       style={{ gridColumnStart: element.xpos, gridRowStart: element.ypos }}
     >
       <div className="absolute top-0.5 left-1 text-xs font-medium">{element.atomicNumber}</div>
