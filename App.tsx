@@ -48,8 +48,12 @@ const AppContent = () => {
   }, [allElements, searchTerm, filters]);
 
   const handleSelectElement = useCallback((element: ElementData) => {
-    setSelectedElement(element);
-  }, []);
+    if (selectedElement?.atomicNumber === element.atomicNumber) {
+        setSelectedElement(null); // Deselect if clicking the same element
+    } else {
+        setSelectedElement(element);
+    }
+  }, [selectedElement]);
 
   const handleClosePanel = useCallback(() => {
     setSelectedElement(null);
@@ -68,40 +72,49 @@ const AppContent = () => {
           </div>
         </header>
 
-        <main>
-          <SearchBarAndFilters
-            searchTerm={searchTerm}
-            onSearchTermChange={setSearchTerm}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClear={clearFilters}
-          />
-          
-          <div className="relative">
-            <PeriodicTable
-              elements={filteredElements}
-              selectedElement={selectedElement}
-              favorites={favorites}
-              onSelectElement={handleSelectElement}
-              onHoverElement={setHoveredElement}
+        <div className="flex flex-row gap-6">
+          <main className="flex-grow transition-all duration-300">
+            <SearchBarAndFilters
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClear={clearFilters}
             />
-            {hoveredElement && !selectedElement && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 bg-white dark:bg-gray-800 border border-cyan-500 dark:border-cyan-400 p-2 rounded-md shadow-lg text-sm z-20 pointer-events-none">
-                    <h4 className="font-bold">{hoveredElement.name} ({hoveredElement.symbol})</h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-300">{hoveredElement.everydayExample}</p>
-                </div>
-            )}
-          </div>
-          
-          <Legend />
+            
+            <div className="relative">
+              <PeriodicTable
+                elements={filteredElements}
+                selectedElement={selectedElement}
+                favorites={favorites}
+                onSelectElement={handleSelectElement}
+                onHoverElement={setHoveredElement}
+              />
+              {hoveredElement && !selectedElement && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 bg-white dark:bg-gray-800 border border-cyan-500 dark:border-cyan-400 p-2 rounded-md shadow-lg text-sm z-20 pointer-events-none">
+                      <h4 className="font-bold">{hoveredElement.name} ({hoveredElement.symbol})</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">{hoveredElement.everydayExample}</p>
+                  </div>
+              )}
+            </div>
+            
+            <Legend />
+          </main>
 
-          <ElementPanel
-            element={selectedElement}
-            isFavorite={selectedElement ? favorites.includes(selectedElement.atomicNumber) : false}
-            onClose={handleClosePanel}
-            onToggleFavorite={toggleFavorite}
-          />
-        </main>
+          <aside className={`transition-all duration-500 ease-in-out ${selectedElement ? 'w-full max-w-md' : 'w-0'}`} >
+            <div className="w-full max-w-md overflow-hidden">
+                {selectedElement && (
+                    <ElementPanel
+                        key={selectedElement.atomicNumber}
+                        element={selectedElement}
+                        isFavorite={favorites.includes(selectedElement.atomicNumber)}
+                        onClose={handleClosePanel}
+                        onToggleFavorite={toggleFavorite}
+                    />
+                )}
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );

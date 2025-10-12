@@ -20,25 +20,13 @@ const ElementCell: React.FC<ElementCellProps> = ({ element, isSelected, isFavori
 
   // 🎨 Block color based on atomic number range
   const blockColor = 
-    element.atomicNumber <= 20 ? 'bg-green-400' :
-    element.atomicNumber <= 40 ? 'bg-blue-400' :
-    element.atomicNumber <= 60 ? 'bg-yellow-400' :
-    element.atomicNumber <= 80 ? 'bg-pink-400' :
-    'bg-purple-500';
+    element.block ==="s" ? 'bg-green-400' :
+    element.block ==="p"?  'bg-blue-400' :
+    element.block ==="d" ? 'bg-yellow-400' :
+  element.block ==="f" ? 'bg-pink-400':
+  "bg-green-400"
 
-let blockName: string;
 
-if (element.xpos >= 1 && element.xpos <= 2) {
-  blockName = 's';
-} else if (element.xpos >= 13 && element.xpos <= 18) {
-  blockName = 'p';
-} else if (element.xpos >= 3 && element.xpos <= 12 && element.ypos <= 7) {
-  blockName = 'd';
-} else if (element.ypos > 7) {
-  blockName = 'f';
-} else {
-  blockName = '?'; // fallback, rare
-}
   return (
     <button
       onClick={() => onSelect(element)}
@@ -62,7 +50,7 @@ if (element.xpos >= 1 && element.xpos <= 2) {
       )}
 
       {/* 🟩 Block mark */}
-      <div className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-sm ${blockColor}`} >{blockName}</div>
+      <div className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-sm ${blockColor}`} >{element.block}</div>
 
       <div className="text-2xl font-bold leading-tight mt-1">{element.symbol}</div>
       <div className="text-xs truncate">{element.name}</div>
