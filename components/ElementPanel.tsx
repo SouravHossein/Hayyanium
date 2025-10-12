@@ -1,4 +1,4 @@
-import React, 'react';
+import React from 'react';
 import { ElementData } from '../types/index';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import ElectronConfigurationViewer from './ElectronConfigurationViewer';
@@ -9,6 +9,8 @@ interface ElementPanelProps {
   isFavorite: boolean;
   onClose: () => void;
   onToggleFavorite: (atomicNumber: number) => void;
+  comparisonList: ElementData[];
+  onAddToCompare: (element: ElementData) => void;
 }
 
 const KtoC = (k: number | null) => (k ? (k - 273.15).toFixed(2) : 'N/A');
@@ -20,7 +22,7 @@ const InfoRow: React.FC<{ label: string; value: React.ReactNode; tooltip?: strin
   </div>
 );
 
-const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClose, onToggleFavorite }) => {
+const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClose, onToggleFavorite, comparisonList, onAddToCompare }) => {
   const panelRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -53,6 +55,8 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
   const colorClass = CATEGORY_COLORS[element.category] || 'bg-gray-700';
   const textColorClass = CATEGORY_TEXT_COLORS[element.category] || 'text-white';
   const atomicMass = typeof element.atomicMass === 'string' ? element.atomicMass : element.atomicMass.toFixed(5);
+  const isInCompare = comparisonList.some(el => el.atomicNumber === element.atomicNumber);
+  const isCompareFull = comparisonList.length >= 3;
   
   return (
     <div
@@ -83,14 +87,28 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       <div className="p-6">
           <p className="mb-4 text-gray-600 dark:text-gray-300 italic">{element.summary}</p>
           
-          <div className="flex space-x-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
                <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  <span>{isFavorite ? 'Favorited' : 'Add to Favorites'}</span>
+                  <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
               </button>
               <button onClick={handleCopySummary} className="px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors">Copy Summary</button>
+              <button 
+                  onClick={() => onAddToCompare(element)} 
+                  disabled={isInCompare || isCompareFull}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isInCompare 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>{isInCompare ? 'In Compare' : (isCompareFull ? 'Compare Full' : 'Add to Compare')}</span>
+              </button>
           </div>
           
           <div className="space-y-6">

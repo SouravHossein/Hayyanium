@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import Atom3DViewer from './Atom3DViewer';
 
 const NOBLE_GAS_CONFIGS: Record<string, string> = {
   He: '1s2',
@@ -152,7 +153,7 @@ interface ElectronConfigurationViewerProps {
 }
 
 const ElectronConfigurationViewer: React.FC<ElectronConfigurationViewerProps> = ({ configuration, symbol }) => {
-  const [view, setView] = useState<'bohr' | 'orbital'>('bohr');
+  const [view, setView] = useState<'bohr' | 'orbital' | '3d'>('bohr');
 
   const { fullConfiguration, shells, parsedOrbitals } = useMemo(() => {
     const fullConfig = expandElectronConfiguration(configuration);
@@ -169,14 +170,16 @@ const ElectronConfigurationViewer: React.FC<ElectronConfigurationViewerProps> = 
     <div>
       <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Electron Configuration</h4>
       <p className="text-sm font-mono mb-4 p-2 bg-gray-100 dark:bg-gray-900 rounded-md text-gray-600 dark:text-gray-300">{configuration}</p>
-      <div className="flex space-x-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button onClick={() => setView('bohr')} className={`${buttonBaseClasses} ${view === 'bohr' ? activeButtonClasses : inactiveButtonClasses}`}>Bohr Model (2D)</button>
-        <button onClick={() => setView('orbital')} className={`${buttonBaseClasses} ${view === 'orbital' ? activeButtonClasses : inactiveButtonClasses}`}>Orbital Diagram (3D)</button>
+        <button onClick={() => setView('orbital')} className={`${buttonBaseClasses} ${view === 'orbital' ? activeButtonClasses : inactiveButtonClasses}`}>Orbital Diagram</button>
+        <button onClick={() => setView('3d')} className={`${buttonBaseClasses} ${view === '3d' ? activeButtonClasses : inactiveButtonClasses}`}>Atomic Model (3D)</button>
       </div>
 
-      <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-md flex justify-center items-center min-h-[220px]">
+      <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-md flex justify-center items-center min-h-[256px]">
         {view === 'bohr' && <BohrModel shells={shells} symbol={symbol} />}
         {view === 'orbital' && <OrbitalDiagram orbitals={parsedOrbitals} />}
+        {view === '3d' && <Atom3DViewer key={symbol} shells={shells} symbol={symbol} />}
       </div>
     </div>
   );

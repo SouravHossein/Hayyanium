@@ -10,6 +10,9 @@ interface PeriodicTableProps {
   onSelectElement: (element: ElementData) => void;
   onHoverElement: (element: ElementData | null) => void;
   selectedTrend: Trend | null;
+  isDraggable?: boolean;
+  onElementDragStart?: (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => void;
+  onElementDragEnd?: (event: React.DragEvent<HTMLButtonElement>) => void;
 }
 
 const GROUP_LABELS: { [key: number]: string } = {
@@ -18,7 +21,17 @@ const GROUP_LABELS: { [key: number]: string } = {
   14: 'IVA', 15: 'VA', 16: 'VIA', 17: 'VIIA', 18: 'VIIIA'
 };
 
-const PeriodicTable: React.FC<PeriodicTableProps> = ({ elements, selectedElement, favorites, onSelectElement, onHoverElement, selectedTrend }) => {
+const PeriodicTable: React.FC<PeriodicTableProps> = ({ 
+  elements, 
+  selectedElement, 
+  favorites, 
+  onSelectElement, 
+  onHoverElement, 
+  selectedTrend,
+  isDraggable,
+  onElementDragStart,
+  onElementDragEnd
+}) => {
 
     const elementStyles = useMemo(() => {
     if (!selectedTrend) return {};
@@ -101,6 +114,9 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ elements, selectedElement
                 onSelect={onSelectElement}
                 onHover={onHoverElement}
                 trendStyle={elementStyles[element.atomicNumber]}
+                isDraggable={isDraggable}
+                onDragStart={onElementDragStart}
+                onDragEnd={onElementDragEnd}
             />
         ))}
         </div>

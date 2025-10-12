@@ -46,3 +46,13 @@ export interface ElementData {
   summary: string;
   isotopes?: Isotope[];
 }
+
+export interface CompoundResult {
+  compoundFormed: boolean;
+  formula?: string;
+  name?: string;
+  bondType?: string;
+  description?: string;
+  lewisStructure?: string;
+  error?: string;
+}
