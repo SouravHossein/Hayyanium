@@ -3,6 +3,8 @@ import { ElementData } from '../types/index';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import ElectronConfigurationViewer from './ElectronConfigurationViewer';
 import IsotopesViewer from './IsotopesViewer';
+import CrystalStructureSection from './CrystalStructureSection';
+import RealLifeApplications from './RealLifeApplications';
 
 interface ElementPanelProps {
   element: ElementData | null;
@@ -130,11 +132,15 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
               <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{element.discovery_story}</p>
             </div>
 
+            <CrystalStructureSection element={element} />
+
             <ElectronConfigurationViewer configuration={element.electronConfiguration} symbol={element.symbol} />
             
             {element.isotopes && element.isotopes.length > 0 && (
                 <IsotopesViewer isotopes={element.isotopes} />
             )}
+
+            <RealLifeApplications element={element} />
 
             <div>
                 <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>

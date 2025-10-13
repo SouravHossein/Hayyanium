@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ElementData } from '../types/index';
 import ElementCell from './ElementCell';
 import { Trend } from '../App';
@@ -13,6 +13,8 @@ interface PeriodicTableProps {
   isDraggable?: boolean;
   onElementDragStart?: (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => void;
   onElementDragEnd?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onGroupClick: (group: number) => void;
+  onPeriodClick: (period: number) => void;
 }
 
 const GROUP_LABELS: { [key: number]: string } = {
@@ -30,8 +32,12 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
   selectedTrend,
   isDraggable,
   onElementDragStart,
-  onElementDragEnd
+  onElementDragEnd,
+  onGroupClick,
+  onPeriodClick,
 }) => {
+    const [hoveredGroup, setHoveredGroup] = useState<number | null>(null);
+    const [hoveredPeriod, setHoveredPeriod] = useState<number | null>(null);
 
     const elementStyles = useMemo(() => {
     if (!selectedTrend) return {};
@@ -94,31 +100,60 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
 
   return (
     <div className="w-full overflow-x-auto p-4">
-        <div className="grid gap-1" style={{gridTemplateColumns: 'repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}>
+        <div className="grid gap-1" style={{gridTemplateColumns: 'auto repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}>
         {/* Group Labels */}
         {Array.from({ length: 18 }, (_, i) => i + 1).map(groupNumber => (
-            <div key={`group-${groupNumber}`} 
-                 className="text-center text-xs text-gray-500 dark:text-gray-400 flex flex-col justify-end pb-1" 
-                 style={{ gridColumnStart: groupNumber, gridRowStart: 1 }}>
+            <button key={`group-${groupNumber}`} 
+                 className="text-center text-xs text-gray-500 dark:text-gray-400 flex flex-col justify-end pb-1 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500" 
+                 style={{ gridColumnStart: groupNumber + 1, gridRowStart: 1 }}
+                 onMouseEnter={() => setHoveredGroup(groupNumber)}
+                 onMouseLeave={() => setHoveredGroup(null)}
+                 onClick={() => onGroupClick(groupNumber)}
+                 aria-label={`Plot trends for group ${groupNumber}`}
+            >
                 <div className="font-bold">{groupNumber}</div>
                 <div className="font-mono text-[10px]">{GROUP_LABELS[groupNumber]}</div>
-            </div>
+            </button>
+        ))}
+        
+        {/* Period Labels */}
+        {Array.from({ length: 7 }, (_, i) => i + 1).map(periodNumber => (
+            <button key={`period-${periodNumber}`}
+                 className="text-center text-xs text-gray-500 dark:text-gray-400 flex items-center justify-end pr-2 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                 style={{ gridRowStart: periodNumber + 1, gridColumnStart: 1 }}
+                 onMouseEnter={() => setHoveredPeriod(periodNumber)}
+                 onMouseLeave={() => setHoveredPeriod(null)}
+                 onClick={() => onPeriodClick(periodNumber)}
+                 aria-label={`Plot trends for period ${periodNumber}`}
+            >
+                <div className="font-bold">{periodNumber}</div>
+            </button>
         ))}
 
-        {elements.map(element => (
-            <ElementCell
-                key={element.atomicNumber}
-                element={{...element, ypos: element.ypos + 1}} // Offset ypos for header row
-                isSelected={selectedElement?.atomicNumber === element.atomicNumber}
-                isFavorite={favorites.includes(element.atomicNumber)}
-                onSelect={onSelectElement}
-                onHover={onHoverElement}
-                trendStyle={elementStyles[element.atomicNumber]}
-                isDraggable={isDraggable}
-                onDragStart={onElementDragStart}
-                onDragEnd={onElementDragEnd}
-            />
-        ))}
+        {elements.map(element => {
+            const isLanthanideOrActinide = element.category === 'lanthanide' || element.category === 'actinide';
+            const isHighlighted = 
+                (hoveredGroup !== null && (element.group === hoveredGroup || (hoveredGroup === 3 && isLanthanideOrActinide))) ||
+                (hoveredPeriod !== null && element.period === hoveredPeriod);
+
+            return (
+                <ElementCell
+                    key={element.atomicNumber}
+                    element={{...element, xpos: element.xpos + 1, ypos: element.ypos + 1}} // Offset for labels
+                    isSelected={selectedElement?.atomicNumber === element.atomicNumber}
+                    isFavorite={favorites.includes(element.atomicNumber)}
+                    onSelect={onSelectElement}
+                    onHover={onHoverElement}
+                    trendStyle={elementStyles[element.atomicNumber]}
+                    isDraggable={isDraggable}
+                    // FIX: The prop `onElementDragStart` was renamed to `onDragStart` to match the props expected by ElementCell.
+                    onDragStart={onElementDragStart}
+                    // FIX: The prop `onElementDragEnd` was renamed to `onDragEnd` to match the props expected by ElementCell.
+                    onDragEnd={onElementDragEnd}
+                    isHighlighted={isHighlighted}
+                />
+            );
+        })}
         </div>
     </div>
   );

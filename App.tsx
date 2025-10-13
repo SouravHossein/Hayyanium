@@ -13,6 +13,7 @@ import ComparisonTray from './components/ComparisonTray';
 import ComparisonModal from './components/ComparisonModal';
 import CompoundBuilderTray from './components/CompoundBuilderTray';
 import CompoundResultModal from './components/CompoundResultModal';
+import TrendPlotModal from './components/TrendPlotModal';
 
 export type Trend = 'atomicRadius_pm' | 'electronegativity' | 'firstIonizationEnergy_kJ_mol';
 
@@ -38,6 +39,13 @@ const AppContent = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [compoundResult, setCompoundResult] = useState<CompoundResult | null>(null);
   const [isCombining, setIsCombining] = useState(false);
+
+  // Trend Plot State
+  const [plotModalInfo, setPlotModalInfo] = useState<{
+      isOpen: boolean;
+      elements: ElementData[];
+      title: string;
+  }>({ isOpen: false, elements: [], title: '' });
 
   const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
@@ -194,6 +202,39 @@ const AppContent = () => {
   const trendNames: Record<Trend, string> = { atomicRadius_pm: 'Atomic Radius', electronegativity: 'Electronegativity', firstIonizationEnergy_kJ_mol: 'First Ionization Energy' };
   const trendUnits: Record<Trend, string> = { atomicRadius_pm: 'pm', electronegativity: '', firstIonizationEnergy_kJ_mol: 'kJ/mol' };
 
+  // Trend Plot Handlers
+  const handleGroupClick = useCallback((groupNumber: number) => {
+    if (!selectedTrend) {
+        alert("Please select a periodic trend from the filters to plot.");
+        return;
+    }
+    
+    const groupElements = allElements.filter(el => el.group === groupNumber);
+
+    setPlotModalInfo({
+        isOpen: true,
+        elements: groupElements,
+        title: `Trend for Group ${groupNumber}`
+    });
+
+  }, [selectedTrend, allElements]);
+
+  const handlePeriodClick = useCallback((periodNumber: number) => {
+      if (!selectedTrend) {
+          alert("Please select a periodic trend from the filters to plot.");
+          return;
+      }
+      
+      const periodElements = allElements.filter(el => el.period === periodNumber);
+      
+      setPlotModalInfo({
+          isOpen: true,
+          elements: periodElements,
+          title: `Trend for Period ${periodNumber}`
+      });
+
+  }, [selectedTrend, allElements]);
+
   return (
     <div className={`min-h-screen text-gray-900 dark:text-gray-100 font-sans p-4 sm:p-6 lg:p-8 transition-all duration-300 ${isBuilderActive ? 'pb-32' : ''}`}>
       <div className="max-w-screen-2xl mx-auto">
@@ -230,6 +271,7 @@ const AppContent = () => {
                 favorites={favorites} onSelectElement={handleSelectElement} onHoverElement={setHoveredElement}
                 selectedTrend={selectedTrend} isDraggable={isBuilderActive}
                 onElementDragStart={handleDragStart} onElementDragEnd={handleDragEnd}
+                onGroupClick={handleGroupClick} onPeriodClick={handlePeriodClick}
               />
               {hoveredElement && !selectedElement && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-12 bg-white dark:bg-gray-800 border border-cyan-500 dark:border-cyan-400 p-2 rounded-md shadow-lg text-sm z-20 pointer-events-none">
@@ -284,6 +326,17 @@ const AppContent = () => {
       {isComparisonModalOpen && (
             <ComparisonModal 
               elements={comparisonList} onClose={() => setComparisonModalOpen(false)}
+            />
+      )}
+       {plotModalInfo.isOpen && selectedTrend && (
+            <TrendPlotModal 
+                isOpen={plotModalInfo.isOpen}
+                onClose={() => setPlotModalInfo({ isOpen: false, elements: [], title: '' })}
+                elementsToPlot={plotModalInfo.elements}
+                title={plotModalInfo.title}
+                trend={selectedTrend}
+                trendLabel={trendNames[selectedTrend]}
+                trendUnit={trendUnits[selectedTrend]}
             />
       )}
     </div>
