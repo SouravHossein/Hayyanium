@@ -17,7 +17,11 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     const [error, setError] = useState<string | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+    const ai = useMemo(() => {
+        if (!apiKey) return null;
+        return new GoogleGenAI({ apiKey });
+    }, [apiKey]);
 
     const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +44,12 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
             }
 
             try {
-                const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
+            if (!ai) {
+                setError('Missing API key. Set VITE_GEMINI_API_KEY in .env.local.');
+                return;
+            }
+
+            const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
                 const geminiResponse = await ai.models.generateContent({
                     model: 'gemini-2.5-flash',
                     contents: prompt,

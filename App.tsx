@@ -1,3 +1,4 @@
+// <reference types="vite/client" />
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { ElementData, CompoundResult } from './types/index';
@@ -47,7 +48,11 @@ const AppContent = () => {
       title: string;
   }>({ isOpen: false, elements: [], title: '' });
 
-  const ai = useMemo(() => new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY }), []);
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+  const ai = useMemo(() => {
+    if (!apiKey) return null;
+    return new GoogleGenAI({ apiKey });
+  }, [apiKey]);
 
   useEffect(() => {
     try {
@@ -161,6 +166,13 @@ const AppContent = () => {
 
   const handleCombine = async () => {
     if (builderElements.length < 2) return;
+    if (!ai) {
+        setCompoundResult({
+            compoundFormed: false,
+            error: "Missing API key. Set VITE_GEMINI_API_KEY in .env.local."
+        });
+        return;
+    }
     setIsCombining(true);
     setCompoundResult(null);
 

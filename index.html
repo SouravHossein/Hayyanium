@@ -1,57 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Interactive Periodic Table</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: 'class', // Enable dark mode based on class
-        theme: {
-          extend: {
-            colors: {
-              'alkali-metal': '#f4a261',
-              'alkaline-earth-metal': '#e9c46a',
-              'lanthanide': '#e76f51',
-              'actinide': '#f4a261',
-              'transition-metal': '#a8dadc',
-              'post-transition-metal': '#457b9d',
-              'metalloid': '#8ecae6',
-              'nonmetal': '#2a9d8f',
-              'halogen': '#264653',
-              'noble-gas': '#a2d2ff',
-              'unknown': '#d9d9d9'
-            }
-          }
-        }
-      }
-    </script>
-    <script>
-      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark')
+      // Set theme before paint to avoid FOUC.
+      if (
+        localStorage.theme === 'dark' ||
+        (!('theme' in localStorage) &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        document.documentElement.classList.add('dark');
       } else {
-        document.documentElement.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
       }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.24.0",
-    "three": "https://aistudiocdn.com/three@^0.167.0",
-    "three/addons/": "https://unpkg.com/three@0.167.0/examples/jsm/",
-    "three/": "https://aistudiocdn.com/three@^0.180.0/"
-  }
-}
-</script>
-</head>
-  <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+  </head>
+  <body class="min-h-full bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-900 dark:text-slate-100">
     <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

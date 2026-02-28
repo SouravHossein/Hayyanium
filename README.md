@@ -26,6 +26,6 @@ An interactive, feature-rich periodic table built with React and Vite. Explore e
 1. Install dependencies:
    `npm install`
 2. Create or update `.env.local` with your API key:
-   `VITE_API_KEY=your_api_key_here`
+   `VITE_GEMINI_API_KEY=your_api_key_here`
 3. Start the dev server:
    `npm run dev`
