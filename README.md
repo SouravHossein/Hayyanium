@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Interactive Periodic Table
 
-# Run and deploy your AI Studio app
+An interactive, feature-rich periodic table built with React and Vite. Explore elements, compare properties, visualize trends, and experiment with a lightweight compound builder.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1M7grfHMB6lFPrpVUQFuyIqhQP5jeitbx
+- Search by name, symbol, or atomic number
+- Filter by category, state at STP, and discovery year range
+- Favorites for quick access
+- Element comparison (up to 3)
+- Periodic trend visualization by group/period
+- Compound builder with AI-assisted result output
+- Light/dark theme toggle
+
+## Tech Stack
+
+- React 19 + TypeScript
+- Vite 6
+- Tailwind CSS
+- @google/genai for AI-assisted compound analysis
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Create or update `.env.local` with your API key:
+   `VITE_API_KEY=your_api_key_here`
+3. Start the dev server:
    `npm run dev`

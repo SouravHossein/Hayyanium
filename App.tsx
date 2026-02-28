@@ -47,7 +47,7 @@ const AppContent = () => {
       title: string;
   }>({ isOpen: false, elements: [], title: '' });
 
-  const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
+  const ai = useMemo(() => new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY }), []);
 
   useEffect(() => {
     try {
