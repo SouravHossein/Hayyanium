@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ElementData } from '../types/index';
 import ElementCell from './ElementCell';
 import { Trend } from '../App';
+import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 
 interface PeriodicTableProps {
   elements: ElementData[];
@@ -38,6 +39,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
 }) => {
     const [hoveredGroup, setHoveredGroup] = useState<number | null>(null);
     const [hoveredPeriod, setHoveredPeriod] = useState<number | null>(null);
+    const { focusedAtomicNumber, setFocusedAtomicNumber, handleKeyDown } = useKeyboardNavigation(elements);
 
     const elementStyles = useMemo(() => {
     if (!selectedTrend) return {};
@@ -100,7 +102,21 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
 
   return (
     <div className="w-full overflow-x-auto p-4">
-        <div className="grid gap-1" style={{gridTemplateColumns: 'auto repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}>
+        <div
+            className="grid gap-1 focus:outline-none"
+            style={{gridTemplateColumns: 'auto repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}
+            tabIndex={0}
+            role="grid"
+            aria-label="Periodic table"
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' && focusedAtomicNumber) {
+                    const focusedElement = elements.find(el => el.atomicNumber === focusedAtomicNumber);
+                    if (focusedElement) onSelectElement(focusedElement);
+                } else {
+                    handleKeyDown(event);
+                }
+            }}
+        >
         {/* Group Labels */}
         {Array.from({ length: 18 }, (_, i) => i + 1).map(groupNumber => (
             <button key={`group-${groupNumber}`} 
@@ -142,6 +158,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
                     element={{...element, xpos: element.xpos + 1, ypos: element.ypos + 1}} // Offset for labels
                     isSelected={selectedElement?.atomicNumber === element.atomicNumber}
                     isFavorite={favorites.includes(element.atomicNumber)}
+                    isFocused={focusedAtomicNumber === element.atomicNumber}
                     onSelect={onSelectElement}
                     onHover={onHoverElement}
                     trendStyle={elementStyles[element.atomicNumber]}
@@ -150,6 +167,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
                     onDragStart={onElementDragStart}
                     // FIX: The prop `onElementDragEnd` was renamed to `onDragEnd` to match the props expected by ElementCell.
                     onDragEnd={onElementDragEnd}
+                    onFocusElement={(el) => setFocusedAtomicNumber(el.atomicNumber)}
                     isHighlighted={isHighlighted}
                 />
             );

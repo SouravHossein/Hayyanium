@@ -16,6 +16,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
     const ai = useMemo(() => {
@@ -24,6 +25,17 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     }, [apiKey]);
 
     const carouselRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -43,9 +55,16 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
                 console.error("Failed to read from cache", e);
             }
 
+            if (!isOnline) {
+                setError('Offline mode: real-life applications are unavailable.');
+                setIsLoading(false);
+                return;
+            }
+
             try {
             if (!ai) {
                 setError('Missing API key. Set VITE_GEMINI_API_KEY in .env.local.');
+                setIsLoading(false);
                 return;
             }
 
@@ -115,7 +134,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
         };
 
         fetchApplications();
-    }, [element.name, ai]);
+    }, [element.name, ai, isOnline]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -135,7 +154,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     if (isLoading) {
         return (
             <div>
-                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
+                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
                 <div className="flex justify-center items-center h-48 bg-gray-100 dark:bg-gray-900 rounded-md">
                     <svg className="animate-spin h-8 w-8 text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -149,7 +168,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     if (error) {
         return (
             <div>
-                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
+                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
                 <div className="p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 rounded-md text-sm">{error}</div>
             </div>
         )
@@ -159,7 +178,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
 
     return (
         <div>
-            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
+            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
             <div ref={carouselRef} className="relative focus:outline-none" tabIndex={0}>
                 <div className="overflow-hidden rounded-xl">
                     <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>

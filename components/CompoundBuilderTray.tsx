@@ -9,9 +9,10 @@ interface CompoundBuilderTrayProps {
     onRemove: (atomicNumber: number) => void;
     onClear: () => void;
     onCombine: () => void;
+    isAiAvailable?: boolean;
 }
 
-const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isDragging, onDrop, onRemove, onClear, onCombine }) => {
+const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isDragging, onDrop, onRemove, onClear, onCombine, isAiAvailable = true }) => {
     
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -47,13 +48,18 @@ const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isD
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={onCombine}
-                        disabled={elements.length < 2}
+                        disabled={elements.length < 2 || !isAiAvailable}
                         className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md font-semibold text-sm transition-colors">
                         Combine
                     </button>
                     <button onClick={onClear} disabled={elements.length === 0} className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-md font-semibold text-sm transition-colors">Clear</button>
                 </div>
             </div>
+            {!isAiAvailable && (
+                <div className="mt-2 text-xs text-yellow-700 dark:text-yellow-300">
+                    AI features are disabled {navigator.onLine ? 'because the API key is missing.' : 'in offline mode.'}
+                </div>
+            )}
         </div>
     );
 };

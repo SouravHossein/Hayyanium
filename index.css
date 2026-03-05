@@ -1,2 +1,40 @@
 @config "./tailwind.config.js";
 @import "tailwindcss";
+
+html.high-contrast {
+  filter: contrast(1.15);
+}
+
+html.dyslexia-font {
+  font-family: "Atkinson Hyperlegible", "Verdana", "Arial", sans-serif;
+}
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.no-print {
+  display: block;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

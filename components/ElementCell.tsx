@@ -6,12 +6,14 @@ interface ElementCellProps {
   element: ElementData;
   isSelected: boolean;
   isFavorite: boolean;
+  isFocused?: boolean;
   onSelect: (element: ElementData) => void;
   onHover: (element: ElementData | null) => void;
   trendStyle?: React.CSSProperties;
   isDraggable?: boolean;
   onDragStart?: (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => void;
   onDragEnd?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onFocusElement?: (element: ElementData) => void;
   isHighlighted?: boolean;
 }
 
@@ -19,12 +21,14 @@ const ElementCell: React.FC<ElementCellProps> = ({
   element, 
   isSelected, 
   isFavorite, 
+  isFocused,
   onSelect, 
   onHover, 
   trendStyle,
   isDraggable,
   onDragStart,
   onDragEnd,
+  onFocusElement,
   isHighlighted
 }) => {
   const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
@@ -52,13 +56,16 @@ const ElementCell: React.FC<ElementCellProps> = ({
       onClick={() => onSelect(element)}
       onMouseEnter={() => onHover(element)}
       onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(element)}
+      onFocus={() => {
+        onHover(element);
+        if (onFocusElement) onFocusElement(element);
+      }}
       onBlur={() => onHover(null)}
       aria-label={element.name}
       draggable={isDraggable}
       onDragStart={isDraggable ? handleDragStart : undefined}
       onDragEnd={isDraggable ? onDragEnd : undefined}
-      className={`relative p-1 rounded-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : ''} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
+      className={`relative p-1 rounded-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : ''} ${isFocused ? 'ring-2 ring-amber-400 dark:ring-amber-300' : ''} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
       style={{ 
         gridColumnStart: element.xpos, 
         gridRowStart: element.ypos,

@@ -5,6 +5,7 @@ import ElectronConfigurationViewer from './ElectronConfigurationViewer';
 import IsotopesViewer from './IsotopesViewer';
 import CrystalStructureSection from './CrystalStructureSection';
 import RealLifeApplications from './RealLifeApplications';
+import ElementImage from './ElementImage';
 
 interface ElementPanelProps {
   element: ElementData | null;
@@ -88,6 +89,8 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       {/* Content */}
       <div className="p-6">
           <p className="mb-4 text-gray-600 dark:text-gray-300 italic">{element.summary}</p>
+
+          <ElementImage elementName={element.name} />
           
           <div className="flex flex-wrap gap-2 mb-6">
                <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>

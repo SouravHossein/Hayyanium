@@ -56,3 +56,44 @@ export interface CompoundResult {
   lewisStructure?: string;
   error?: string;
 }
+
+export type QuizMode = 'symbol' | 'name' | 'atomicNumber' | 'group' | 'period';
+
+export interface QuizResult {
+  mode: QuizMode;
+  correct: number;
+  total: number;
+  durationMs: number;
+  timestamp: number;
+}
+
+export interface ProgressState {
+  perMode: Record<QuizMode, { correct: number; total: number }>;
+  perCategory: Record<ElementCategory, { correct: number; total: number }>;
+  perGroup: Record<string, { correct: number; total: number }>;
+  perPeriod: Record<string, { correct: number; total: number }>;
+  streak: number;
+  lastPlayed: number | null;
+}
+
+export interface StudySet {
+  id: string;
+  name: string;
+  elementIds: number[];
+  source: 'builtin' | 'custom';
+  createdAt: number;
+}
+
+export interface UiSettings {
+  highContrast: boolean;
+  reducedMotion: boolean;
+  dyslexiaFont: boolean;
+}
+
+export interface UrlState {
+  tab: 'explore' | 'learn' | 'classroom' | 'settings';
+  search: string;
+  filters: { category: string; state: string };
+  elementId: number | null;
+  studySetId: string | null;
+}
