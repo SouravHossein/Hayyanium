@@ -16,26 +16,10 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
 
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-    const ai = useMemo(() => {
-        if (!apiKey) return null;
-        return new GoogleGenAI({ apiKey });
-    }, [apiKey]);
+    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const carouselRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -55,20 +39,8 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
                 console.error("Failed to read from cache", e);
             }
 
-            if (!isOnline) {
-                setError('Offline mode: real-life applications are unavailable.');
-                setIsLoading(false);
-                return;
-            }
-
             try {
-            if (!ai) {
-                setError('Missing API key. Set VITE_GEMINI_API_KEY in .env.local.');
-                setIsLoading(false);
-                return;
-            }
-
-            const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
+                const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
                 const geminiResponse = await ai.models.generateContent({
                     model: 'gemini-2.5-flash',
                     contents: prompt,
@@ -134,10 +106,11 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
         };
 
         fetchApplications();
-    }, [element.name, ai, isOnline]);
+    }, [element.name, ai]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (applications.length <= 1) return;
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 setCurrentIndex(prev => (prev > 0 ? prev - 1 : applications.length - 1));
@@ -154,7 +127,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     if (isLoading) {
         return (
             <div>
-                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
+                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
                 <div className="flex justify-center items-center h-48 bg-gray-100 dark:bg-gray-900 rounded-md">
                     <svg className="animate-spin h-8 w-8 text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -168,7 +141,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
     if (error) {
         return (
             <div>
-                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
+                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
                 <div className="p-4 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-200 rounded-md text-sm">{error}</div>
             </div>
         )
@@ -178,12 +151,12 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
 
     return (
         <div>
-            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications</h4>
-            <div ref={carouselRef} className="relative focus:outline-none" tabIndex={0}>
+            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Real-Life Applications 🧪</h4>
+            <div ref={carouselRef} className="relative focus:outline-none" tabIndex={0} aria-roledescription="carousel" aria-label={`Real-life applications of ${element.name}`}>
                 <div className="overflow-hidden rounded-xl">
                     <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
                         {applications.map((app, index) => (
-                            <div key={index} className="flex-shrink-0 w-full" aria-hidden={currentIndex !== index}>
+                            <div key={index} className="flex-shrink-0 w-full" role="group" aria-roledescription="slide" aria-label={`${index + 1} of ${applications.length}`} aria-hidden={currentIndex !== index}>
                                 <div className="p-3 rounded-2xl shadow-lg bg-gray-100 dark:bg-gray-900">
                                     <img src={app.image} alt={app.title} loading="lazy" className="w-full h-48 object-cover rounded-xl bg-gray-700" />
                                     <div className="mt-3 text-center">
@@ -215,9 +188,9 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                         </button>
                         
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2" role="tablist" aria-label="Slides">
                             {applications.map((_, index) => (
-                                <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2 h-2 rounded-full ${currentIndex === index ? 'bg-white' : 'bg-gray-400'}`} aria-label={`Go to slide ${index + 1}`}></button>
+                                <button key={index} onClick={() => setCurrentIndex(index)} className={`w-2 h-2 rounded-full ${currentIndex === index ? 'bg-white' : 'bg-gray-400'}`} aria-selected={currentIndex === index} role="tab" aria-label={`Go to slide ${index + 1}`}></button>
                             ))}
                         </div>
                     </>

@@ -41,3 +41,17 @@ export const CATEGORY_HEX_COLORS: Record<ElementCategory, string> = {
     'noble gas': '#a2d2ff',
     'unknown': '#d9d9d9',
 };
+
+export const CATEGORY_EMOJIS: Record<ElementCategory, string> = {
+  'alkali metal': '🔋',
+  'alkaline earth metal': '🦴',
+  lanthanide: '💡',
+  actinide: '☢️',
+  'transition metal': '⚙️',
+  'post-transition metal': '🔗',
+  metalloid: '⚡️',
+  nonmetal: '🎈',
+  halogen: '🧂',
+  'noble gas': '🌬️',
+  unknown: '❓',
+};
