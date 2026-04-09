@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Interactive Periodic Table
 
-# Run and deploy your AI Studio app
+A Vite + React + TypeScript periodic table with:
 
-This contains everything you need to run your app locally.
+- interactive grid and list views
+- favorites, compare mode, and compound builder
+- optional Gemini-powered chemistry helpers
+- Tailwind-powered styling with local build-time dependencies
 
-View your app in AI Studio: https://ai.studio/apps/3c0dc203-126b-48aa-acdf-bf789d65c23e
+## Getting Started
 
-## Run Locally
+1. Install dependencies with `npm install`
+2. Create `.env.local` from `.env.example`
+3. Start the dev server with `npm run dev`
 
-**Prerequisites:**  Node.js
+## Environment
 
+This project uses Vite-style client env vars:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- `VITE_GEMINI_API_KEY`
+
+If the Gemini key is missing, the app still works and AI-only actions degrade gracefully.
+
+## Scripts
+
+- `npm run dev`
+- `npm run build`
+- `npm run preview`
+- `npm run typecheck`

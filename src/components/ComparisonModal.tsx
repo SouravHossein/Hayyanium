@@ -60,7 +60,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ elements, onClose }) 
 
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 p-4"
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4"
              role="dialog" aria-modal="true" aria-labelledby="comparison-title">
             <div
                 ref={modalRef}

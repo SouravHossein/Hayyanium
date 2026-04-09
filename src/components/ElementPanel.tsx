@@ -1,11 +1,12 @@
-import React from 'react';
-import { GoogleGenAI } from "@google/genai";
-import { ElementData } from '../types/index';
+import React, { Suspense, lazy } from 'react';
+import type { GoogleGenAI } from '@google/genai';
+import { ElementData } from '../types';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import ElectronConfigurationViewer from './ElectronConfigurationViewer';
 import IsotopesViewer from './IsotopesViewer';
 import CrystalStructureSection from './CrystalStructureSection';
-import RealLifeApplications from './RealLifeApplications';
+
+const RealLifeApplications = lazy(() => import('./RealLifeApplications'));
 
 interface ElementPanelProps {
   element: ElementData | null;
@@ -14,7 +15,7 @@ interface ElementPanelProps {
   onToggleFavorite: (atomicNumber: number) => void;
   comparisonList: ElementData[];
   onAddToCompare: (element: ElementData) => void;
-  ai: GoogleGenAI;
+  ai: GoogleGenAI | null;
   onAddToBuilder: (element: ElementData) => void;
   builderElements: ElementData[];
 }
@@ -40,7 +41,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
   }, [element]);
 
   const generateAiMessage = async (type: 'roast' | 'hype') => {
-    if (!element) return;
+    if (!element || !ai) return;
     setIsGeneratingMessage(true);
     setMessageType(type);
     setAiMessage(null);
@@ -168,19 +169,25 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
               </button>
               <button 
                   onClick={() => generateAiMessage('roast')}
-                  disabled={isGeneratingMessage}
+                  disabled={!ai || isGeneratingMessage}
                   className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
                   <span>🔥 Roast</span>
               </button>
               <button 
                   onClick={() => generateAiMessage('hype')}
-                  disabled={isGeneratingMessage}
+                  disabled={!ai || isGeneratingMessage}
                   className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
                   <span>🚀 Hype</span>
               </button>
           </div>
+
+          {!ai && (
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/80 dark:bg-amber-950/40 dark:text-amber-200">
+                  Add <code>VITE_GEMINI_API_KEY</code> in <code>.env.local</code> to enable AI roast, hype, and compound analysis features.
+              </div>
+          )}
 
           {/* AI Message Area */}
           {(aiMessage || isGeneratingMessage) && (
@@ -229,7 +236,9 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
                 <IsotopesViewer isotopes={element.isotopes} />
             )}
 
-            <RealLifeApplications element={element} />
+            <Suspense fallback={<div className="text-sm text-gray-500 dark:text-gray-400">Loading applications...</div>}>
+              <RealLifeApplications element={element} />
+            </Suspense>
 
             <div>
                 <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>

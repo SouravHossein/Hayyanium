@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <rect x="64" y="64" width="384" height="384" rx="64" fill="#0ea5e9"/>
+  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="200" fill="#ffffff">H</text>
+  <text x="50%" y="74%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" fill="#e2e8f0">Periodic</text>
+</svg>

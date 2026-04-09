@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import Atom3DViewer from './Atom3DViewer';
+import React, { Suspense, lazy, useMemo, useState } from 'react';
+
+const Atom3DViewer = lazy(() => import('./Atom3DViewer'));
 
 const NOBLE_GAS_CONFIGS: Record<string, string> = {
   He: '1s2',
@@ -179,7 +180,11 @@ const ElectronConfigurationViewer: React.FC<ElectronConfigurationViewerProps> = 
       <div className="p-2 bg-gray-100 dark:bg-gray-900 rounded-md flex justify-center items-center min-h-[256px]">
         {view === 'bohr' && <BohrModel shells={shells} symbol={symbol} />}
         {view === 'orbital' && <OrbitalDiagram orbitals={parsedOrbitals} />}
-        {view === '3d' && <Atom3DViewer key={symbol} shells={shells} symbol={symbol} />}
+        {view === '3d' && (
+          <Suspense fallback={<div className="text-sm text-gray-500 dark:text-gray-400">Loading 3D model...</div>}>
+            <Atom3DViewer key={symbol} shells={shells} symbol={symbol} />
+          </Suspense>
+        )}
       </div>
     </div>
   );
