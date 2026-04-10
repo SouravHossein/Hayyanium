@@ -55,7 +55,8 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
-      setAiMessage(response.text || "Failed to generate message.");
+      const responseText = await response.text;
+      setAiMessage(responseText || "Failed to generate message.");
     } catch (error) {
       console.error("Error generating AI message:", error);
       setAiMessage("Whoops, the AI is taking a break. Try again later!");
@@ -103,7 +104,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
     <div
       ref={panelRef}
       tabIndex={-1}
-      className="bg-white dark:bg-gray-800 rounded-t-3xl lg:rounded-lg shadow-2xl w-full h-full lg:max-h-[calc(100vh-4rem)] overflow-y-auto text-gray-900 dark:text-white relative outline-none"
+      className="bg-white dark:bg-gray-800 rounded-t-3xl lg:rounded-lg shadow-2xl w-full h-full lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto text-gray-900 dark:text-white relative outline-none"
       role="region"
       aria-labelledby="element-panel-title"
     >

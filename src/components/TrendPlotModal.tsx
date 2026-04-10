@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Trend } from '../App';
+import { ElementData, Trend } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { ElementData } from '../types';
 
 interface TrendPlotModalProps {
   isOpen: boolean;

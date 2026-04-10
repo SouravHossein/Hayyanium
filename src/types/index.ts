@@ -68,3 +68,8 @@ export interface SavedCompound {
   name: string;
   elements: ElementData[];
 }
+
+export type Trend =
+  | 'atomicRadius_pm'
+  | 'electronegativity'
+  | 'firstIonizationEnergy_kJ_mol';

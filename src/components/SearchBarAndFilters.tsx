@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ElementCategory, ElementData } from '../types/index';
-import { Trend } from '../App';
+import { ElementCategory, ElementData, Trend } from '../types';
 import { CATEGORY_EMOJIS } from '../constants';
 
 const categories: ElementCategory[] = [
@@ -44,6 +43,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<ElementData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,103 +97,118 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md mb-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
-        <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-2" ref={searchWrapperRef}>
-            <label htmlFor="search-input" className="sr-only">Search</label>
-            <input
-              id="search-input"
-              type="text"
-              placeholder="Search by name, symbol, or number..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onFocus={() => searchTerm.trim() && suggestions.length > 0 && setShowSuggestions(true)}
-              autoComplete="off"
-              className={commonInputClasses}
-            />
-            {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute top-full mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
-                {suggestions.map(el => (
-                  <li key={el.atomicNumber}>
-                    <button
-                      onClick={() => handleSuggestionClick(el)}
-                      className="w-full text-left px-3 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/50 flex items-center gap-3"
-                    >
-                      <span className="text-xl">{CATEGORY_EMOJIS[el.category]}</span>
-                      <div className="flex-grow">
-                        <span className="font-bold">{el.symbol} - {el.name}</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 block capitalize">{el.category}</span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-        </div>
-        <div>
-            <label htmlFor="category-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Category</label>
-            <select
-              id="category-filter"
-              value={filters.category}
-              onChange={(e) => onFilterChange('category', e.target.value)}
-              className={commonSelectClasses}
-            >
-              <option value="">All</option>
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-        </div>
-        <div>
-            <label htmlFor="state-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">State</label>
-            <select
-              id="state-filter"
-              value={filters.state}
-              onChange={(e) => onFilterChange('state', e.target.value)}
-              className={commonSelectClasses}
-            >
-              <option value="">All</option>
-              {states.map(st => <option key={st} value={st}>{st}</option>)}
-            </select>
-        </div>
-         <div>
-            <label htmlFor="min-year" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">From Year</label>
-            <input
-                type="number"
-                id="min-year"
-                value={dateFilter.min}
-                min={yearRange.min}
-                max={dateFilter.max}
-                onChange={handleMinDateChange}
+      <div className="flex flex-col gap-4">
+        {/* Search Bar - Always Visible */}
+        <div className="flex gap-2">
+          <div className="relative flex-grow" ref={searchWrapperRef}>
+              <label htmlFor="search-input" className="sr-only">Search</label>
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Search by name, symbol, or number..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => searchTerm.trim() && suggestions.length > 0 && setShowSuggestions(true)}
+                autoComplete="off"
                 className={commonInputClasses}
-                placeholder={`e.g. ${yearRange.min}`}
-            />
-        </div>
-        <div>
-            <label htmlFor="max-year" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">To Year</label>
-            <input
-                type="number"
-                id="max-year"
-                value={dateFilter.max}
-                min={dateFilter.min}
-                max={yearRange.max}
-                onChange={handleMaxDateChange}
-                className={commonInputClasses}
-                placeholder={`e.g. ${yearRange.max}`}
-            />
-        </div>
-        <div>
-            <label htmlFor="trend-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Periodic Trend</label>
-            <select
-                id="trend-filter"
-                value={selectedTrend || ''}
-                onChange={(e) => onTrendChange(e.target.value === '' ? null : e.target.value as Trend)}
-                className={commonSelectClasses}
-            >
-                <option value="">Default View</option>
-                <option value="atomicRadius_pm">Atomic Radius</option>
-                <option value="electronegativity">Electronegativity</option>
-                <option value="firstIonizationEnergy_kJ_mol">First Ionization Energy</option>
-            </select>
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="absolute top-full mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-20 max-h-60 overflow-y-auto">
+                  {suggestions.map(el => (
+                    <li key={el.atomicNumber}>
+                      <button
+                        onClick={() => handleSuggestionClick(el)}
+                        className="w-full text-left px-3 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/50 flex items-center gap-3"
+                      >
+                        <span className="text-xl">{CATEGORY_EMOJIS[el.category]}</span>
+                        <div className="flex-grow">
+                          <span className="font-bold">{el.symbol} - {el.name}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 block capitalize">{el.category}</span>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+          </div>
+          <button 
+            className="md:hidden flex items-center justify-center p-2 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+            aria-label="Toggle Advanced Filters"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </button>
         </div>
 
+        {/* Advanced Filters */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end transition-all ${isFiltersOpen ? 'block' : 'hidden md:grid'}`}>
+          <div>
+              <label htmlFor="category-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Category</label>
+              <select
+                id="category-filter"
+                value={filters.category}
+                onChange={(e) => onFilterChange('category', e.target.value)}
+                className={commonSelectClasses}
+              >
+                <option value="">All</option>
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+          </div>
+          <div>
+              <label htmlFor="state-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">State</label>
+              <select
+                id="state-filter"
+                value={filters.state}
+                onChange={(e) => onFilterChange('state', e.target.value)}
+                className={commonSelectClasses}
+              >
+                <option value="">All</option>
+                {states.map(st => <option key={st} value={st}>{st}</option>)}
+              </select>
+          </div>
+          <div>
+              <label htmlFor="min-year" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">From Year</label>
+              <input
+                  type="number"
+                  id="min-year"
+                  value={dateFilter.min}
+                  min={yearRange.min}
+                  max={dateFilter.max}
+                  onChange={handleMinDateChange}
+                  className={commonInputClasses}
+                  placeholder={`e.g. ${yearRange.min}`}
+              />
+          </div>
+          <div>
+              <label htmlFor="max-year" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">To Year</label>
+              <input
+                  type="number"
+                  id="max-year"
+                  value={dateFilter.max}
+                  min={dateFilter.min}
+                  max={yearRange.max}
+                  onChange={handleMaxDateChange}
+                  className={commonInputClasses}
+                  placeholder={`e.g. ${yearRange.max}`}
+              />
+          </div>
+          <div>
+              <label htmlFor="trend-filter" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Periodic Trend</label>
+              <select
+                  id="trend-filter"
+                  value={selectedTrend || ''}
+                  onChange={(e) => onTrendChange(e.target.value === '' ? null : e.target.value as Trend)}
+                  className={commonSelectClasses}
+              >
+                  <option value="">Default View</option>
+                  <option value="atomicRadius_pm">Atomic Radius</option>
+                  <option value="electronegativity">Electronegativity</option>
+                  <option value="firstIonizationEnergy_kJ_mol">First Ionization Energy</option>
+              </select>
+          </div>
+        </div>
       </div>
       <div className="mt-4 flex justify-between items-center">
         <div className="flex bg-gray-200 dark:bg-gray-700 rounded-md p-1 w-32">

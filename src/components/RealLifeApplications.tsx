@@ -36,115 +36,137 @@ const createFallbackApplications = (element: ElementData): Application[] => {
 
 const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) => {
   const [applications, setApplications] = useState<Application[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAiGenerated, setIsAiGenerated] = useState(false);
   const ai = useMemo(() => createGeminiClient(), []);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchApplications = async () => {
-      setIsLoading(true);
-      setError(null);
+    const loadInitialApplications = () => {
       setCurrentIndex(0);
-
-      if (!ai) {
-        setApplications(createFallbackApplications(element));
-        setIsLoading(false);
-        return;
-      }
+      setError(null);
+      setIsLoading(false);
 
       const cacheKey = `real-apps-${element.name}`;
-
       try {
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
           setApplications(JSON.parse(cachedData));
-          setIsLoading(false);
+          setIsAiGenerated(true);
           return;
         }
       } catch (cacheError) {
         console.error('Failed to read from cache', cacheError);
       }
 
-      try {
-        const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
-        const geminiResponse = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                applications: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      searchTerm: {
-                        type: Type.STRING,
-                        description: 'A concise search term for Wikipedia.',
-                      },
+      setApplications(createFallbackApplications(element));
+      setIsAiGenerated(false);
+    };
+
+    loadInitialApplications();
+  }, [element]);
+
+  const handleGenerateAI = async () => {
+    if (!ai) {
+      setError('AI service is not configured.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setCurrentIndex(0);
+
+    const cacheKey = `real-apps-${element.name}`;
+
+    try {
+      const prompt = `List 3 to 5 common, tangible, real-world applications or forms of the element '${element.name}'. For each, provide a single, concise search term suitable for a Wikipedia page title.`;
+      const geminiResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              applications: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    searchTerm: {
+                      type: Type.STRING,
+                      description: 'A concise search term for Wikipedia.',
                     },
-                    required: ['searchTerm'],
                   },
+                  required: ['searchTerm'],
                 },
               },
             },
           },
-        });
+        },
+      });
 
-        const result = JSON.parse(geminiResponse.text);
-        const searchTerms: { searchTerm: string }[] = result.applications || [];
+      const responseText = await geminiResponse.text;
+      if (!responseText) {
+        throw new Error('Empty response received from AI.');
+      }
+      const result = JSON.parse(responseText);
+      const searchTerms: { searchTerm: string }[] = result.applications || [];
 
-        const wikiPromises = searchTerms.map(async ({ searchTerm }) => {
-          try {
-            const response = await fetch(
-              `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`,
-            );
-            if (!response.ok) {
-              return null;
-            }
-
-            const data = await response.json();
-            return {
-              image: data?.thumbnail?.source || data?.originalimage?.source || placeholderSvg,
-              caption: data?.description || data?.extract || 'No description available.',
-              link: data?.content_urls?.desktop?.page || '#',
-              title: data?.title || searchTerm,
-            };
-          } catch {
+      const wikiPromises = searchTerms.map(async ({ searchTerm }) => {
+        try {
+          const response = await fetch(
+            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(searchTerm)}`,
+          );
+          if (!response.ok) {
             return null;
           }
-        });
 
-        const resolvedApps = (await Promise.all(wikiPromises)).filter(
-          (application): application is Application =>
-            application !== null && application.title !== 'Not found.',
-        );
-
-        if (resolvedApps.length > 0) {
-          setApplications(resolvedApps);
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(resolvedApps));
-          } catch (cacheError) {
-            console.error('Failed to write to cache', cacheError);
-          }
-        } else {
-          setApplications(createFallbackApplications(element));
+          const data = await response.json();
+          return {
+            image: data?.thumbnail?.source || data?.originalimage?.source || placeholderSvg,
+            caption: data?.description || data?.extract || 'No description available.',
+            link: data?.content_urls?.desktop?.page || '#',
+            title: data?.title || searchTerm,
+          };
+        } catch {
+          return null;
         }
-      } catch (requestError) {
-        console.error('Failed to fetch applications:', requestError);
-        setError('Could not fetch applications at this time.');
-        setApplications(createFallbackApplications(element));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      });
 
-    fetchApplications();
-  }, [element, ai]);
+      const resolvedApps = (await Promise.all(wikiPromises)).filter(
+        (application): application is Application =>
+          application !== null && application.title !== 'Not found.',
+      );
+
+      if (resolvedApps.length > 0) {
+        setApplications(resolvedApps);
+        setIsAiGenerated(true);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(resolvedApps));
+        } catch (cacheError) {
+          console.error('Failed to write to cache', cacheError);
+        }
+      } else {
+        throw new Error('Could not find enough details for this element.');
+      }
+    } catch (requestError: any) {
+      console.error('Failed to fetch applications:', requestError);
+      
+      let errorMessage = 'Failed to generate examples. Please try again later.';
+      if (requestError.status === 503 || requestError.message?.includes('503')) {
+        errorMessage = 'AI model is currently experiencing high demand. Please try again later.';
+      } else if (requestError.message) {
+        errorMessage = requestError.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -169,9 +191,11 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
   if (isLoading) {
     return (
       <div>
-        <h4 className="mb-2 text-lg font-bold text-cyan-600 dark:text-cyan-300">
-          Real-Life Applications &#129514;
-        </h4>
+        <div className="mb-2 flex items-center justify-between">
+          <h4 className="text-lg font-bold text-cyan-600 dark:text-cyan-300">
+            Real-Life Applications &#129514;
+          </h4>
+        </div>
         <div className="flex h-48 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900">
           <svg className="h-8 w-8 animate-spin text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -185,10 +209,12 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
   if (applications.length === 0 && error) {
     return (
       <div>
-        <h4 className="mb-2 text-lg font-bold text-cyan-600 dark:text-cyan-300">
-          Real-Life Applications &#129514;
-        </h4>
-        <div className="rounded-md bg-yellow-100 p-4 text-sm text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200">
+        <div className="mb-2 flex items-center justify-between">
+          <h4 className="text-lg font-bold text-cyan-600 dark:text-cyan-300">
+            Real-Life Applications &#129514;
+          </h4>
+        </div>
+        <div className="rounded-md bg-red-100 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800">
           {error}
         </div>
       </div>
@@ -201,9 +227,27 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
 
   return (
     <div>
-      <h4 className="mb-2 text-lg font-bold text-cyan-600 dark:text-cyan-300">
-        Real-Life Applications &#129514;
-      </h4>
+      <div className="mb-2 flex items-center justify-between">
+        <h4 className="text-lg font-bold text-cyan-600 dark:text-cyan-300">
+          Real-Life Applications &#129514;
+        </h4>
+        {!isAiGenerated && (
+          <button
+            onClick={handleGenerateAI}
+            disabled={isLoading || !ai}
+            className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 dark:bg-cyan-700 dark:hover:bg-cyan-600"
+          >
+            Enhance with AI ✨
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div className="mb-3 rounded-md bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800">
+          {error}
+        </div>
+      )}
+
       <div
         ref={carouselRef}
         className="relative focus:outline-none"

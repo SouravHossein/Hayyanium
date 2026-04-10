@@ -1,37 +1,33 @@
+"use client";
+
 import React, {
   Suspense,
-  lazy,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { Helmet, HelmetProvider } from 'react-helmet-async';
+import dynamic from 'next/dynamic';
 import { Type } from '@google/genai';
-import PeriodicTable from './components/PeriodicTable';
-import Legend from './components/Legend';
-import SearchBarAndFilters from './components/SearchBarAndFilters';
-import { useFavorites } from './hooks/useFavorites';
-import { ThemeProvider } from './contexts/ThemeContext';
-import ThemeToggleButton from './components/ThemeToggleButton';
-import ComparisonTray from './components/ComparisonTray';
-import CompoundBuilderTray from './components/CompoundBuilderTray';
-import { useCompoundGallery } from './hooks/useCompoundGallery';
-import ElementList from './components/ElementList';
-import { createGeminiClient } from './lib/gemini';
-import { CompoundResult, ElementData, SavedCompound } from './types';
+import { Drawer } from 'vaul';
+import PeriodicTable from './PeriodicTable';
+import Legend from './Legend';
+import SearchBarAndFilters from './SearchBarAndFilters';
+import { useFavorites } from '../hooks/useFavorites';
+import ThemeToggleButton from './ThemeToggleButton';
+import ComparisonTray from './ComparisonTray';
+import CompoundBuilderTray from './CompoundBuilderTray';
+import { useCompoundGallery } from '../hooks/useCompoundGallery';
+import ElementList from './ElementList';
+import { createGeminiClient } from '../lib/gemini';
+import { CompoundResult, ElementData, SavedCompound, Trend } from '../types';
 
-export type Trend =
-  | 'atomicRadius_pm'
-  | 'electronegativity'
-  | 'firstIonizationEnergy_kJ_mol';
-
-const ElementPanel = lazy(() => import('./components/ElementPanel'));
-const ComparisonModal = lazy(() => import('./components/ComparisonModal'));
-const CompoundResultModal = lazy(() => import('./components/CompoundResultModal'));
-const TrendPlotModal = lazy(() => import('./components/TrendPlotModal'));
-const HistoricalTimelineModal = lazy(() => import('./components/HistoricalTimelineModal'));
-const CompoundGalleryModal = lazy(() => import('./components/CompoundGalleryModal'));
+const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
+const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
+const CompoundResultModal = dynamic(() => import('./CompoundResultModal'), { ssr: false });
+const TrendPlotModal = dynamic(() => import('./TrendPlotModal'), { ssr: false });
+const HistoricalTimelineModal = dynamic(() => import('./HistoricalTimelineModal'), { ssr: false });
+const CompoundGalleryModal = dynamic(() => import('./CompoundGalleryModal'), { ssr: false });
 
 const AppContent = () => {
   const [allElements, setAllElements] = useState<ElementData[]>([]);
@@ -67,7 +63,7 @@ const AppContent = () => {
 
     const loadElements = async () => {
       try {
-        const { default: allElementsData } = await import('./data/elements');
+        const { default: allElementsData } = await import('../data/elements');
         const data = allElementsData as ElementData[];
 
         if (!isMounted) {
@@ -228,7 +224,7 @@ const AppContent = () => {
     if (!ai) {
       setCompoundResult({
         compoundFormed: false,
-        error: 'Add VITE_GEMINI_API_KEY to enable AI-powered compound analysis.',
+        error: 'Add NEXT_PUBLIC_GEMINI_API_KEY to enable AI-powered compound analysis.',
       });
       return;
     }
@@ -284,7 +280,12 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         },
       });
 
-      setCompoundResult(JSON.parse(response.text) as CompoundResult);
+      const responseText = await response.text;
+      if (responseText) {
+        setCompoundResult(JSON.parse(responseText) as CompoundResult);
+      } else {
+        throw new Error('Empty response from AI');
+      }
     } catch (error) {
       console.error('Gemini API call failed:', error);
       setCompoundResult({
@@ -364,24 +365,11 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
   return (
     <>
-      <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:image" content={pageImage} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={pageImage} />
-        <link rel="canonical" href={pageUrl} />
-      </Helmet>
+      {/* Next.js Handles Metadata in layout.tsx or page.tsx */}
       <div
-        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 ${
-          isBuilderActive ? 'pb-32' : ''
-        } p-4 sm:p-6 lg:p-8`}
+        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${
+          isBuilderActive ? 'pb-48 md:pb-32' : ''
+        } p-4 sm:p-6 lg:p-8 overflow-x-hidden`}
       >
       <div className="mx-auto max-w-screen-2xl">
         <header className="relative mb-6 text-center">
@@ -394,7 +382,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           <div className="absolute top-0 right-0 flex items-center gap-2">
             <button
               onClick={() => setIsGalleryOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              className="hidden md:flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
               aria-label="Open compound gallery"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -404,7 +392,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             </button>
             <button
               onClick={() => setTimelineModalOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              className="hidden md:flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
               aria-label="Open historical timeline"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -417,7 +405,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             </button>
             <button
               onClick={() => setIsBuilderActive(!isBuilderActive)}
-              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+              className={`hidden md:flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
                 isBuilderActive
                   ? 'bg-cyan-500 text-white'
                   : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
@@ -438,23 +426,25 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               selectedElement ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
             }`}
           >
-            <SearchBarAndFilters
-              searchTerm={searchTerm}
-              onSearchTermChange={setSearchTerm}
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              dateFilter={dateFilter}
-              yearRange={yearRange}
-              onDateFilterChange={setDateFilter}
-              selectedTrend={selectedTrend}
-              onTrendChange={setSelectedTrend}
-              onClear={clearFilters}
-              allElements={allElements}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-            />
+            <section aria-label="Search and filters">
+              <SearchBarAndFilters
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                dateFilter={dateFilter}
+                yearRange={yearRange}
+                onDateFilterChange={setDateFilter}
+                selectedTrend={selectedTrend}
+                onTrendChange={setSelectedTrend}
+                onClear={clearFilters}
+                allElements={allElements}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
+            </section>
 
-            <div className="relative">
+            <section aria-label="Periodic table view" className="relative">
               {viewMode === 'grid' ? (
                 <PeriodicTable
                   elements={filteredElements}
@@ -490,24 +480,17 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   </p>
                 </div>
               )}
-            </div>
+            </section>
             <Legend />
           </main>
 
+          {/* Desktop Panel */}
           <aside
-            className={`transition-all duration-500 ease-in-out ${
-              selectedElement
-                ? 'fixed inset-0 z-50 flex items-end lg:relative lg:inset-auto lg:w-full lg:max-w-md lg:items-start'
-                : 'hidden w-0 lg:block'
+            className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${
+              selectedElement ? 'lg:w-full lg:max-w-md' : 'lg:w-0'
             }`}
           >
-            {selectedElement && (
-              <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm lg:hidden"
-                onClick={handleClosePanel}
-              />
-            )}
-            <div className="relative z-10 h-[85vh] w-full overflow-hidden rounded-t-3xl shadow-2xl lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
+            <div className="relative z-10 w-full overflow-hidden lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
               {selectedElement && (
                 <Suspense fallback={null}>
                   <ElementPanel
@@ -526,6 +509,39 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               )}
             </div>
           </aside>
+
+          {/* Mobile Panel Drawer */}
+          <Drawer.Root 
+            open={!!selectedElement} 
+            onOpenChange={(open) => !open && handleClosePanel()}
+            snapPoints={[0.5, 0.9]}
+            fadeFromIndex={0}
+          >
+            <Drawer.Portal>
+              <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
+              <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
+                <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+                <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+                  {selectedElement && (
+                    <Suspense fallback={null}>
+                      <ElementPanel
+                        key={selectedElement.atomicNumber}
+                        element={selectedElement}
+                        isFavorite={favorites.includes(selectedElement.atomicNumber)}
+                        onClose={handleClosePanel}
+                        onToggleFavorite={toggleFavorite}
+                        comparisonList={comparisonList}
+                        onAddToCompare={handleAddToCompare}
+                        ai={ai}
+                        onAddToBuilder={handleAddToBuilder}
+                        builderElements={builderElements}
+                      />
+                    </Suspense>
+                  )}
+                </div>
+              </Drawer.Content>
+            </Drawer.Portal>
+          </Drawer.Root>
         </div>
       </div>
 
@@ -601,18 +617,44 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         />
       </Suspense>
     </div>
+    
+    {/* Mobile Bottom Navigation Dock */}
+    <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-around bg-white/90 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/95 dark:border-gray-800 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+      <button
+        onClick={() => { setIsBuilderActive(false); setIsGalleryOpen(false); setTimelineModalOpen(false); }}
+        className="flex flex-col items-center gap-1 p-2 text-cyan-600 dark:text-cyan-400"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+        <span className="text-[10px] font-medium">Table</span>
+      </button>
+      <button
+        onClick={() => { setIsBuilderActive(!isBuilderActive); setIsGalleryOpen(false); setTimelineModalOpen(false); }}
+        className={`flex flex-col items-center gap-1 p-2 ${isBuilderActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+        <span className="text-[10px] font-medium">Builder</span>
+      </button>
+      <button
+        onClick={() => { setIsGalleryOpen(true); setIsBuilderActive(false); setTimelineModalOpen(false); }}
+        className={`flex flex-col items-center gap-1 p-2 ${isGalleryOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+        <span className="text-[10px] font-medium">Gallery</span>
+      </button>
+      <button
+        onClick={() => { setTimelineModalOpen(true); setIsBuilderActive(false); setIsGalleryOpen(false); }}
+        className={`flex flex-col items-center gap-1 p-2 ${isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+        <span className="text-[10px] font-medium">Timeline</span>
+      </button>
+    </div>
   </>
   );
 };
 
-const App = () => {
-  return (
-    <HelmetProvider>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </HelmetProvider>
-  );
+const ClientApp = () => {
+  return <AppContent />;
 };
 
-export default App;
+export default ClientApp;

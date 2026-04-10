@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ElementData } from '../types/index';
 import ElementCell from './ElementCell';
-import { Trend } from '../App';
+import { Trend } from '../types';
 
 interface PeriodicTableProps {
   elements: ElementData[];
@@ -99,7 +99,10 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
 
 
   return (
-    <div className="w-full overflow-x-auto p-4 snap-x hide-scrollbar">
+    <div 
+      className="w-full overflow-auto p-4 overscroll-contain touch-pan-x touch-pan-y hide-scrollbar scroll-smooth"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
         <div className="grid gap-1 min-w-[1000px] lg:min-w-0" style={{gridTemplateColumns: 'auto repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}>
         {/* Group Labels */}
         {Array.from({ length: 18 }, (_, i) => i + 1).map(groupNumber => (

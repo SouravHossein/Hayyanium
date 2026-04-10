@@ -1,0 +1,17 @@
+{
+  "name": "Interactive Periodic Table",
+  "short_name": "Periodic Table",
+  "description": "Interactive 3D Periodic Table of Elements.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#081220",
+  "theme_color": "#081220",
+  "icons": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ]
+}
