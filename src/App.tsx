@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Type } from '@google/genai';
 import PeriodicTable from './components/PeriodicTable';
 import Legend from './components/Legend';
@@ -347,12 +348,41 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
     [selectedTrend, allElements],
   );
 
+  const pageTitle = selectedElement
+    ? `${selectedElement.name} (${selectedElement.symbol}) - Element Details | Interactive Periodic Table`
+    : 'Interactive Periodic Table - Learn Elements, Compounds & Chemistry';
+
+  const pageDescription = selectedElement
+    ? `Discover ${selectedElement.name} (${selectedElement.symbol}), atomic number ${selectedElement.atomicNumber}. Explore properties, uses, electron configuration, and periodic trends for this element.`
+    : 'Explore the interactive periodic table with detailed element information, 3D atomic models, compound builder, and learning tools. Perfect for students, teachers, and chemistry enthusiasts.';
+
+  const pageUrl = selectedElement
+    ? `https://interactive-periodic-table-wheat.vercel.app/?element=${selectedElement.symbol}`
+    : 'https://interactive-periodic-table-wheat.vercel.app/';
+
+  const pageImage = 'https://interactive-periodic-table-wheat.vercel.app/og-image.png';
+
   return (
-    <div
-      className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 ${
-        isBuilderActive ? 'pb-32' : ''
-      } p-4 sm:p-6 lg:p-8`}
-    >
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={pageImage} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+        <link rel="canonical" href={pageUrl} />
+      </Helmet>
+      <div
+        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 ${
+          isBuilderActive ? 'pb-32' : ''
+        } p-4 sm:p-6 lg:p-8`}
+      >
       <div className="mx-auto max-w-screen-2xl">
         <header className="relative mb-6 text-center">
           <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
@@ -571,14 +601,17 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         />
       </Suspense>
     </div>
+  </>
   );
 };
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </HelmetProvider>
   );
 };
 
