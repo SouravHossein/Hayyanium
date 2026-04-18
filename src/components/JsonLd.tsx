@@ -1,7 +1,12 @@
 import React from 'react';
+import { ElementData } from '@/types';
 
-const JsonLd = () => {
-  const structuredData = {
+interface JsonLdProps {
+  element?: ElementData;
+}
+
+const JsonLd: React.FC<JsonLdProps> = ({ element }) => {
+  const baseData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Interactive Periodic Table",
@@ -33,11 +38,40 @@ const JsonLd = () => {
     ]
   };
 
+  const elementData = element ? {
+    "@context": "https://schema.org",
+    "@type": "ChemicalSubstance",
+    "name": element.name,
+    "description": element.summary,
+    "identifiers": [
+      {
+        "@type": "PropertyValue",
+        "name": "Atomic Number",
+        "value": element.atomicNumber
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "Symbol",
+        "value": element.symbol
+      }
+    ],
+    "chemicalComposition": element.symbol,
+    "url": `https://interactive-periodic-table.vercel.app/element/${element.symbol}`
+  } : null;
+
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(baseData) }}
+      />
+      {elementData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(elementData) }}
+        />
+      )}
+    </>
   );
 };
 

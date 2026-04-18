@@ -29,16 +29,30 @@ const TrendPlotModal = dynamic(() => import('./TrendPlotModal'), { ssr: false })
 const HistoricalTimelineModal = dynamic(() => import('./HistoricalTimelineModal'), { ssr: false });
 const CompoundGalleryModal = dynamic(() => import('./CompoundGalleryModal'), { ssr: false });
 
-const AppContent = () => {
-  const [allElements, setAllElements] = useState<ElementData[]>([]);
+interface ClientAppProps {
+  initialElements: ElementData[];
+}
+
+const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
+  const [allElements, setAllElements] = useState<ElementData[]>(initialElements);
   const [selectedElement, setSelectedElement] = useState<ElementData | null>(null);
   const [hoveredElement, setHoveredElement] = useState<ElementData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ category: '', state: '' });
   const [favorites, toggleFavorite] = useFavorites();
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null);
-  const [yearRange, setYearRange] = useState({ min: 1600, max: new Date().getFullYear() });
-  const [dateFilter, setDateFilter] = useState({ min: 1600, max: new Date().getFullYear() });
+  
+  // Initialize year range from data
+  const initialYearRange = useMemo(() => {
+    if (initialElements.length === 0) return { min: 1600, max: new Date().getFullYear() };
+    const years = initialElements
+      .map((element: ElementData) => element.discoveryYear)
+      .filter((year): year is number => typeof year === 'number');
+    return { min: Math.min(...years), max: Math.max(...years) };
+  }, [initialElements]);
+
+  const [yearRange, setYearRange] = useState(initialYearRange);
+  const [dateFilter, setDateFilter] = useState(initialYearRange);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [comparisonList, setComparisonList] = useState<ElementData[]>([]);
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
@@ -58,42 +72,12 @@ const AppContent = () => {
 
   const ai = useMemo(() => createGeminiClient(), []);
 
+  // Effect to sync year range if initialElements changes (though it shouldn't in static)
   useEffect(() => {
-    let isMounted = true;
-
-    const loadElements = async () => {
-      try {
-        const { default: allElementsData } = await import('../data/elements');
-        const data = allElementsData as ElementData[];
-
-        if (!isMounted) {
-          return;
-        }
-
-        setAllElements(data);
-
-        if (data.length > 0) {
-          const years = data
-            .map((element: ElementData) => element.discoveryYear)
-            .filter((year): year is number => typeof year === 'number');
-
-          const minYear = Math.min(...years);
-          const maxYear = Math.max(...years);
-
-          setYearRange({ min: minYear, max: maxYear });
-          setDateFilter({ min: minYear, max: maxYear });
-        }
-      } catch (error) {
-        console.error('Failed to load element data:', error);
-      }
-    };
-
-    loadElements();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    setYearRange(initialYearRange);
+    setDateFilter(initialYearRange);
+    setAllElements(initialElements);
+  }, [initialElements, initialYearRange]);
 
   const handleFilterChange = (filterType: 'category' | 'state', value: string) => {
     setFilters((prev) => ({ ...prev, [filterType]: value }));
@@ -163,14 +147,14 @@ const AppContent = () => {
   }, []);
 
   const handleDragStart = useCallback(
-    (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => {
+    (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => {
       event.dataTransfer.setData('atomicNumber', element.atomicNumber.toString());
       setIsDragging(true);
     },
     [],
   );
 
-  const handleDragEnd = useCallback(() => setIsDragging(false), []);
+  const handleDragEnd = useCallback((_event: React.DragEvent<HTMLAnchorElement>) => setIsDragging(false), []);
 
   const handleDropOnBuilder = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -653,8 +637,8 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
   );
 };
 
-const ClientApp = () => {
-  return <AppContent />;
+const ClientApp: React.FC<ClientAppProps> = ({ initialElements }) => {
+  return <AppContent initialElements={initialElements} />;
 };
 
 export default ClientApp;

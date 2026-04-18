@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: "Interactive Periodic Table - Advanced Visual Science Tool",
     description: "Deep dive into chemical elements with 3D models and real-world applications.",
     type: "website",
-    url: "https://interactive-periodic-table-wheat.vercel.app/",
+    url: "https://interactive-periodic-table.vercel.app/",
     images: [
       {
         url: "/og-image.png",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     creator: "@sourav_hossein",
   },
   alternates: {
-    canonical: "https://interactive-periodic-table-wheat.vercel.app/",
+    canonical: "https://interactive-periodic-table.vercel.app/",
   },
   verification: {
     google: "google-site-verification-id", // User should replace this
@@ -85,6 +85,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://raw.githubusercontent.com" />
+      </head>
       <body className={inter.className}>
         <JsonLd />
         <ThemeProvider>

@@ -11,8 +11,8 @@ interface PeriodicTableProps {
   onHoverElement: (element: ElementData | null) => void;
   selectedTrend: Trend | null;
   isDraggable?: boolean;
-  onElementDragStart?: (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => void;
-  onElementDragEnd?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onElementDragStart?: (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => void;
+  onElementDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
   onGroupClick: (group: number) => void;
   onPeriodClick: (period: number) => void;
 }

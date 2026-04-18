@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { ElementData } from '../types/index';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 
@@ -10,8 +11,8 @@ interface ElementCellProps {
   onHover: (element: ElementData | null) => void;
   trendStyle?: React.CSSProperties;
   isDraggable?: boolean;
-  onDragStart?: (event: React.DragEvent<HTMLButtonElement>, element: ElementData) => void;
-  onDragEnd?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onDragStart?: (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => void;
+  onDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
   isHighlighted?: boolean;
 }
 
@@ -41,15 +42,24 @@ const ElementCell: React.FC<ElementCellProps> = ({
     element.block ==="f" ? 'bg-pink-400':
     "bg-green-400"
 
-  const handleDragStart = (e: React.DragEvent<HTMLButtonElement>) => {
+  const handleDragStart = (e: React.DragEvent<HTMLAnchorElement>) => {
     if (onDragStart) {
       onDragStart(e, element);
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    // If it's a normal click (not cmd/ctrl/middle click), intercept it for the SPA drawer
+    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+      e.preventDefault();
+      onSelect(element);
+    }
+  };
+
   return (
-    <button
-      onClick={() => onSelect(element)}
+    <Link
+      href={`/element/${element.symbol}`}
+      onClick={handleClick}
       onMouseEnter={() => onHover(element)}
       onMouseLeave={() => onHover(null)}
       onFocus={() => onHover(element)}
@@ -58,14 +68,16 @@ const ElementCell: React.FC<ElementCellProps> = ({
       draggable={isDraggable}
       onDragStart={isDraggable ? handleDragStart : undefined}
       onDragEnd={isDraggable ? onDragEnd : undefined}
-      className={`relative p-1 rounded-md transition-all duration-500 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : ''} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
+      className={`relative p-1 rounded-md transition-all duration-500 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : 'block'} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
       style={{ 
         gridColumnStart: element.xpos, 
         gridRowStart: element.ypos,
-        ...(trendStyle || {}) 
+        ...(trendStyle || {}),
+        display: isSelected ? 'flex' : 'block', // Ensuring focus states work
+        flexDirection: 'column'
       }}
     >
-      <div className="absolute top-0.5 left-1 text-xs font-medium">{element.atomicNumber}</div>
+      <div className="absolute top-0.5 left-1 text-[10px] sm:text-xs font-medium">{element.atomicNumber}</div>
 
       {isFavorite && (
         <div className="absolute top-0.5 right-1 text-xs">
@@ -75,13 +87,13 @@ const ElementCell: React.FC<ElementCellProps> = ({
         </div>
       )}
 
-      {!trendStyle && <div className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-sm ${blockColor}`} ></div>}
+      {!trendStyle && <div className={`absolute top-0.5 right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm ${blockColor}`} ></div>}
 
-      <div className="text-2xl font-bold leading-tight mt-1">{element.symbol}</div>
-      <div className="text-xs truncate">{element.name}</div>
-      <div className="text-xs">{atomicMass}</div>
-    </button>
+      <div className="text-xl sm:text-2xl font-bold leading-tight mt-1">{element.symbol}</div>
+      <div className="text-[10px] sm:text-xs truncate">{element.name}</div>
+      <div className="text-[10px] sm:text-xs">{atomicMass}</div>
+    </Link>
   );
 };
 
-export default ElementCell;
+export default ElementCell;

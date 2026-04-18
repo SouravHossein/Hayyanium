@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/'],
     },
-    sitemap: 'https://interactive-periodic-table-wheat.vercel.app/sitemap.xml',
+    sitemap: 'https://interactive-periodic-table.vercel.app/sitemap.xml',
   };
 }

@@ -1,10 +1,12 @@
 import { MetadataRoute } from 'next';
+import { allElementsData } from '@/data/elements';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://interactive-periodic-table-wheat.vercel.app';
+  const baseUrl = 'https://interactive-periodic-table.vercel.app';
   const lastModified = new Date();
 
-  const routes = [
+  // Core routes
+  const mainRoutes = [
     '',
     '/elements',
     '/compounds',
@@ -17,5 +19,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  return routes;
+  // Element specific routes
+  const elementRoutes = allElementsData.map((element) => ({
+    url: `${baseUrl}/element/${element.symbol}`,
+    lastModified,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
+  return [...mainRoutes, ...elementRoutes];
 }
