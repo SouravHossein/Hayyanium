@@ -96,4 +96,4 @@ const ElementCell: React.FC<ElementCellProps> = ({
   );
 };
 
-export default ElementCell;
+export default ElementCell;

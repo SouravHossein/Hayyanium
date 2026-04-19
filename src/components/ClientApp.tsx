@@ -19,6 +19,9 @@ import ComparisonTray from './ComparisonTray';
 import CompoundBuilderTray from './CompoundBuilderTray';
 import { useCompoundGallery } from '../hooks/useCompoundGallery';
 import ElementList from './ElementList';
+import LabPartner from './LabPartner';
+import CollectionProgress from './CollectionProgress';
+import { useDiscovery } from '../hooks/useDiscovery';
 import { createGeminiClient } from '../lib/gemini';
 import { CompoundResult, ElementData, SavedCompound, Trend } from '../types';
 
@@ -69,6 +72,13 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
     title: string;
   }>({ isOpen: false, elements: [], title: '' });
   const [isTimelineModalOpen, setTimelineModalOpen] = useState(false);
+  const [labPartnerMessage, setLabPartnerMessage] = useState<string | null>(null);
+  const { discovered, discover } = useDiscovery();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const ai = useMemo(() => createGeminiClient(), []);
 
@@ -115,13 +125,31 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
 
   const handleSelectElement = useCallback(
     (element: ElementData) => {
-      if (selectedElement?.atomicNumber === element.atomicNumber) {
-        setSelectedElement(null);
-      } else {
+      if (selectedElement?.atomicNumber !== element.atomicNumber) {
         setSelectedElement(element);
+        
+        // Handle discovery
+        const isNew = !discovered.includes(element.atomicNumber);
+        if (isNew) {
+          discover(element.atomicNumber);
+        }
+
+        // Add a fun reaction for the Lab Partner
+        const reactions = isNew 
+          ? [
+              `NEW DISCOVERY! You found ${element.name}. That's ${discovered.length + 1} elements found!`,
+              `Eureka! ${element.name} added to your collection. Did you know it's a ${element.category}?`,
+              `First time seeing ${element.symbol}? Truly ${element.category} excellence!`
+            ]
+          : [
+              `Ah, the familiar ${element.symbol}. Density is ${element.density_g_cm3 || 'mysterious'} g/cm³.`,
+              `${element.name} is a ${element.block}-block element. Still as ${element.category} as ever!`,
+              `Checking in on ${element.name}? ${element.everydayExample.split('.')[0]}.`
+            ];
+        setLabPartnerMessage(reactions[Math.floor(Math.random() * reactions.length)]);
       }
     },
-    [selectedElement],
+    [selectedElement, discovered, discover],
   );
 
   const handleClosePanel = useCallback(() => {
@@ -334,18 +362,18 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
   );
 
   const pageTitle = selectedElement
-    ? `${selectedElement.name} (${selectedElement.symbol}) - Element Details | Interactive Periodic Table`
-    : 'Interactive Periodic Table - Learn Elements, Compounds & Chemistry';
+    ? `${selectedElement.name} (${selectedElement.symbol}) - Element Details | Hayyanium`
+    : 'Hayyanium - Learn Elements, Compounds & Chemistry';
 
   const pageDescription = selectedElement
     ? `Discover ${selectedElement.name} (${selectedElement.symbol}), atomic number ${selectedElement.atomicNumber}. Explore properties, uses, electron configuration, and periodic trends for this element.`
     : 'Explore the interactive periodic table with detailed element information, 3D atomic models, compound builder, and learning tools. Perfect for students, teachers, and chemistry enthusiasts.';
 
   const pageUrl = selectedElement
-    ? `https://interactive-periodic-table-wheat.vercel.app/?element=${selectedElement.symbol}`
-    : 'https://interactive-periodic-table-wheat.vercel.app/';
+    ? `https://hayyanium.vercel.app/?element=${selectedElement.symbol}`
+    : 'https://hayyanium.vercel.app/';
 
-  const pageImage = 'https://interactive-periodic-table-wheat.vercel.app/og-image.png';
+  const pageImage = 'https://hayyanium.vercel.app/og-image.png';
 
   return (
     <>
@@ -358,49 +386,49 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
       <div className="mx-auto max-w-screen-2xl">
         <header className="relative mb-6 text-center">
           <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
-            Interactive Periodic Table
+            Hayyanium
           </h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
             Explore the building blocks of the universe.
           </p>
-          <div className="absolute top-0 right-0 flex items-center gap-2">
-            <button
-              onClick={() => setIsGalleryOpen(true)}
-              className="hidden md:flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-              aria-label="Open compound gallery"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-              </svg>
-              <span>Gallery</span>
-            </button>
-            <button
-              onClick={() => setTimelineModalOpen(true)}
-              className="hidden md:flex items-center gap-2 rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold transition-colors hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-              aria-label="Open historical timeline"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={() => setIsBuilderActive(!isBuilderActive)}
-              className={`hidden md:flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-                isBuilderActive
-                  ? 'bg-cyan-500 text-white'
-                  : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-              }`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-              </svg>
-              <span>Builder</span>
-            </button>
-            <ThemeToggleButton />
+          <div className="mt-4 flex justify-center">
+            <div className="w-full max-w-xs">
+              <CollectionProgress total={allElements.length} count={discovered.length} />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+             <button
+               onClick={() => setIsGalleryOpen(true)}
+               className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+               aria-label="Open compound gallery"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                 <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+               </svg>
+               <span>Gallery</span>
+             </button>
+             <button
+               onClick={() => setTimelineModalOpen(true)}
+               className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+               aria-label="Open historical timeline"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
+               </svg>
+               <span>Timeline</span>
+             </button>
+             <button
+               onClick={() => setIsBuilderActive(!isBuilderActive)}
+               className={`flex items-center gap-3 rounded-lg border px-4 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${
+                 isBuilderActive
+                   ? 'bg-cyan-500 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                   : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700'
+               }`}
+             >
+               <div className={`w-2 h-2 rounded-full ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
+               <span>Builder</span>
+             </button>
+             <ThemeToggleButton />
           </div>
         </header>
 
@@ -410,7 +438,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               selectedElement ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
             }`}
           >
-            <section aria-label="Search and filters">
+            <section aria-label="Filters and controls" className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md sticky top-0 z-30 py-4 px-6 border-b border-gray-200 dark:border-gray-700">
               <SearchBarAndFilters
                 searchTerm={searchTerm}
                 onSearchTermChange={setSearchTerm}
@@ -428,7 +456,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               />
             </section>
 
-            <section aria-label="Periodic table view" className="relative">
+            <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
               {viewMode === 'grid' ? (
                 <PeriodicTable
                   elements={filteredElements}
@@ -537,6 +565,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           onRemove={handleRemoveFromBuilder}
           onClear={handleClearBuilder}
           onCombine={handleCombine}
+          isCombining={isCombining}
         />
       )}
 
@@ -633,7 +662,8 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         <span className="text-[10px] font-medium">Timeline</span>
       </button>
     </div>
-  </>
+      <LabPartner message={labPartnerMessage} />
+    </>
   );
 };
 

@@ -9,7 +9,7 @@ const JsonLd: React.FC<JsonLdProps> = ({ element }) => {
   const baseData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Interactive Periodic Table",
+    "name": "Hayyanium",
     "description": "An advanced interactive periodic table with 3D atomic structures and chemical compound builder.",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web",

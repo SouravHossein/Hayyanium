@@ -1,6 +1,6 @@
 {
-  "name": "Interactive Periodic Table",
-  "short_name": "Periodic Table",
+  "name": "Hayyanium",
+  "short_name": "Hayyanium",
   "description": "Explore the periodic table with learning tools and classroom modes.",
   "start_url": ".",
   "display": "standalone",

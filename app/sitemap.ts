@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { allElementsData } from '@/data/elements';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://interactive-periodic-table.vercel.app';
+  const baseUrl = 'https://hayyanium.vercel.app';
   const lastModified = new Date();
 
   // Core routes

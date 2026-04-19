@@ -9,9 +9,10 @@ interface CompoundBuilderTrayProps {
     onRemove: (atomicNumber: number) => void;
     onClear: () => void;
     onCombine: () => void;
+    isCombining: boolean;
 }
 
-const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isDragging, onDrop, onRemove, onClear, onCombine }) => {
+const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isDragging, onDrop, onRemove, onClear, onCombine, isCombining }) => {
     
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -24,7 +25,7 @@ const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isD
                 <div 
                     onDrop={onDrop}
                     onDragOver={handleDragOver}
-                    className={`flex-grow w-full sm:w-auto flex items-center gap-2 p-2 rounded-lg border-2 border-dashed transition-colors ${isDragging ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/50' : 'border-gray-300 dark:border-gray-700'}`}
+                    className={`flex-grow w-full sm:w-auto flex items-center gap-2 p-2 rounded-lg border-2 border-dashed transition-all duration-700 ${isDragging ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/50' : isCombining ? 'border-green-500 bg-green-50 dark:bg-green-900/50 scale-[1.02] shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'border-gray-300 dark:border-gray-700'}`}
                 >
                     <h3 className="text-lg font-bold mr-4 hidden md:block text-gray-700 dark:text-gray-300">Workbench</h3>
                     <div className="flex flex-wrap gap-2 flex-grow justify-center sm:justify-start">
@@ -39,7 +40,14 @@ const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isD
                                 </button>
                             </div>
                         ))}
-                        {elements.length === 0 && (
+                        {isCombining && (
+                             <div className="flex gap-1 items-center px-2">
+                                <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
+                             </div>
+                        )}
+                        {elements.length === 0 && !isCombining && (
                             <div className="flex-1 text-center text-gray-500 dark:text-gray-400 p-2 text-sm sm:text-base">
                                 Add elements to combine
                             </div>

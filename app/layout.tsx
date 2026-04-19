@@ -16,15 +16,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hayyanium.vercel.app/"),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Periodic Table",
+    title: "Hayyanium",
   },
   title: {
-    default: "Interactive Periodic Table - Elements, Compounds & 3D Models",
-    template: "%s | Interactive Periodic Table"
+    default: "Hayyanium - Interactive Periodic Table",
+    template: "%s | Hayyanium"
   },
   description: "Advanced interactive periodic table with detailed element data, 3D atomic structures, chemical compound builder, and historical discovery timelines. Built for science education.",
   keywords: [
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Sourav Hossein", url: "https://github.com/SouravHossein" }],
   creator: "Sourav Hossein",
-  publisher: "Interactive Periodic Table",
+  publisher: "Hayyanium",
   robots: {
     index: true,
     follow: true,
@@ -48,30 +49,30 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Interactive Periodic Table - Advanced Visual Science Tool",
+    title: "Hayyanium - Advanced Visual Science Tool",
     description: "Deep dive into chemical elements with 3D models and real-world applications.",
     type: "website",
-    url: "https://interactive-periodic-table.vercel.app/",
+    url: "https://hayyanium.vercel.app/",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Interactive Periodic Table Dashboard",
+        alt: "Hayyanium Dashboard",
       },
     ],
-    siteName: "Interactive Periodic Table",
+    siteName: "Hayyanium",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Interactive Periodic Table - Elements & 3D Models",
+    title: "Hayyanium - Elements & 3D Models",
     description: "Explore the building blocks of the universe with our interactive 3D periodic table.",
     images: ["/og-image.png"],
     creator: "@sourav_hossein",
   },
   alternates: {
-    canonical: "https://interactive-periodic-table.vercel.app/",
+    canonical: "https://hayyanium.vercel.app/",
   },
   verification: {
     google: "google-site-verification-id", // User should replace this

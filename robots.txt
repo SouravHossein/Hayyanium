@@ -1,8 +1,8 @@
-# Robots.txt for Interactive Periodic Table
+# Robots.txt for Hayyanium
 # Allow all crawlers full access to the site
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://interactive-periodic-table-wheat.vercel.app/sitemap.xml
+Sitemap: https://hayyanium.vercel.app/sitemap.xml

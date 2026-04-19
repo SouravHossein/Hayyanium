@@ -1,6 +1,6 @@
 {
-  "name": "Interactive Periodic Table",
-  "short_name": "Periodic Table",
+  "name": "Hayyanium",
+  "short_name": "Hayyanium",
   "description": "Interactive 3D Periodic Table of Elements with chemical properties and discovery stories.",
   "start_url": "/",
   "display": "standalone",

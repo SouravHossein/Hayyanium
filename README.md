@@ -1,4 +1,4 @@
-# Interactive Periodic Table
+# Hayyanium
 
 A Vite + React + TypeScript periodic table with:
 
