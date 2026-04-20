@@ -9,7 +9,7 @@ const BLOCK_DEPTH: Record<string, number> = { s: 0, p: 2, d: 4, f: 6 };
 
 export const grid3DLayout: LayoutEngine3D = (elements: ElementData[]): Layout3DResult => {
   const positions = new Map<number, Position3D>();
-  const spacing = 2.2;
+  const spacing = 2.15;
 
   elements.forEach((el) => {
     let x: number, y: number, z: number;

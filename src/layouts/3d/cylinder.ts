@@ -7,8 +7,8 @@ import { LayoutEngine3D, Layout3DResult, Position3D } from './types';
  */
 export const cylinderLayout: LayoutEngine3D = (elements: ElementData[]): Layout3DResult => {
   const positions = new Map<number, Position3D>();
-  const radius = 22;
-  const heightSpacing = 5;
+  const radius = 16; // Reduced from 22
+  const heightSpacing = 3.2; // Reduced from 5
 
   elements.forEach((el) => {
     let theta: number, y: number;
@@ -30,12 +30,14 @@ export const cylinderLayout: LayoutEngine3D = (elements: ElementData[]): Layout3
       x: radius * Math.cos(theta),
       z: radius * Math.sin(theta),
       y: y + 4 * heightSpacing,
+      // Rotate around Y to face outward
+      rotation: [0, -theta - Math.PI / 2, 0],
     });
   });
 
   return {
     positions,
-    cameraPosition: [40, 10, 40],
-    cameraTarget: [0, -5, 0],
+    cameraPosition: [35, 5, 35],
+    cameraTarget: [0, 0, 0],
   };
 };

@@ -14,7 +14,7 @@ const BLOCK_OFFSET: Record<string, [number, number, number]> = {
 
 export const block3DLayout: LayoutEngine3D = (elements: ElementData[]): Layout3DResult => {
   const positions = new Map<number, Position3D>();
-  const spacing = 2.5;
+  const spacing = 2.25;
 
   // Group by block
   const blocks = new Map<string, ElementData[]>();

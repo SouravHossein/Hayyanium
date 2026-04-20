@@ -23,8 +23,8 @@ function getL(el: ElementData): number {
 
 export const orbitalLayout: LayoutEngine3D = (elements: ElementData[]): Layout3DResult => {
   const positions = new Map<number, Position3D>();
-  const radiusScale = 6;
-  const heightScale = 4;
+  const radiusScale = 4.5;
+  const heightScale = 3.2;
 
   elements.forEach((el) => {
     const n = getN(el);
@@ -60,17 +60,27 @@ export const orbitalLayout: LayoutEngine3D = (elements: ElementData[]): Layout3D
 
     // Height offset by angular momentum
     const y = -l * heightScale + (n - 4) * heightScale * 0.5;
+    
+    const posX = r * Math.cos(theta);
+    const posZ = r * Math.sin(theta);
+    const posY = y;
+    
+    // Calculate rotation to face outward from center
+    const dist = Math.sqrt(posX * posX + posY * posY + posZ * posZ);
+    const phi = Math.acos(posY / dist);
+    const azimuthal = Math.atan2(posZ, posX);
 
     positions.set(el.atomicNumber, {
-      x: r * Math.cos(theta),
-      z: r * Math.sin(theta),
-      y,
+      x: posX,
+      y: posY,
+      z: posZ,
+      rotation: [phi - Math.PI / 2, -azimuthal - Math.PI / 2, 0],
     });
   });
 
   return {
     positions,
-    cameraPosition: [0, 20, 55],
+    cameraPosition: [0, 15, 45],
     cameraTarget: [0, 0, 0],
   };
 };
