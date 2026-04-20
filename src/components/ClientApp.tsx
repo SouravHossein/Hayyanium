@@ -24,13 +24,16 @@ import CollectionProgress from './CollectionProgress';
 import { useDiscovery } from '../hooks/useDiscovery';
 import { createGeminiClient } from '../lib/gemini';
 import { CompoundResult, ElementData, SavedCompound, Trend } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import Link from 'next/link';
 
 const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
 const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
 const CompoundResultModal = dynamic(() => import('./CompoundResultModal'), { ssr: false });
 const TrendPlotModal = dynamic(() => import('./TrendPlotModal'), { ssr: false });
 const HistoricalTimelineModal = dynamic(() => import('./HistoricalTimelineModal'), { ssr: false });
-const CompoundGalleryModal = dynamic(() => import('./CompoundGalleryModal'), { ssr: false });
+const AuthModal = dynamic(() => import('./AuthModal'), { ssr: false });
+const FeedbackModal = dynamic(() => import('./FeedbackModal'), { ssr: false });
 
 interface ClientAppProps {
   initialElements: ElementData[];
@@ -44,7 +47,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [filters, setFilters] = useState({ category: '', state: '' });
   const [favorites, toggleFavorite] = useFavorites();
   const [selectedTrend, setSelectedTrend] = useState<Trend | null>(null);
-  
+
   // Initialize year range from data
   const initialYearRange = useMemo(() => {
     if (initialElements.length === 0) return { min: 1600, max: new Date().getFullYear() };
@@ -65,7 +68,9 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [compoundResult, setCompoundResult] = useState<CompoundResult | null>(null);
   const [isCombining, setIsCombining] = useState(false);
   const { savedCompounds, saveCompound, deleteCompound } = useCompoundGallery();
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const { user } = useAuth();
   const [plotModalInfo, setPlotModalInfo] = useState<{
     isOpen: boolean;
     elements: ElementData[];
@@ -127,7 +132,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
     (element: ElementData) => {
       if (selectedElement?.atomicNumber !== element.atomicNumber) {
         setSelectedElement(element);
-        
+
         // Handle discovery
         const isNew = !discovered.includes(element.atomicNumber);
         if (isNew) {
@@ -135,17 +140,17 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
         }
 
         // Add a fun reaction for the Lab Partner
-        const reactions = isNew 
+        const reactions = isNew
           ? [
-              `NEW DISCOVERY! You found ${element.name}. That's ${discovered.length + 1} elements found!`,
-              `Eureka! ${element.name} added to your collection. Did you know it's a ${element.category}?`,
-              `First time seeing ${element.symbol}? Truly ${element.category} excellence!`
-            ]
+            `NEW DISCOVERY! You found ${element.name}. That's ${discovered.length + 1} elements found!`,
+            `Eureka! ${element.name} added to your collection. Did you know it's a ${element.category}?`,
+            `First time seeing ${element.symbol}? Truly ${element.category} excellence!`
+          ]
           : [
-              `Ah, the familiar ${element.symbol}. Density is ${element.density_g_cm3 || 'mysterious'} g/cm³.`,
-              `${element.name} is a ${element.block}-block element. Still as ${element.category} as ever!`,
-              `Checking in on ${element.name}? ${element.everydayExample.split('.')[0]}.`
-            ];
+            `Ah, the familiar ${element.symbol}. Density is ${element.density_g_cm3 || 'mysterious'} g/cm³.`,
+            `${element.name} is a ${element.block}-block element. Still as ${element.category} as ever!`,
+            `Checking in on ${element.name}? ${element.everydayExample.split('.')[0]}.`
+          ];
         setLabPartnerMessage(reactions[Math.floor(Math.random() * reactions.length)]);
       }
     },
@@ -311,7 +316,6 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
   const handleLoadFromGallery = useCallback((compound: SavedCompound) => {
     setBuilderElements(compound.elements);
-    setIsGalleryOpen(false);
     setIsBuilderActive(true);
   }, []);
 
@@ -379,289 +383,312 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
     <>
       {/* Next.js Handles Metadata in layout.tsx or page.tsx */}
       <div
-        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${
-          isBuilderActive ? 'pb-48 md:pb-32' : ''
-        } p-4 sm:p-6 lg:p-8 overflow-x-hidden`}
+        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${isBuilderActive ? 'pb-48 md:pb-32' : ''
+          } p-4 sm:p-6 lg:p-8 overflow-x-hidden`}
       >
-      <div className="mx-auto max-w-screen-2xl">
-        <header className="relative mb-6 text-center">
-          <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
-            Hayyanium
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Explore the building blocks of the universe.
-          </p>
-          <div className="mt-4 flex justify-center">
-            <div className="w-full max-w-xs">
-              <CollectionProgress total={allElements.length} count={discovered.length} />
+        <div className="mx-auto max-w-screen-2xl">
+          <header className="relative mb-6 text-center">
+            <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
+              Hayyanium
+            </h1>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
+              Explore the building blocks of the universe.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              <div className="flex bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+                {user ? (
+                  <Link href="/profile" className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-cyan-600 dark:text-cyan-400">
+                    {user.user_metadata?.avatar_url ? (
+                      <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span>Profile</span>
+                  </Link>
+                ) : (
+                  <button onClick={() => setIsAuthModalOpen(true)} className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-cyan-600 dark:text-cyan-400">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    <span>Sign In</span>
+                  </button>
+                )}
+                <button onClick={() => setIsFeedbackModalOpen(true)} className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-amber-600 dark:text-amber-400">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" /></svg>
+                  <span className="hidden sm:inline">Feedback</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => setTimelineModalOpen(true)}
+                className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                aria-label="Open historical timeline"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <span className="hidden sm:inline">Timeline</span>
+              </button>
+              <button
+                onClick={() => setIsBuilderActive(!isBuilderActive)}
+                className={`flex items-center gap-3 rounded-lg border px-4 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${isBuilderActive
+                  ? 'bg-cyan-500 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                  : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700'
+                  }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
+                <span>Builder</span>
+              </button>
+              <ThemeToggleButton />
             </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-             <button
-               onClick={() => setIsGalleryOpen(true)}
-               className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
-               aria-label="Open compound gallery"
-             >
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
-                 <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-               </svg>
-               <span>Gallery</span>
-             </button>
-             <button
-               onClick={() => setTimelineModalOpen(true)}
-               className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
-               aria-label="Open historical timeline"
-             >
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
-                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
-               </svg>
-               <span>Timeline</span>
-             </button>
-             <button
-               onClick={() => setIsBuilderActive(!isBuilderActive)}
-               className={`flex items-center gap-3 rounded-lg border px-4 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${
-                 isBuilderActive
-                   ? 'bg-cyan-500 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                   : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700'
-               }`}
-             >
-               <div className={`w-2 h-2 rounded-full ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
-               <span>Builder</span>
-             </button>
-             <ThemeToggleButton />
-          </div>
-        </header>
+          </header>
 
-        <div className="flex flex-row gap-6">
-          <main
-            className={`flex-grow transition-all duration-500 ease-in-out ${
-              selectedElement ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
-            }`}
-          >
-            <section aria-label="Filters and controls" className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md sticky top-0 z-30 py-4 px-6 border-b border-gray-200 dark:border-gray-700">
-              <SearchBarAndFilters
-                searchTerm={searchTerm}
-                onSearchTermChange={setSearchTerm}
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                dateFilter={dateFilter}
-                yearRange={yearRange}
-                onDateFilterChange={setDateFilter}
-                selectedTrend={selectedTrend}
-                onTrendChange={setSelectedTrend}
-                onClear={clearFilters}
-                allElements={allElements}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-              />
-            </section>
-
-            <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
-              {viewMode === 'grid' ? (
-                <PeriodicTable
-                  elements={filteredElements}
-                  selectedElement={selectedElement}
-                  favorites={favorites}
-                  onSelectElement={handleSelectElement}
-                  onHoverElement={setHoveredElement}
+          <div className="flex flex-row gap-6">
+            <main
+              className={`flex-grow transition-all duration-500 ease-in-out ${selectedElement ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
+                }`}
+            >
+              <section aria-label="Filters and controls" className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md sticky top-0 z-30 py-4 px-6 border-b border-gray-200 dark:border-gray-700">
+                <SearchBarAndFilters
+                  searchTerm={searchTerm}
+                  onSearchTermChange={setSearchTerm}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  dateFilter={dateFilter}
+                  yearRange={yearRange}
+                  onDateFilterChange={setDateFilter}
                   selectedTrend={selectedTrend}
-                  isDraggable={isBuilderActive}
-                  onElementDragStart={handleDragStart}
-                  onElementDragEnd={handleDragEnd}
-                  onGroupClick={handleGroupClick}
-                  onPeriodClick={handlePeriodClick}
+                  onTrendChange={setSelectedTrend}
+                  onClear={clearFilters}
+                  allElements={allElements}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
                 />
-              ) : (
-                <ElementList
-                  elements={filteredElements}
-                  selectedElement={selectedElement}
-                  favorites={favorites}
-                  onSelectElement={handleSelectElement}
-                />
-              )}
+              </section>
 
-              {hoveredElement && !selectedElement && viewMode === 'grid' && (
-                <div className="pointer-events-none absolute top-0 left-1/2 z-20 -mt-12 -translate-x-1/2 rounded-md border border-cyan-500 bg-white p-2 text-sm shadow-lg dark:border-cyan-400 dark:bg-gray-800">
-                  <h4 className="font-bold">
-                    {hoveredElement.name} ({hoveredElement.symbol})
-                  </h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    {selectedTrend
-                      ? `${trendNames[selectedTrend]}: ${hoveredElement[selectedTrend] ?? 'N/A'} ${trendUnits[selectedTrend]}`.trim()
-                      : hoveredElement.everydayExample}
-                  </p>
-                </div>
-              )}
-            </section>
-            <Legend />
-          </main>
-
-          {/* Desktop Panel */}
-          <aside
-            className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${
-              selectedElement ? 'lg:w-full lg:max-w-md' : 'lg:w-0'
-            }`}
-          >
-            <div className="relative z-10 w-full overflow-hidden lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
-              {selectedElement && (
-                <Suspense fallback={null}>
-                  <ElementPanel
-                    key={selectedElement.atomicNumber}
-                    element={selectedElement}
-                    isFavorite={favorites.includes(selectedElement.atomicNumber)}
-                    onClose={handleClosePanel}
-                    onToggleFavorite={toggleFavorite}
-                    comparisonList={comparisonList}
-                    onAddToCompare={handleAddToCompare}
-                    ai={ai}
-                    onAddToBuilder={handleAddToBuilder}
-                    builderElements={builderElements}
+              <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
+                {viewMode === 'grid' ? (
+                  <PeriodicTable
+                    elements={filteredElements}
+                    selectedElement={selectedElement}
+                    favorites={favorites}
+                    onSelectElement={handleSelectElement}
+                    onHoverElement={setHoveredElement}
+                    selectedTrend={selectedTrend}
+                    isDraggable={isBuilderActive}
+                    onElementDragStart={handleDragStart}
+                    onElementDragEnd={handleDragEnd}
+                    onGroupClick={handleGroupClick}
+                    onPeriodClick={handlePeriodClick}
                   />
-                </Suspense>
-              )}
-            </div>
-          </aside>
+                ) : (
+                  <ElementList
+                    elements={filteredElements}
+                    selectedElement={selectedElement}
+                    favorites={favorites}
+                    onSelectElement={handleSelectElement}
+                  />
+                )}
 
-          {/* Mobile Panel Drawer */}
-          <Drawer.Root 
-            open={!!selectedElement} 
-            onOpenChange={(open) => !open && handleClosePanel()}
-            snapPoints={[0.5, 0.9]}
-            fadeFromIndex={0}
-          >
-            <Drawer.Portal>
-              <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
-              <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
-                <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
-                <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
-                  {selectedElement && (
-                    <Suspense fallback={null}>
-                      <ElementPanel
-                        key={selectedElement.atomicNumber}
-                        element={selectedElement}
-                        isFavorite={favorites.includes(selectedElement.atomicNumber)}
-                        onClose={handleClosePanel}
-                        onToggleFavorite={toggleFavorite}
-                        comparisonList={comparisonList}
-                        onAddToCompare={handleAddToCompare}
-                        ai={ai}
-                        onAddToBuilder={handleAddToBuilder}
-                        builderElements={builderElements}
-                      />
-                    </Suspense>
-                  )}
-                </div>
-              </Drawer.Content>
-            </Drawer.Portal>
-          </Drawer.Root>
+                {hoveredElement && !selectedElement && viewMode === 'grid' && (
+                  <div className="pointer-events-none absolute top-30 left-1/2 z-20 -mt-12 -translate-x-1/2 rounded-md border border-cyan-500 bg-white p-2 text-sm shadow-lg dark:border-cyan-400 dark:bg-gray-800">
+                    <h4 className="font-bold">
+                      {hoveredElement.name} ({hoveredElement.symbol})
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      {selectedTrend
+                        ? `${trendNames[selectedTrend]}: ${hoveredElement[selectedTrend] ?? 'N/A'} ${trendUnits[selectedTrend]}`.trim()
+                        : hoveredElement.everydayExample}
+                    </p>
+                  </div>
+                )}
+              </section>
+              <Legend />
+            </main>
+
+            {/* Desktop Panel */}
+            <aside
+              className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${selectedElement ? 'lg:w-full lg:max-w-md' : 'lg:w-0'
+                }`}
+            >
+              <div className="relative z-10 w-full overflow-hidden lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
+                {selectedElement && (
+                  <Suspense fallback={null}>
+                    <ElementPanel
+                      key={selectedElement.atomicNumber}
+                      element={selectedElement}
+                      isFavorite={favorites.includes(selectedElement.atomicNumber)}
+                      onClose={handleClosePanel}
+                      onToggleFavorite={toggleFavorite}
+                      comparisonList={comparisonList}
+                      onAddToCompare={handleAddToCompare}
+                      ai={ai}
+                      onAddToBuilder={handleAddToBuilder}
+                      builderElements={builderElements}
+                    />
+                  </Suspense>
+                )}
+              </div>
+            </aside>
+
+            {/* Mobile Panel Drawer */}
+            <Drawer.Root
+              open={!!selectedElement}
+              onOpenChange={(open) => !open && handleClosePanel()}
+              snapPoints={[0.5, 0.9]}
+              fadeFromIndex={0}
+            >
+              <Drawer.Portal>
+                <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
+                <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
+                  <Drawer.Title className="sr-only">Element Details</Drawer.Title>
+                  <Drawer.Description className="sr-only">View detailed information about the selected element</Drawer.Description>
+                  <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+                  <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+                    {selectedElement && (
+                      <Suspense fallback={null}>
+                        <ElementPanel
+                          key={selectedElement.atomicNumber}
+                          element={selectedElement}
+                          isFavorite={favorites.includes(selectedElement.atomicNumber)}
+                          onClose={handleClosePanel}
+                          onToggleFavorite={toggleFavorite}
+                          comparisonList={comparisonList}
+                          onAddToCompare={handleAddToCompare}
+                          ai={ai}
+                          onAddToBuilder={handleAddToBuilder}
+                          builderElements={builderElements}
+                        />
+                      </Suspense>
+                    )}
+                  </div>
+                </Drawer.Content>
+              </Drawer.Portal>
+            </Drawer.Root>
+          </div>
         </div>
+
+        {isBuilderActive && (
+          <CompoundBuilderTray
+            elements={builderElements}
+            isDragging={isDragging}
+            onDrop={handleDropOnBuilder}
+            onRemove={handleRemoveFromBuilder}
+            onClear={handleClearBuilder}
+            onCombine={handleCombine}
+            isCombining={isCombining}
+          />
+        )}
+
+        {(isCombining || compoundResult) && (
+          <Suspense fallback={null}>
+            <CompoundResultModal
+              isLoading={isCombining}
+              result={compoundResult}
+              elements={builderElements}
+              onClose={() => setCompoundResult(null)}
+              onSaveCompound={saveCompound}
+            />
+          </Suspense>
+        )}
+
+        <ComparisonTray
+          elements={comparisonList}
+          onRemove={handleRemoveFromCompare}
+          onClear={handleClearCompare}
+          onCompare={() => setComparisonModalOpen(true)}
+        />
+
+        {isComparisonModalOpen && (
+          <Suspense fallback={null}>
+            <ComparisonModal
+              elements={comparisonList}
+              onClose={() => setComparisonModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        {plotModalInfo.isOpen && selectedTrend && (
+          <Suspense fallback={null}>
+            <TrendPlotModal
+              isOpen={plotModalInfo.isOpen}
+              onClose={() => setPlotModalInfo({ isOpen: false, elements: [], title: '' })}
+              elementsToPlot={plotModalInfo.elements}
+              title={plotModalInfo.title}
+              trend={selectedTrend}
+              trendLabel={trendNames[selectedTrend]}
+              trendUnit={trendUnits[selectedTrend]}
+            />
+          </Suspense>
+        )}
+
+        {isTimelineModalOpen && (
+          <Suspense fallback={null}>
+            <HistoricalTimelineModal
+              elements={allElements}
+              onClose={() => setTimelineModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        <Suspense fallback={null}>
+          <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
+        </Suspense>
       </div>
 
-      {isBuilderActive && (
-        <CompoundBuilderTray
-          elements={builderElements}
-          isDragging={isDragging}
-          onDrop={handleDropOnBuilder}
-          onRemove={handleRemoveFromBuilder}
-          onClear={handleClearBuilder}
-          onCombine={handleCombine}
-          isCombining={isCombining}
-        />
-      )}
+      {/* Mobile Bottom Navigation Dock */}
+      <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-around bg-white/90 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/95 dark:border-gray-800 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <button
+          onClick={() => { setIsBuilderActive(false); setTimelineModalOpen(false); }}
+          className={`flex flex-col items-center gap-1 p-2 ${!isBuilderActive && !isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+          <span className="text-[10px] font-medium">Table</span>
+        </button>
+        <button
+          onClick={() => { setIsBuilderActive(!isBuilderActive); setTimelineModalOpen(false); }}
+          className={`flex flex-col items-center gap-1 p-2 ${isBuilderActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+          <span className="text-[10px] font-medium">Builder</span>
+        </button>
+        <button
+          onClick={() => { setTimelineModalOpen(!isTimelineModalOpen); setIsBuilderActive(false); }}
+          className={`flex flex-col items-center gap-1 p-2 ${isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+          <span className="text-[10px] font-medium">Timeline</span>
+        </button>
+        {user ? (
+          <Link
+            href="/profile"
+            className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
+          >
+            {user.user_metadata?.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="User" className="w-6 h-6 rounded-full" />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white">
+                {user.email?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="text-[10px] font-medium">Profile</span>
+          </Link>
+        ) : (
+          <button
+            onClick={() => { setIsAuthModalOpen(true); setIsBuilderActive(false); setTimelineModalOpen(false); }}
+            className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <span className="text-[10px] font-medium">Profile</span>
+          </button>
+        )}
 
-      {(isCombining || compoundResult) && (
-        <Suspense fallback={null}>
-          <CompoundResultModal
-            isLoading={isCombining}
-            result={compoundResult}
-            elements={builderElements}
-            onClose={() => setCompoundResult(null)}
-            onSaveCompound={saveCompound}
-          />
-        </Suspense>
-      )}
 
-      <ComparisonTray
-        elements={comparisonList}
-        onRemove={handleRemoveFromCompare}
-        onClear={handleClearCompare}
-        onCompare={() => setComparisonModalOpen(true)}
-      />
-
-      {isComparisonModalOpen && (
-        <Suspense fallback={null}>
-          <ComparisonModal
-            elements={comparisonList}
-            onClose={() => setComparisonModalOpen(false)}
-          />
-        </Suspense>
-      )}
-
-      {plotModalInfo.isOpen && selectedTrend && (
-        <Suspense fallback={null}>
-          <TrendPlotModal
-            isOpen={plotModalInfo.isOpen}
-            onClose={() => setPlotModalInfo({ isOpen: false, elements: [], title: '' })}
-            elementsToPlot={plotModalInfo.elements}
-            title={plotModalInfo.title}
-            trend={selectedTrend}
-            trendLabel={trendNames[selectedTrend]}
-            trendUnit={trendUnits[selectedTrend]}
-          />
-        </Suspense>
-      )}
-
-      {isTimelineModalOpen && (
-        <Suspense fallback={null}>
-          <HistoricalTimelineModal
-            elements={allElements}
-            onClose={() => setTimelineModalOpen(false)}
-          />
-        </Suspense>
-      )}
-
-      <Suspense fallback={null}>
-        <CompoundGalleryModal
-          isOpen={isGalleryOpen}
-          compounds={savedCompounds}
-          onClose={() => setIsGalleryOpen(false)}
-          onLoad={handleLoadFromGallery}
-          onDelete={deleteCompound}
-        />
-      </Suspense>
-    </div>
-    
-    {/* Mobile Bottom Navigation Dock */}
-    <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-around bg-white/90 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/95 dark:border-gray-800 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-      <button
-        onClick={() => { setIsBuilderActive(false); setIsGalleryOpen(false); setTimelineModalOpen(false); }}
-        className="flex flex-col items-center gap-1 p-2 text-cyan-600 dark:text-cyan-400"
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
-        <span className="text-[10px] font-medium">Table</span>
-      </button>
-      <button
-        onClick={() => { setIsBuilderActive(!isBuilderActive); setIsGalleryOpen(false); setTimelineModalOpen(false); }}
-        className={`flex flex-col items-center gap-1 p-2 ${isBuilderActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-        <span className="text-[10px] font-medium">Builder</span>
-      </button>
-      <button
-        onClick={() => { setIsGalleryOpen(true); setIsBuilderActive(false); setTimelineModalOpen(false); }}
-        className={`flex flex-col items-center gap-1 p-2 ${isGalleryOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
-        <span className="text-[10px] font-medium">Gallery</span>
-      </button>
-      <button
-        onClick={() => { setTimelineModalOpen(true); setIsBuilderActive(false); setIsGalleryOpen(false); }}
-        className={`flex flex-col items-center gap-1 p-2 ${isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-      >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
-        <span className="text-[10px] font-medium">Timeline</span>
-      </button>
-    </div>
+      </div>
       <LabPartner message={labPartnerMessage} />
     </>
   );

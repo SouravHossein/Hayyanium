@@ -79,6 +79,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/contexts/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -93,9 +95,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <JsonLd />
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
