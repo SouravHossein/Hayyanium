@@ -15,6 +15,9 @@ interface PeriodicTableProps {
   onElementDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
   onGroupClick: (group: number) => void;
   onPeriodClick: (period: number) => void;
+  onElementTouchStart?: (element: ElementData, e: React.TouchEvent) => void;
+  onElementTouchMove?: (e: React.TouchEvent) => void;
+  onElementTouchEnd?: (e: React.TouchEvent) => void;
 }
 
 const GROUP_LABELS: { [key: number]: string } = {
@@ -35,6 +38,9 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
   onElementDragEnd,
   onGroupClick,
   onPeriodClick,
+  onElementTouchStart,
+  onElementTouchMove,
+  onElementTouchEnd,
 }) => {
     const [hoveredGroup, setHoveredGroup] = useState<number | null>(null);
     const [hoveredPeriod, setHoveredPeriod] = useState<number | null>(null);
@@ -149,11 +155,12 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
                     onHover={onHoverElement}
                     trendStyle={elementStyles[element.atomicNumber]}
                     isDraggable={isDraggable}
-                    // FIX: The prop `onElementDragStart` was renamed to `onDragStart` to match the props expected by ElementCell.
                     onDragStart={onElementDragStart}
-                    // FIX: The prop `onElementDragEnd` was renamed to `onDragEnd` to match the props expected by ElementCell.
                     onDragEnd={onElementDragEnd}
                     isHighlighted={isHighlighted}
+                    onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(element, e) : undefined}
+                    onTouchMove={onElementTouchMove}
+                    onTouchEnd={onElementTouchEnd}
                 />
             );
         })}

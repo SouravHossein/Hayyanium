@@ -14,6 +14,9 @@ interface ElementCellProps {
   onDragStart?: (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => void;
   onDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
   isHighlighted?: boolean;
+  onTouchStart?: (e: React.TouchEvent) => void;
+  onTouchMove?: (e: React.TouchEvent) => void;
+  onTouchEnd?: (e: React.TouchEvent) => void;
 }
 
 const ElementCell: React.FC<ElementCellProps> = ({ 
@@ -26,7 +29,10 @@ const ElementCell: React.FC<ElementCellProps> = ({
   isDraggable,
   onDragStart,
   onDragEnd,
-  isHighlighted
+  isHighlighted,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
 }) => {
   const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
   const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
@@ -68,12 +74,15 @@ const ElementCell: React.FC<ElementCellProps> = ({
       draggable={isDraggable}
       onDragStart={isDraggable ? handleDragStart : undefined}
       onDragEnd={isDraggable ? onDragEnd : undefined}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
       className={`relative p-1 rounded-md transition-all duration-500 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : 'block'} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
       style={{ 
         gridColumnStart: element.xpos, 
         gridRowStart: element.ypos,
         ...(trendStyle || {}),
-        display: isSelected ? 'flex' : 'block', // Ensuring focus states work
+        display: isSelected ? 'flex' : 'block',
         flexDirection: 'column'
       }}
     >

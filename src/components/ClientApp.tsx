@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import dynamic from 'next/dynamic';
@@ -33,7 +34,6 @@ const CompoundResultModal = dynamic(() => import('./CompoundResultModal'), { ssr
 const TrendPlotModal = dynamic(() => import('./TrendPlotModal'), { ssr: false });
 const HistoricalTimelineModal = dynamic(() => import('./HistoricalTimelineModal'), { ssr: false });
 const AuthModal = dynamic(() => import('./AuthModal'), { ssr: false });
-const FeedbackModal = dynamic(() => import('./FeedbackModal'), { ssr: false });
 
 interface ClientAppProps {
   initialElements: ElementData[];
@@ -69,7 +69,6 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [isCombining, setIsCombining] = useState(false);
   const { savedCompounds, saveCompound, deleteCompound } = useCompoundGallery();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const { user } = useAuth();
   const [plotModalInfo, setPlotModalInfo] = useState<{
     isOpen: boolean;
@@ -81,13 +80,20 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const { discovered, discover } = useDiscovery();
   const [mounted, setMounted] = useState(false);
 
+  // Touch drag state
+  const touchDragElement = useRef<ElementData | null>(null);
+  const workbenchRef = useRef<HTMLDivElement | null>(null);
+  const [touchDragActive, setTouchDragActive] = useState(false);
+  const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
+  const touchGhostRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const ai = useMemo(() => createGeminiClient(), []);
 
-  // Effect to sync year range if initialElements changes (though it shouldn't in static)
+  // Effect to sync year range if initialElements changes
   useEffect(() => {
     setYearRange(initialYearRange);
     setDateFilter(initialYearRange);
@@ -166,7 +172,6 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
       if (prev.length < 3 && !prev.some((item) => item.atomicNumber === element.atomicNumber)) {
         return [...prev, element];
       }
-
       return prev;
     });
   }, []);
@@ -208,7 +213,6 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
           ) {
             return [...prev, elementToAdd];
           }
-
           return prev;
         });
       }
@@ -227,11 +231,40 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
       if (prev.length < 4 && !prev.some((item) => item.atomicNumber === element.atomicNumber)) {
         return [...prev, element];
       }
-
       return prev;
     });
     setIsBuilderActive(true);
   }, []);
+
+  // --- Touch drag handlers ---
+  const handleElementTouchStart = useCallback((element: ElementData, e: React.TouchEvent) => {
+    if (!isBuilderActive) return;
+    touchDragElement.current = element;
+    const touch = e.touches[0];
+    setTouchPos({ x: touch.clientX, y: touch.clientY });
+    setTouchDragActive(true);
+  }, [isBuilderActive]);
+
+  const handleElementTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchDragElement.current) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    setTouchPos({ x: touch.clientX, y: touch.clientY });
+  }, []);
+
+  const handleElementTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchDragElement.current) return;
+    const touch = e.changedTouches[0];
+
+    // Check if released over the workbench
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (workbenchRef.current && workbenchRef.current.contains(target)) {
+      handleAddToBuilder(touchDragElement.current);
+    }
+
+    touchDragElement.current = null;
+    setTouchDragActive(false);
+  }, [handleAddToBuilder]);
 
   const handleCombine = async () => {
     if (builderElements.length < 2) {
@@ -365,29 +398,16 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
     [selectedTrend, allElements],
   );
 
-  const pageTitle = selectedElement
-    ? `${selectedElement.name} (${selectedElement.symbol}) - Element Details | Hayyanium`
-    : 'Hayyanium - Learn Elements, Compounds & Chemistry';
-
-  const pageDescription = selectedElement
-    ? `Discover ${selectedElement.name} (${selectedElement.symbol}), atomic number ${selectedElement.atomicNumber}. Explore properties, uses, electron configuration, and periodic trends for this element.`
-    : 'Explore the interactive periodic table with detailed element information, 3D atomic models, compound builder, and learning tools. Perfect for students, teachers, and chemistry enthusiasts.';
-
-  const pageUrl = selectedElement
-    ? `https://hayyanium.vercel.app/?element=${selectedElement.symbol}`
-    : 'https://hayyanium.vercel.app/';
-
-  const pageImage = 'https://hayyanium.vercel.app/og-image.png';
-
   return (
     <>
-      {/* Next.js Handles Metadata in layout.tsx or page.tsx */}
       <div
         className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${isBuilderActive ? 'pb-48 md:pb-32' : ''
           } p-4 sm:p-6 lg:p-8 overflow-x-hidden`}
       >
         <div className="mx-auto max-w-screen-2xl">
-          <header className="relative mb-6 text-center">
+          {/* ─── HEADER ─────────────────────────────────────────────────────── */}
+          {/* Desktop header: centered brand + all controls */}
+          <header className="relative mb-6 hidden md:block text-center">
             <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
               Hayyanium
             </h1>
@@ -413,10 +433,6 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     <span>Sign In</span>
                   </button>
                 )}
-                <button onClick={() => setIsFeedbackModalOpen(true)} className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-amber-600 dark:text-amber-400">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" /></svg>
-                  <span className="hidden sm:inline">Feedback</span>
-                </button>
               </div>
 
               <button
@@ -427,8 +443,15 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
-                <span className="hidden sm:inline">Timeline</span>
+                <span>Timeline</span>
               </button>
+              <Link
+                href="/community"
+                className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm text-violet-600 dark:text-violet-400"
+              >
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+                <span>Community</span>
+              </Link>
               <button
                 onClick={() => setIsBuilderActive(!isBuilderActive)}
                 className={`flex items-center gap-3 rounded-lg border px-4 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${isBuilderActive
@@ -439,6 +462,36 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 <div className={`w-2 h-2 rounded-full ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
                 <span>Builder</span>
               </button>
+              <ThemeToggleButton />
+            </div>
+          </header>
+
+          {/* Mobile header: brand left, sign-in + dark mode right */}
+          <header className="md:hidden flex items-center justify-between mb-5 px-1">
+            <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-2xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500">
+              Hayyanium
+            </h1>
+            <div className="flex items-center gap-2">
+              {user ? (
+                <Link href="/profile" className="flex items-center gap-1.5 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 px-3 py-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 border border-gray-200 dark:border-gray-700">
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 px-3 py-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 border border-gray-200 dark:border-gray-700"
+                  aria-label="Sign In"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                  <span className="text-xs">Sign In</span>
+                </button>
+              )}
               <ThemeToggleButton />
             </div>
           </header>
@@ -466,6 +519,14 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 />
               </section>
 
+              {/* Touch drag hint on mobile */}
+              {isBuilderActive && (
+                <div className="md:hidden flex items-center gap-2 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-xl px-4 py-2 my-2 text-xs text-cyan-700 dark:text-cyan-300">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" /></svg>
+                  <span>Long-press & drag an element into the Workbench below</span>
+                </div>
+              )}
+
               <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
                 {viewMode === 'grid' ? (
                   <PeriodicTable
@@ -480,6 +541,9 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     onElementDragEnd={handleDragEnd}
                     onGroupClick={handleGroupClick}
                     onPeriodClick={handlePeriodClick}
+                    onElementTouchStart={handleElementTouchStart}
+                    onElementTouchMove={handleElementTouchMove}
+                    onElementTouchEnd={handleElementTouchEnd}
                   />
                 ) : (
                   <ElementList
@@ -568,6 +632,24 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           </div>
         </div>
 
+        {/* Touch drag ghost element */}
+        {touchDragActive && touchDragElement.current && (
+          <div
+            style={{
+              position: 'fixed',
+              left: touchPos.x - 28,
+              top: touchPos.y - 28,
+              zIndex: 9999,
+              pointerEvents: 'none',
+              opacity: 0.85,
+            }}
+            className="w-14 h-14 rounded-lg bg-cyan-500 text-white flex flex-col items-center justify-center shadow-2xl border-2 border-cyan-300 animate-pulse"
+          >
+            <span className="text-lg font-bold">{touchDragElement.current.symbol}</span>
+            <span className="text-[10px]">{touchDragElement.current.atomicNumber}</span>
+          </div>
+        )}
+
         {isBuilderActive && (
           <CompoundBuilderTray
             elements={builderElements}
@@ -577,6 +659,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             onClear={handleClearBuilder}
             onCombine={handleCombine}
             isCombining={isCombining}
+            workbenchRef={workbenchRef}
           />
         )}
 
@@ -634,15 +717,12 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         <Suspense fallback={null}>
           <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </Suspense>
-
-        <Suspense fallback={null}>
-          <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
-        </Suspense>
       </div>
 
       {/* Mobile Bottom Navigation Dock */}
       <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-around bg-white/90 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/95 dark:border-gray-800 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <button
+          id="nav-table"
           onClick={() => { setIsBuilderActive(false); setTimelineModalOpen(false); }}
           className={`flex flex-col items-center gap-1 p-2 ${!isBuilderActive && !isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
         >
@@ -650,6 +730,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           <span className="text-[10px] font-medium">Table</span>
         </button>
         <button
+          id="nav-builder"
           onClick={() => { setIsBuilderActive(!isBuilderActive); setTimelineModalOpen(false); }}
           className={`flex flex-col items-center gap-1 p-2 ${isBuilderActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
         >
@@ -657,14 +738,27 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           <span className="text-[10px] font-medium">Builder</span>
         </button>
         <button
+          id="nav-timeline"
           onClick={() => { setTimelineModalOpen(!isTimelineModalOpen); setIsBuilderActive(false); }}
           className={`flex flex-col items-center gap-1 p-2 ${isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
           <span className="text-[10px] font-medium">Timeline</span>
         </button>
+
+        {/* Community tab */}
+        <Link
+          id="nav-community"
+          href="/community"
+          className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
+        >
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+          <span className="text-[10px] font-medium">Community</span>
+        </Link>
+
         {user ? (
           <Link
+            id="nav-profile"
             href="/profile"
             className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
           >
@@ -679,6 +773,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           </Link>
         ) : (
           <button
+            id="nav-profile-signin"
             onClick={() => { setIsAuthModalOpen(true); setIsBuilderActive(false); setTimelineModalOpen(false); }}
             className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
           >
@@ -686,8 +781,6 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             <span className="text-[10px] font-medium">Profile</span>
           </button>
         )}
-
-
       </div>
       <LabPartner message={labPartnerMessage} />
     </>

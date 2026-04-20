@@ -10,58 +10,92 @@ interface CompoundBuilderTrayProps {
     onClear: () => void;
     onCombine: () => void;
     isCombining: boolean;
+    workbenchRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({ elements, isDragging, onDrop, onRemove, onClear, onCombine, isCombining }) => {
-    
+const CompoundBuilderTray: React.FC<CompoundBuilderTrayProps> = ({
+    elements,
+    isDragging,
+    onDrop,
+    onRemove,
+    onClear,
+    onCombine,
+    isCombining,
+    workbenchRef,
+}) => {
+
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
     };
 
     return (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 sm:bottom-0 sm:left-0 sm:right-0 sm:translate-x-0 bg-white dark:bg-gray-900 shadow-2xl sm:shadow-lg z-40 p-3 rounded-2xl sm:rounded-none border border-gray-200 dark:border-gray-700 sm:border-none transform transition-all duration-300 ease-in-out w-[95%] sm:w-auto"
-             role="toolbar" aria-label="Compound Builder Tray">
+        /*
+         * On mobile (< md): float above the bottom nav (bottom-16 = 64px = nav height)
+         * On desktop: sit at the bottom edge
+         */
+        <div
+            className="fixed bottom-16 md:bottom-0 left-1/2 -translate-x-1/2 md:left-0 md:right-0 md:translate-x-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-2xl md:shadow-lg z-40 p-3 rounded-2xl md:rounded-none border border-gray-200 dark:border-gray-700 md:border-none transform transition-all duration-300 ease-in-out w-[95%] md:w-auto"
+            role="toolbar"
+            aria-label="Compound Builder Tray"
+        >
             <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div 
+                <div
+                    ref={workbenchRef}
                     onDrop={onDrop}
                     onDragOver={handleDragOver}
-                    className={`flex-grow w-full sm:w-auto flex items-center gap-2 p-2 rounded-lg border-2 border-dashed transition-all duration-700 ${isDragging ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/50' : isCombining ? 'border-green-500 bg-green-50 dark:bg-green-900/50 scale-[1.02] shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'border-gray-300 dark:border-gray-700'}`}
+                    className={`flex-grow w-full sm:w-auto flex items-center gap-2 p-2 rounded-lg border-2 border-dashed transition-all duration-700 ${isDragging
+                        ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/50'
+                        : isCombining
+                            ? 'border-green-500 bg-green-50 dark:bg-green-900/50 scale-[1.02] shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                            : 'border-gray-300 dark:border-gray-700'
+                        }`}
                 >
                     <h3 className="text-lg font-bold mr-4 hidden md:block text-gray-700 dark:text-gray-300">Workbench</h3>
+                    {/* Mobile label */}
+                    <span className="md:hidden text-xs font-semibold text-gray-400 dark:text-gray-500 shrink-0">Workbench</span>
                     <div className="flex flex-wrap gap-2 flex-grow justify-center sm:justify-start">
                         {elements.map(el => (
                             <div key={el.atomicNumber} className={`relative flex items-center p-2 rounded-md ${CATEGORY_COLORS[el.category]} ${CATEGORY_TEXT_COLORS[el.category]}`}>
                                 <span className="font-bold">{el.symbol}</span>
-                                <button 
-                                    onClick={() => onRemove(el.atomicNumber)} 
+                                <button
+                                    onClick={() => onRemove(el.atomicNumber)}
                                     aria-label={`Remove ${el.name} from builder`}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                >
                                     &times;
                                 </button>
                             </div>
                         ))}
                         {isCombining && (
-                             <div className="flex gap-1 items-center px-2">
+                            <div className="flex gap-1 items-center px-2">
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                                 <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
-                             </div>
+                            </div>
                         )}
                         {elements.length === 0 && !isCombining && (
-                            <div className="flex-1 text-center text-gray-500 dark:text-gray-400 p-2 text-sm sm:text-base">
-                                Add elements to combine
+                            <div className="flex-1 text-center text-gray-500 dark:text-gray-400 p-2 text-sm">
+                                <span className="hidden md:inline">Drag elements here to combine</span>
+                                <span className="md:hidden">Drop elements here</span>
                             </div>
                         )}
                     </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 w-full sm:w-auto">
-                    <button 
+                    <button
                         onClick={onCombine}
                         disabled={elements.length < 2}
-                        className="flex-1 sm:flex-none px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md font-semibold text-sm transition-colors">
+                        className="flex-1 sm:flex-none px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md font-semibold text-sm transition-colors"
+                    >
                         Combine
                     </button>
-                    <button onClick={onClear} disabled={elements.length === 0} className="flex-1 sm:flex-none px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-md font-semibold text-sm transition-colors">Clear</button>
+                    <button
+                        onClick={onClear}
+                        disabled={elements.length === 0}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-md font-semibold text-sm transition-colors"
+                    >
+                        Clear
+                    </button>
                 </div>
             </div>
         </div>
