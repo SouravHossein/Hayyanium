@@ -16,8 +16,8 @@ interface SearchBarAndFiltersProps {
   onTrendChange: (trend: Trend | null) => void;
   onClear: () => void;
   allElements: ElementData[];
-  viewMode: 'grid' | 'list';
-  onViewModeChange: (mode: 'grid' | 'list') => void;
+  viewMode: 'grid' | 'list' | '3d';
+  onViewModeChange: (mode: 'grid' | 'list' | '3d') => void;
 }
 
 const categories: ElementCategory[] = [
@@ -153,6 +153,13 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                 title="List View"
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+              </button>
+              <button
+                onClick={() => onViewModeChange('3d')}
+                className={`p-2 rounded-lg transition-all ${viewMode === '3d' ? 'bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                title="3D View"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
               </button>
             </div>
 
