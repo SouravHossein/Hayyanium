@@ -27,6 +27,9 @@ import { createGeminiClient } from '../lib/gemini';
 import { CompoundResult, ElementData, SavedCompound, Trend } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import Link from 'next/link';
+import TableRenderer from './table/TableRenderer';
+import TableModeSwitcher from './table/TableModeSwitcher';
+import { TableMode, LAYOUT_META } from '../layouts';
 
 const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
 const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
@@ -60,6 +63,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [yearRange, setYearRange] = useState(initialYearRange);
   const [dateFilter, setDateFilter] = useState(initialYearRange);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [tableMode, setTableMode] = useState<TableMode>('modern');
   const [comparisonList, setComparisonList] = useState<ElementData[]>([]);
   const [isComparisonModalOpen, setComparisonModalOpen] = useState(false);
   const [isBuilderActive, setIsBuilderActive] = useState(false);
@@ -527,8 +531,30 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 </div>
               )}
 
+              {/* Table Mode Switcher (visible only in grid mode) */}
+              {viewMode === 'grid' && (
+                <div className="px-2 py-2 bg-gray-50/80 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 shrink-0 hidden sm:block">Layout</span>
+                    <TableModeSwitcher currentMode={tableMode} onModeChange={setTableMode} />
+                  </div>
+                  {/* Mode description */}
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 pl-1">
+                    {LAYOUT_META[tableMode].icon} {LAYOUT_META[tableMode].description}
+                  </p>
+                </div>
+              )}
+
               <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
-                {viewMode === 'grid' ? (
+                {viewMode === 'list' ? (
+                  <ElementList
+                    elements={filteredElements}
+                    selectedElement={selectedElement}
+                    favorites={favorites}
+                    onSelectElement={handleSelectElement}
+                  />
+                ) : tableMode === 'modern' ? (
+                  /* Modern mode uses the original PeriodicTable for full feature compat (group/period clicks) */
                   <PeriodicTable
                     elements={filteredElements}
                     selectedElement={selectedElement}
@@ -546,11 +572,21 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     onElementTouchEnd={handleElementTouchEnd}
                   />
                 ) : (
-                  <ElementList
+                  /* All other modes use the universal TableRenderer */
+                  <TableRenderer
                     elements={filteredElements}
                     selectedElement={selectedElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
+                    onHoverElement={setHoveredElement}
+                    selectedTrend={selectedTrend}
+                    tableMode={tableMode}
+                    isDraggable={isBuilderActive}
+                    onElementDragStart={handleDragStart}
+                    onElementDragEnd={handleDragEnd}
+                    onElementTouchStart={handleElementTouchStart}
+                    onElementTouchMove={handleElementTouchMove}
+                    onElementTouchEnd={handleElementTouchEnd}
                   />
                 )}
 
