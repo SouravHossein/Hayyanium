@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   description: "Advanced interactive periodic table with detailed element data, 3D atomic structures, chemical compound builder, and historical discovery timelines. Built for science education.",
   keywords: [
-    "interactive periodic table", "chemical elements", "atomic properties", 
-    "electron configuration", "chemistry learning tools", "periodic trends", 
-    "3D atomic models", "compound builder", "isotopes", "valence electrons", 
+    "interactive periodic table", "chemical elements", "atomic properties",
+    "electron configuration", "chemistry learning tools", "periodic trends",
+    "3D atomic models", "compound builder", "isotopes", "valence electrons",
     "periodic table for students", "science education"
   ],
   authors: [{ name: "Sourav Hossein", url: "https://github.com/SouravHossein" }],
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     canonical: "https://hayyanium.vercel.app/",
   },
   verification: {
-    google: "google-site-verification-id", // User should replace this
+    google: "jSf0-zlaS8N6NhW9JibN7ARfDUvPtgPxJEC8V2CyyLQ",
   },
 };
 

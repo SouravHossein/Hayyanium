@@ -44,7 +44,7 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const loadInitialApplications = () => {
+    const loadInitialApplications = async () => {
       setCurrentIndex(0);
       setError(null);
       setIsLoading(false);
@@ -61,7 +61,20 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
         console.error('Failed to read from cache', cacheError);
       }
 
-      setApplications(createFallbackApplications(element));
+      const fallback = createFallbackApplications(element);
+      try {
+        const response = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(element.name)}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          fallback[0].image = data?.thumbnail?.source || data?.originalimage?.source || placeholderSvg;
+          fallback[0].caption = data?.description || data?.extract || fallback[0].caption;
+        }
+      } catch (e) {
+        // use fallback as is
+      }
+      setApplications(fallback);
       setIsAiGenerated(false);
     };
 
