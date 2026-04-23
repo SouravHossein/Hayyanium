@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Type } from '@google/genai';
 import { createGeminiClient } from '../lib/gemini';
 import { ElementData } from '../types';
+import SkeletonLoader from './ui/SkeletonLoader';
 
 interface Application {
   image: string;
@@ -43,41 +44,43 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
   const ai = useMemo(() => createGeminiClient(), []);
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  const loadInitialApplications = async () => {
+    setCurrentIndex(0);
+    setError(null);
+    setIsLoading(true); // Set loading to true when starting
+
+    const cacheKey = `real-apps-${element.name}`;
+    try {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        setApplications(JSON.parse(cachedData));
+        setIsAiGenerated(true);
+        setIsLoading(false);
+        return;
+      }
+    } catch (cacheError) {
+      console.error('Failed to read from cache', cacheError);
+    }
+
+    const fallback = createFallbackApplications(element);
+    try {
+      const response = await fetch(
+        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(element.name)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        fallback[0].image = data?.thumbnail?.source || data?.originalimage?.source || placeholderSvg;
+        fallback[0].caption = data?.description || data?.extract || fallback[0].caption;
+      }
+    } catch (e) {
+      // use fallback as is
+    }
+    setApplications(fallback);
+    setIsAiGenerated(false);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const loadInitialApplications = async () => {
-      setCurrentIndex(0);
-      setError(null);
-      setIsLoading(false);
-
-      const cacheKey = `real-apps-${element.name}`;
-      try {
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          setApplications(JSON.parse(cachedData));
-          setIsAiGenerated(true);
-          return;
-        }
-      } catch (cacheError) {
-        console.error('Failed to read from cache', cacheError);
-      }
-
-      const fallback = createFallbackApplications(element);
-      try {
-        const response = await fetch(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(element.name)}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          fallback[0].image = data?.thumbnail?.source || data?.originalimage?.source || placeholderSvg;
-          fallback[0].caption = data?.description || data?.extract || fallback[0].caption;
-        }
-      } catch (e) {
-        // use fallback as is
-      }
-      setApplications(fallback);
-      setIsAiGenerated(false);
-    };
-
     loadInitialApplications();
   }, [element]);
 
@@ -167,14 +170,14 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
       }
     } catch (requestError: any) {
       console.error('Failed to fetch applications:', requestError);
-      
+
       let errorMessage = 'Failed to generate examples. Please try again later.';
       if (requestError.status === 503 || requestError.message?.includes('503')) {
         errorMessage = 'AI model is currently experiencing high demand. Please try again later.';
       } else if (requestError.message) {
         errorMessage = requestError.message;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -209,11 +212,18 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
             Real-Life Applications &#129514;
           </h4>
         </div>
-        <div className="flex h-48 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900">
-          <svg className="h-8 w-8 animate-spin text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+        <div className="grid gap-4">
+          {/* Skeleton cards for loading state - show 3 placeholder cards */}
+          {[1, 2, 3].map((index) => (
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+              <SkeletonLoader width="100%" height="200px" radius="xl" className="mb-3" />
+              <div className="space-y-2">
+                <SkeletonLoader width="70%" height="1.5rem" radius="md" />
+                <SkeletonLoader width="50%" height="1rem" radius="sm" />
+                <SkeletonLoader width="80%" height="1rem" radius="sm" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -226,10 +236,24 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
           <h4 className="text-lg font-bold text-cyan-600 dark:text-cyan-300">
             Real-Life Applications &#129514;
           </h4>
+          <button
+            onClick={() => {
+              setError(null);
+              setIsLoading(true);
+              // Trigger reload
+              loadInitialApplications();
+            }}
+            className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 dark:bg-cyan-700 dark:hover:bg-cyan-600"
+          >
+            Retry
+          </button>
         </div>
         <div className="rounded-md bg-red-100 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800">
           {error}
         </div>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          Unable to load real-life applications. Please check your connection and try again.
+        </p>
       </div>
     );
   }
@@ -250,7 +274,17 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
             disabled={isLoading || !ai}
             className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 dark:bg-cyan-700 dark:hover:bg-cyan-600"
           >
-            Enhance with AI ✨
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating...
+              </>
+            ) : (
+              'Enhance with AI ✨'
+            )}
           </button>
         )}
       </div>
@@ -263,10 +297,10 @@ const RealLifeApplications: React.FC<{ element: ElementData }> = ({ element }) =
 
       <div
         ref={carouselRef}
-        className="relative focus:outline-none"
+        className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
         tabIndex={0}
         aria-roledescription="carousel"
-        aria-label={`Real-life applications of ${element.name}`}
+        aria-label={`Real-life applications of ${element.name}. Use left and right arrow keys to navigate.`}
       >
         <div className="overflow-hidden rounded-xl">
           <div

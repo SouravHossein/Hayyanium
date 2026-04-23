@@ -33,6 +33,7 @@ import { TableMode, LAYOUT_META } from '../layouts';
 import { Table3DMode, LAYOUT_3D_META } from '../layouts/3d/types';
 import TableModeSwitcher3D from './table/TableModeSwitcher3D';
 import Scene3D from './3d/Scene3D';
+import SkeletonLoader from './ui/SkeletonLoader';
 
 const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
 const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
@@ -47,7 +48,8 @@ interface ClientAppProps {
 
 const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [allElements, setAllElements] = useState<ElementData[]>(initialElements);
-  const [selectedElement, setSelectedElement] = useState<ElementData | null>(null);
+  const [activeElement, setActiveElement] = useState<ElementData | null>(null);
+  const [isElementPanelOpen, setIsElementPanelOpen] = useState(false);
   const [hoveredElement, setHoveredElement] = useState<ElementData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ category: '', state: '' });
@@ -86,7 +88,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [isTimelineModalOpen, setTimelineModalOpen] = useState(false);
   const [labPartnerMessage, setLabPartnerMessage] = useState<string | null>(null);
   const { discovered, discover } = useDiscovery();
-  const [mounted, setMounted] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
 
   // Touch drag state
   const touchDragElement = useRef<ElementData | null>(null);
@@ -96,7 +98,21 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const touchGhostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 1023px)');
+    const syncViewport = () => setIsMobileViewport(mediaQuery.matches);
+
+    syncViewport();
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncViewport);
+      return () => mediaQuery.removeEventListener('change', syncViewport);
+    }
+
+    mediaQuery.addListener(syncViewport);
+    return () => mediaQuery.removeListener(syncViewport);
   }, []);
 
   const ai = useMemo(() => createGeminiClient(), []);
@@ -144,9 +160,11 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
 
   const handleSelectElement = useCallback(
     (element: ElementData) => {
-      if (selectedElement?.atomicNumber !== element.atomicNumber) {
-        setSelectedElement(element);
+      const isDifferentElement = activeElement?.atomicNumber !== element.atomicNumber;
+      setActiveElement(element);
+      setIsElementPanelOpen(true);
 
+      if (isDifferentElement) {
         // Handle discovery
         const isNew = !discovered.includes(element.atomicNumber);
         if (isNew) {
@@ -168,11 +186,12 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
         setLabPartnerMessage(reactions[Math.floor(Math.random() * reactions.length)]);
       }
     },
-    [selectedElement, discovered, discover],
+    [activeElement, discovered, discover],
   );
 
   const handleClosePanel = useCallback(() => {
-    setSelectedElement(null);
+    setIsElementPanelOpen(false);
+    setActiveElement(null);
   }, []);
 
   const handleAddToCompare = useCallback((element: ElementData) => {
@@ -506,7 +525,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
           <div className="flex flex-row gap-6">
             <main
-              className={`flex-grow transition-all duration-500 ease-in-out ${selectedElement ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
+              className={`flex-grow transition-all duration-500 ease-in-out ${isElementPanelOpen ? 'w-full lg:w-[calc(100%-28rem)]' : 'w-full'
                 }`}
             >
               <section aria-label="Filters and controls" className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md sticky top-0 z-30 py-4 px-6 border-b border-gray-200 dark:border-gray-700">
@@ -565,14 +584,14 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 {viewMode === 'list' ? (
                   <ElementList
                     elements={filteredElements}
-                    selectedElement={selectedElement}
+                    selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
                   />
                 ) : viewMode === '3d' ? (
                   <Scene3D
                     elements={filteredElements}
-                    selectedElement={selectedElement}
+                    selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
                     onHoverElement={setHoveredElement}
@@ -582,7 +601,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   /* Modern mode uses the original PeriodicTable for full feature compat (group/period clicks) */
                   <PeriodicTable
                     elements={filteredElements}
-                    selectedElement={selectedElement}
+                    selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
                     onHoverElement={setHoveredElement}
@@ -600,7 +619,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   /* All other modes use the universal TableRenderer */
                   <TableRenderer
                     elements={filteredElements}
-                    selectedElement={selectedElement}
+                    selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
                     onHoverElement={setHoveredElement}
@@ -615,7 +634,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   />
                 )}
 
-                {hoveredElement && !selectedElement && viewMode === 'grid' && (
+                {hoveredElement && !activeElement && viewMode === 'grid' && (
                   <div className="pointer-events-none absolute top-30 left-1/2 z-20 -mt-12 -translate-x-1/2 rounded-md border border-cyan-500 bg-white p-2 text-sm shadow-lg dark:border-cyan-400 dark:bg-gray-800">
                     <h4 className="font-bold">
                       {hoveredElement.name} ({hoveredElement.symbol})
@@ -633,16 +652,30 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
             {/* Desktop Panel */}
             <aside
-              className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${selectedElement ? 'lg:w-full lg:max-w-md' : 'lg:w-0'
+              className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${isElementPanelOpen ? 'lg:w-full lg:max-w-md' : 'lg:w-0'
                 }`}
             >
               <div className="relative z-10 w-full overflow-hidden lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
-                {selectedElement && (
-                  <Suspense fallback={null}>
+                {activeElement && isElementPanelOpen && (
+                  <Suspense fallback={
+                    <div className="space-y-4">
+                      <div className="grid gap-4">
+                        {[1, 2, 3].map((index) => (
+                          <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                            <SkeletonLoader width="100%" height="200px" radius="xl" className="mb-3" />
+                            <div className="space-y-2">
+                              <SkeletonLoader width="70%" height="1.5rem" radius="md" />
+                              <SkeletonLoader width="50%" height="1rem" radius="sm" />
+                              <SkeletonLoader width="80%" height="1rem" radius="sm" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  }>
                     <ElementPanel
-                      key={selectedElement.atomicNumber}
-                      element={selectedElement}
-                      isFavorite={favorites.includes(selectedElement.atomicNumber)}
+                      element={activeElement}
+                      isFavorite={favorites.includes(activeElement.atomicNumber)}
                       onClose={handleClosePanel}
                       onToggleFavorite={toggleFavorite}
                       comparisonList={comparisonList}
@@ -657,39 +690,40 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             </aside>
 
             {/* Mobile Panel Drawer */}
-            <Drawer.Root
-              open={!!selectedElement}
-              onOpenChange={(open) => !open && handleClosePanel()}
-              snapPoints={[0.5, 0.9]}
-              fadeFromIndex={0}
-            >
-              <Drawer.Portal>
-                <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
-                <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
-                  <Drawer.Title className="sr-only">Element Details</Drawer.Title>
-                  <Drawer.Description className="sr-only">View detailed information about the selected element</Drawer.Description>
-                  <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
-                  <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
-                    {selectedElement && (
-                      <Suspense fallback={null}>
-                        <ElementPanel
-                          key={selectedElement.atomicNumber}
-                          element={selectedElement}
-                          isFavorite={favorites.includes(selectedElement.atomicNumber)}
-                          onClose={handleClosePanel}
-                          onToggleFavorite={toggleFavorite}
-                          comparisonList={comparisonList}
-                          onAddToCompare={handleAddToCompare}
-                          ai={ai}
-                          onAddToBuilder={handleAddToBuilder}
-                          builderElements={builderElements}
-                        />
-                      </Suspense>
-                    )}
-                  </div>
-                </Drawer.Content>
-              </Drawer.Portal>
-            </Drawer.Root>
+            {isMobileViewport && (
+              <Drawer.Root
+                open={isElementPanelOpen}
+                onOpenChange={(open) => !open && handleClosePanel()}
+                snapPoints={[0.5, 0.9]}
+                fadeFromIndex={0}
+              >
+                <Drawer.Portal>
+                  <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
+                  <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
+                    <Drawer.Title className="sr-only">Element Details</Drawer.Title>
+                    <Drawer.Description className="sr-only">View detailed information about the selected element</Drawer.Description>
+                    <div className="mx-auto mt-4 mb-2 h-1.5 w-12 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+                      {activeElement && isElementPanelOpen && (
+                        <Suspense fallback={null}>
+                          <ElementPanel
+                            element={activeElement}
+                            isFavorite={favorites.includes(activeElement.atomicNumber)}
+                            onClose={handleClosePanel}
+                            onToggleFavorite={toggleFavorite}
+                            comparisonList={comparisonList}
+                            onAddToCompare={handleAddToCompare}
+                            ai={ai}
+                            onAddToBuilder={handleAddToBuilder}
+                            builderElements={builderElements}
+                          />
+                        </Suspense>
+                      )}
+                    </div>
+                  </Drawer.Content>
+                </Drawer.Portal>
+              </Drawer.Root>
+            )}
           </div>
         </div>
 

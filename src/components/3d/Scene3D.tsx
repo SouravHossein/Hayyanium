@@ -2,12 +2,13 @@
 
 import React, { useMemo, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars, Environment, Float } from '@react-three/drei';
+import { OrbitControls, Stars, Environment, Html } from '@react-three/drei';
 import { ElementData } from '../../types';
 import { Table3DMode } from '../../layouts/3d/types';
 import { get3DLayoutEngine } from '../../layouts/3d';
 import { useTheme } from '../../contexts/ThemeContext';
 import ElementMesh from './ElementMesh';
+import SkeletonLoader from '../ui/SkeletonLoader';
 
 interface Scene3DProps {
   elements: ElementData[];
@@ -117,7 +118,14 @@ const Scene3D: React.FC<Scene3DProps> = (props) => {
         gl={{ antialias: true, alpha: true }}
         style={{ background: bgGradient }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <Html center>
+            <div className="flex flex-col items-center justify-center py-8">
+              <SkeletonLoader width="100px" height="100px" radius="full" className="mb-4" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading 3D scene...</p>
+            </div>
+          </Html>
+        }>
           <SceneContent {...props} />
           {!isDark && <Environment preset="city" />}
         </Suspense>

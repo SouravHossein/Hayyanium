@@ -5,6 +5,7 @@ import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import ElectronConfigurationViewer from './ElectronConfigurationViewer';
 import IsotopesViewer from './IsotopesViewer';
 import CrystalStructureSection from './CrystalStructureSection';
+import SkeletonLoader from './ui/SkeletonLoader';
 
 const RealLifeApplications = lazy(() => import('./RealLifeApplications'));
 
@@ -46,7 +47,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
     setMessageType(type);
     setAiMessage(null);
 
-    const prompt = type === 'roast' 
+    const prompt = type === 'roast'
       ? `Write a scientifically accurate but hilarious and brutal roast of the chemical element ${element.name}. Keep it to 2-3 short sentences. Example for Argon: "Argon: The ultimate third wheel of the atmosphere. You make up 1% of the air and literally do nothing. You're so lazy we put you in lightbulbs just to stop other elements from doing actual work."`
       : `Write a scientifically accurate, overly enthusiastic, and hype-filled promotion of the chemical element ${element.name}. Make it sound like the greatest thing in the universe. Keep it to 2-3 short sentences.`;
 
@@ -75,19 +76,19 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-   React.useEffect(() => {
+  React.useEffect(() => {
     if (element && panelRef.current) {
-        panelRef.current.focus();
-        panelRef.current.scrollTop = 0; // Scroll to top when element changes
+      panelRef.current.focus();
+      panelRef.current.scrollTop = 0; // Scroll to top when element changes
     }
   }, [element]);
 
   const handleCopySummary = () => {
-      if(element) {
-          navigator.clipboard.writeText(element.summary)
-            .then(() => alert('Summary copied to clipboard!'))
-            .catch(err => console.error('Failed to copy summary: ', err));
-      }
+    if (element) {
+      navigator.clipboard.writeText(element.summary)
+        .then(() => alert('Summary copied to clipboard!'))
+        .catch(err => console.error('Failed to copy summary: ', err));
+    }
   }
 
   if (!element) return null;
@@ -99,7 +100,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
   const isCompareFull = comparisonList.length >= 3;
   const isInBuilder = builderElements.some(el => el.atomicNumber === element.atomicNumber);
   const isBuilderFull = builderElements.length >= 4;
-  
+
   return (
     <div
       ref={panelRef}
@@ -109,7 +110,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       aria-labelledby="element-panel-title"
     >
       {/* Mobile drag handle indicator */}
-      <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-1 lg:hidden"></div>
+      {/* <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-1 lg:hidden"></div> */}
 
       <button onClick={onClose} aria-label="Close element details" className="sticky top-4 right-4 float-right text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors z-10 mr-4">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,132 +131,145 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
 
       {/* Content */}
       <div className="p-6">
-          <p className="mb-4 text-gray-600 dark:text-gray-300 italic">{element.summary}</p>
-          
-          <div className="flex flex-wrap gap-2 mb-6">
-               <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
-              </button>
-              <button onClick={handleCopySummary} className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors">Copy Summary</button>
-              <button 
-                  onClick={() => onAddToCompare(element)} 
-                  disabled={isInCompare || isCompareFull}
-                  className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isInCompare 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
-                  }`}
-              >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  <span>{isInCompare ? 'In Compare' : (isCompareFull ? 'Compare Full' : 'Compare')}</span>
-              </button>
-              <button 
-                  onClick={() => onAddToBuilder(element)} 
-                  disabled={isInBuilder || isBuilderFull}
-                  className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isInBuilder 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
-                  }`}
-              >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                  </svg>
-                  <span>{isInBuilder ? 'In Builder' : (isBuilderFull ? 'Builder Full' : 'Add to Builder')}</span>
-              </button>
-              <button 
-                  onClick={() => generateAiMessage('roast')}
-                  disabled={!ai || isGeneratingMessage}
-                  className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
-              >
-                  <span>🔥 Roast</span>
-              </button>
-              <button 
-                  onClick={() => generateAiMessage('hype')}
-                  disabled={!ai || isGeneratingMessage}
-                  className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
-              >
-                  <span>🚀 Hype</span>
-              </button>
+        <p className="mb-4 text-gray-600 dark:text-gray-300 italic">{element.summary}</p>
+
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
+          </button>
+          <button onClick={handleCopySummary} className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors">Copy Summary</button>
+          <button
+            onClick={() => onAddToCompare(element)}
+            disabled={isInCompare || isCompareFull}
+            className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInCompare
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            <span>{isInCompare ? 'In Compare' : (isCompareFull ? 'Compare Full' : 'Compare')}</span>
+          </button>
+          <button
+            onClick={() => onAddToBuilder(element)}
+            disabled={isInBuilder || isBuilderFull}
+            className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInBuilder
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+            <span>{isInBuilder ? 'In Builder' : (isBuilderFull ? 'Builder Full' : 'Add to Builder')}</span>
+          </button>
+          <button
+            onClick={() => generateAiMessage('roast')}
+            disabled={!ai || isGeneratingMessage}
+            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
+          >
+            <span>🔥 Roast</span>
+          </button>
+          <button
+            onClick={() => generateAiMessage('hype')}
+            disabled={!ai || isGeneratingMessage}
+            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
+          >
+            <span>🚀 Hype</span>
+          </button>
+        </div>
+
+        {!ai && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/80 dark:bg-amber-950/40 dark:text-amber-200">
+            Add <code>VITE_GEMINI_API_KEY</code> in <code>.env.local</code> to enable AI roast, hype, and compound analysis features.
+          </div>
+        )}
+
+        {/* AI Message Area */}
+        {(aiMessage || isGeneratingMessage) && (
+          <div className={`mb-6 p-4 rounded-lg border ${messageType === 'roast' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'}`}>
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="text-xl">{messageType === 'roast' ? '🔥' : '🚀'}</span>
+              <h4 className={`font-bold ${messageType === 'roast' ? 'text-orange-700 dark:text-orange-400' : 'text-purple-700 dark:text-purple-400'}`}>
+                {messageType === 'roast' ? 'AI Roast' : 'AI Hype'}
+              </h4>
+            </div>
+            {isGeneratingMessage ? (
+              <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <span className="text-sm italic">Gemini is thinking...</span>
+              </div>
+            ) : (
+              <p className="text-gray-800 dark:text-gray-200 text-sm italic leading-relaxed">"{aiMessage}"</p>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Properties</h4>
+            <dl>
+              <InfoRow label="Atomic Mass" value={`${atomicMass} u`} />
+              <InfoRow label="Phase at STP" value={<span className="capitalize">{element.stateAtSTP}</span>} />
+              <InfoRow label="Density" value={element.density_g_cm3 ? `${element.density_g_cm3} g/cm³` : 'N/A'} />
+              <InfoRow label="Melting Point" value={`${KtoC(element.meltingPointK)} °C / ${element.meltingPointK || 'N/A'} K`} />
+              <InfoRow label="Boiling Point" value={`${KtoC(element.boilingPointK)} °C / ${element.boilingPointK || 'N/A'} K`} />
+              <InfoRow label="Electronegativity" value={element.electronegativity} tooltip="Pauling scale" />
+              <InfoRow label="Oxidation States" value={element.oxidationStates?.join(', ')} />
+            </dl>
           </div>
 
-          {!ai && (
-              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/80 dark:bg-amber-950/40 dark:text-amber-200">
-                  Add <code>VITE_GEMINI_API_KEY</code> in <code>.env.local</code> to enable AI roast, hype, and compound analysis features.
-              </div>
+          <div>
+            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Discovery</h4>
+            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{element.discovery_story}</p>
+          </div>
+
+          <CrystalStructureSection element={element} />
+
+          <ElectronConfigurationViewer configuration={element.electronConfiguration} symbol={element.symbol} />
+
+          {element.isotopes && element.isotopes.length > 0 && (
+            <IsotopesViewer isotopes={element.isotopes} />
           )}
 
-          {/* AI Message Area */}
-          {(aiMessage || isGeneratingMessage) && (
-              <div className={`mb-6 p-4 rounded-lg border ${messageType === 'roast' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'}`}>
-                  <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-xl">{messageType === 'roast' ? '🔥' : '🚀'}</span>
-                      <h4 className={`font-bold ${messageType === 'roast' ? 'text-orange-700 dark:text-orange-400' : 'text-purple-700 dark:text-purple-400'}`}>
-                          {messageType === 'roast' ? 'AI Roast' : 'AI Hype'}
-                      </h4>
+          <Suspense fallback={
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                {[1, 2, 3].map((index) => (
+                  <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
+                    <SkeletonLoader width="100%" height="200px" radius="xl" className="mb-3" />
+                    <div className="space-y-2">
+                      <SkeletonLoader width="70%" height="1.5rem" radius="md" />
+                      <SkeletonLoader width="50%" height="1rem" radius="sm" />
+                      <SkeletonLoader width="80%" height="1rem" radius="sm" />
+                    </div>
                   </div>
-                  {isGeneratingMessage ? (
-                      <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                          <span className="text-sm italic">Gemini is thinking...</span>
-                      </div>
-                  ) : (
-                      <p className="text-gray-800 dark:text-gray-200 text-sm italic leading-relaxed">"{aiMessage}"</p>
-                  )}
+                ))}
               </div>
-          )}
-          
-          <div className="space-y-6">
-            <div>
-              <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Properties</h4>
-              <dl>
-                  <InfoRow label="Atomic Mass" value={`${atomicMass} u`} />
-                  <InfoRow label="Phase at STP" value={<span className="capitalize">{element.stateAtSTP}</span>} />
-                  <InfoRow label="Density" value={element.density_g_cm3 ? `${element.density_g_cm3} g/cm³` : 'N/A'} />
-                  <InfoRow label="Melting Point" value={`${KtoC(element.meltingPointK)} °C / ${element.meltingPointK || 'N/A'} K`} />
-                  <InfoRow label="Boiling Point" value={`${KtoC(element.boilingPointK)} °C / ${element.boilingPointK || 'N/A'} K`} />
-                  <InfoRow label="Electronegativity" value={element.electronegativity} tooltip="Pauling scale" />
-                  <InfoRow label="Oxidation States" value={element.oxidationStates?.join(', ')} />
-              </dl>
             </div>
-          
-            <div>
-              <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Discovery</h4>
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{element.discovery_story}</p>
-            </div>
+          }>
+            <RealLifeApplications element={element} />
+          </Suspense>
 
-            <CrystalStructureSection element={element} />
-
-            <ElectronConfigurationViewer configuration={element.electronConfiguration} symbol={element.symbol} />
-            
-            {element.isotopes && element.isotopes.length > 0 && (
-                <IsotopesViewer isotopes={element.isotopes} />
-            )}
-
-            <Suspense fallback={<div className="text-sm text-gray-500 dark:text-gray-400">Loading applications...</div>}>
-              <RealLifeApplications element={element} />
-            </Suspense>
-
-            <div>
-                <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>
-                {element.commonUses && element.commonUses.length > 0 &&
-                    <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
-                        {element.commonUses.map((use, index) => <li key={index}>{use}</li>)}
-                    </ul>
-                }
-                <p className="mt-2 text-sm italic bg-gray-100 dark:bg-gray-700 p-3 rounded-md">"{element.everydayExample}"</p>
-            </div>
-            {element.safetyNotes &&
-                 <div>
-                    <h4 className="font-bold text-yellow-600 dark:text-yellow-400 text-lg mb-2">Safety Notes</h4>
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">{element.safetyNotes}</p>
-                </div>
+          <div>
+            <h4 className="font-bold text-cyan-600 dark:text-cyan-300 text-lg mb-2">Uses & Fun Fact</h4>
+            {element.commonUses && element.commonUses.length > 0 &&
+              <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
+                {element.commonUses.map((use, index) => <li key={index}>{use}</li>)}
+              </ul>
             }
+            <p className="mt-2 text-sm italic bg-gray-100 dark:bg-gray-700 p-3 rounded-md">"{element.everydayExample}"</p>
+          </div>
+          {element.safetyNotes &&
+            <div>
+              <h4 className="font-bold text-yellow-600 dark:text-yellow-400 text-lg mb-2">Safety Notes</h4>
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">{element.safetyNotes}</p>
+            </div>
+          }
         </div>
 
       </div>

@@ -1,4 +1,5 @@
 import React, { Suspense, lazy, useMemo, useState } from 'react';
+import SkeletonLoader from './ui/SkeletonLoader';
 
 const Atom3DViewer = lazy(() => import('./Atom3DViewer'));
 
@@ -181,7 +182,12 @@ const ElectronConfigurationViewer: React.FC<ElectronConfigurationViewerProps> = 
         {view === 'bohr' && <BohrModel shells={shells} symbol={symbol} />}
         {view === 'orbital' && <OrbitalDiagram orbitals={parsedOrbitals} />}
         {view === '3d' && (
-          <Suspense fallback={<div className="text-sm text-gray-500 dark:text-gray-400">Loading 3D model...</div>}>
+          <Suspense fallback={
+            <div className="flex flex-col items-center justify-center py-8">
+              <SkeletonLoader width="100px" height="100px" radius="full" className="mb-4" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading 3D model...</p>
+            </div>
+          }>
             <Atom3DViewer key={symbol} shells={shells} symbol={symbol} />
           </Suspense>
         )}
