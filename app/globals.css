@@ -60,4 +60,28 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes quiz-correct-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes quiz-wrong-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  .quiz-correct-pulse {
+    animation: quiz-correct-pulse 0.5s ease-in-out;
+  }
+
+  .quiz-wrong-shake {
+    animation: quiz-wrong-shake 0.2s ease-in-out 2;
+  }
 }
