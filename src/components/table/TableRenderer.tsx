@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { ElementData, Trend } from '../../types';
 import { TableMode, LAYOUT_META } from '../../layouts';
 import { getLayoutEngine } from '../../layouts';
-import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS, CATEGORY_HEX_COLORS } from '../../constants';
+import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../../constants';
 import Link from 'next/link';
+import { TableDetailLevel } from './zoomTypes';
 
 interface TableRendererProps {
   elements: ElementData[];
@@ -19,6 +20,7 @@ interface TableRendererProps {
   onElementTouchStart?: (element: ElementData, e: React.TouchEvent) => void;
   onElementTouchMove?: (e: React.TouchEvent) => void;
   onElementTouchEnd?: (e: React.TouchEvent) => void;
+  detailLevel?: TableDetailLevel;
 }
 
 // ─── Trend Color Engine (shared across all modes) ──────────────────────
@@ -83,12 +85,13 @@ interface MiniCellProps {
   onTouchMove?: (e: React.TouchEvent) => void;
   onTouchEnd?: (e: React.TouchEvent) => void;
   compact?: boolean;
+  detailLevel?: TableDetailLevel;
 }
 
 const MiniCell: React.FC<MiniCellProps> = ({
   element, isSelected, isFavorite, trendStyle, style,
   onSelect, onHover, isDraggable, onDragStart, onDragEnd,
-  onTouchStart, onTouchMove, onTouchEnd, compact,
+  onTouchStart, onTouchMove, onTouchEnd, compact, detailLevel = 'medium',
 }) => {
   const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
   const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
@@ -122,30 +125,37 @@ const MiniCell: React.FC<MiniCellProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className={`relative rounded-md transition-all duration-300 transform hover:scale-110 hover:z-20 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${colorClass} ${textColorClass} ${isSelected ? 'ring-2 ring-cyan-400 scale-110 z-20' : ''
+      className={`relative rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${colorClass} ${textColorClass} ${isSelected ? 'ring-2 ring-cyan-400 z-20 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : ''
         } ${isDraggable ? 'cursor-grab' : ''}`}
+      id={`element-${element.atomicNumber}`}
       style={{
         ...style,
         ...(trendStyle || {}),
         overflow: 'hidden',
+        padding: compact
+          ? 'clamp(1px, calc(var(--table-cell-size, 56px) * 0.04), 3px)'
+          : 'clamp(2px, calc(var(--table-cell-size, 56px) * 0.07), 5px)',
+        border: detailLevel === 'small' ? '1px solid rgba(255,255,255,0.12)' : undefined,
       }}
     >
       {/* Content */}
-      <div className={`flex flex-col items-center justify-center h-full w-full ${compact ? 'p-0.5' : 'p-1'}`}>
-        <span className={`absolute top-0 left-0.5 ${compact ? 'text-[7px]' : 'text-[9px]'} font-medium opacity-70`}>
-          {element.atomicNumber}
-        </span>
-        {!trendStyle && (
+      <div className={`flex flex-col items-center justify-center h-full w-full ${detailLevel === 'small' ? 'opacity-90' : ''}`}>
+        {detailLevel !== 'small' && (
+          <span className={`absolute top-0 left-0.5 ${compact ? 'text-[7px]' : 'text-[9px]'} font-medium opacity-70`}>
+            {element.atomicNumber}
+          </span>
+        )}
+        {detailLevel === 'large' && !trendStyle && (
           <span className={`absolute top-0 right-0.5 w-1.5 h-1.5 rounded-sm ${blockColor}`} />
         )}
         {isFavorite && (
-          <span className="absolute top-0 right-0.5 text-[8px] text-yellow-300">★</span>
+          <span className="absolute top-0 right-0.5 text-[8px] text-yellow-300">*</span>
         )}
-        <span className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-bold leading-none`}>
+        <span className={`${compact ? (detailLevel === 'large' ? 'text-sm' : 'text-[10px]') : (detailLevel === 'small' ? 'text-sm' : detailLevel === 'medium' ? 'text-lg' : 'text-lg sm:text-xl')} font-bold leading-none`}>
           {element.symbol}
         </span>
-        {!compact && (
-          <span className="text-[8px] sm:text-[10px] truncate max-w-full leading-none mt-0.5">
+        {detailLevel === 'large' && !compact && (
+          <span className="text-[8px] sm:text-[10px] truncate max-w-full leading-none mt-0.5 font-medium">
             {element.name}
           </span>
         )}
@@ -154,41 +164,52 @@ const MiniCell: React.FC<MiniCellProps> = ({
   );
 };
 
+const MemoMiniCell = React.memo(MiniCell);
+
 // ─── GRID Renderer ─────────────────────────────────────────────────────
 const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (props) => {
   const {
     elements, selectedElement, favorites, onSelectElement, onHoverElement,
     selectedTrend, tableMode, isDraggable, onElementDragStart, onElementDragEnd,
-    onElementTouchStart, onElementTouchMove, onElementTouchEnd, themeClass,
+    onElementTouchStart, onElementTouchMove, onElementTouchEnd, themeClass, detailLevel = 'medium',
   } = props;
 
   const engine = getLayoutEngine(tableMode);
   const layout = useMemo(() => engine(elements), [engine, elements]);
   const trendStyles = useTrendStyles(elements, selectedTrend);
 
+  const gridCols = layout.gridCols || 20;
+  const gridRows = layout.gridRows || 11;
+
   const gridTemplate = {
-    gridTemplateColumns: `repeat(${layout.gridCols || 20}, minmax(0, 1fr))`,
-    gridTemplateRows: `repeat(${layout.gridRows || 11}, minmax(0, 1fr))`,
+    gridTemplateColumns: `var(--table-label-size, 34px) repeat(${Math.max(1, gridCols - 1)}, var(--table-cell-size, 56px))`,
+    gridTemplateRows: `var(--table-label-size, 34px) repeat(${Math.max(1, gridRows - 1)}, var(--table-cell-size, 56px))`,
+    gap: 'var(--table-gap-size, 4px)',
   };
 
   return (
     <div
-      className={`w-full overflow-auto p-3 overscroll-contain touch-pan-x touch-pan-y hide-scrollbar scroll-smooth ${themeClass || ''}`}
-      style={{ WebkitOverflowScrolling: 'touch' }}
+      className={`inline-block align-top ${themeClass || ''}`}
     >
       <div
-        className="grid gap-0.5 min-w-[700px] lg:min-w-0"
+        className="grid"
         style={gridTemplate}
       >
         {/* Labels */}
         {layout.labels?.map((label, i) => (
           <div
             key={`label-${i}`}
-            className={`flex items-center justify-center text-[10px] font-bold ${label.type === 'block'
-                ? 'text-cyan-500 dark:text-cyan-400 text-[9px] uppercase tracking-wider'
+            className={`flex items-center justify-center font-bold ${label.type === 'block'
+                ? 'text-cyan-500 dark:text-cyan-400 uppercase tracking-wider'
                 : 'text-gray-400 dark:text-gray-500'
               }`}
-            style={{ gridColumnStart: label.x, gridRowStart: label.y }}
+            style={{
+              gridColumnStart: label.x,
+              gridRowStart: label.y,
+              fontSize: label.type === 'block'
+                ? 'clamp(8px, calc(var(--table-label-size, 34px) * 0.23), 12px)'
+                : 'clamp(9px, calc(var(--table-label-size, 34px) * 0.28), 13px)',
+            }}
           >
             {label.text}
           </div>
@@ -198,8 +219,12 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
         {layout.gaps?.map((gap, i) => (
           <div
             key={`gap-${i}`}
-            className="border-2 border-dashed border-amber-300/40 dark:border-amber-700/40 rounded-md flex items-center justify-center text-[10px] text-amber-500/60 italic"
-            style={{ gridColumnStart: gap.x, gridRowStart: gap.y }}
+            className="border-2 border-dashed border-amber-300/40 dark:border-amber-700/40 rounded-md flex items-center justify-center text-amber-500/60 italic"
+            style={{
+              gridColumnStart: gap.x,
+              gridRowStart: gap.y,
+              fontSize: 'clamp(9px, calc(var(--table-cell-size, 56px) * 0.22), 14px)',
+            }}
           >
             ?
           </div>
@@ -211,7 +236,7 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
           if (!pos) return null;
 
           return (
-            <MiniCell
+            <MemoMiniCell
               key={element.atomicNumber}
               element={element}
               isSelected={selectedElement?.atomicNumber === element.atomicNumber}
@@ -227,6 +252,7 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
               onTouchMove={onElementTouchMove}
               onTouchEnd={onElementTouchEnd}
               compact={tableMode === 'leftStep' || tableMode === 'block'}
+              detailLevel={detailLevel}
             />
           );
         })}
@@ -240,7 +266,7 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
   const {
     elements, selectedElement, favorites, onSelectElement, onHoverElement,
     selectedTrend, tableMode, isDraggable, onElementDragStart, onElementDragEnd,
-    onElementTouchStart, onElementTouchMove, onElementTouchEnd,
+    onElementTouchStart, onElementTouchMove, onElementTouchEnd, detailLevel = 'medium',
   } = props;
 
   const engine = getLayoutEngine(tableMode);
@@ -326,7 +352,7 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
 
   return (
     <div
-      className="w-full overflow-auto overscroll-contain hide-scrollbar"
+      className="w-full overscroll-contain hide-scrollbar"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div
@@ -377,7 +403,7 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
                 transition: isSpinning.current ? 'none' : 'transform 0.1s ease-out'
               }}
             >
-              <MiniCell
+              <MemoMiniCell
                 element={element}
                 isSelected={selectedElement?.atomicNumber === element.atomicNumber}
                 isFavorite={favorites.includes(element.atomicNumber)}
@@ -392,6 +418,7 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
                 onTouchMove={onElementTouchMove}
                 onTouchEnd={onElementTouchEnd}
                 compact
+                detailLevel={detailLevel}
               />
             </div>
           );
@@ -412,4 +439,5 @@ const TableRenderer: React.FC<TableRendererProps> = (props) => {
   return <GridRenderer {...props} themeClass={meta.themeClass} />;
 };
 
-export default TableRenderer;
+export default React.memo(TableRenderer);
+

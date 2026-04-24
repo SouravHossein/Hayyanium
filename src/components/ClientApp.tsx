@@ -34,6 +34,7 @@ import { Table3DMode, LAYOUT_3D_META } from '../layouts/3d/types';
 import TableModeSwitcher3D from './table/TableModeSwitcher3D';
 import Scene3D from './3d/Scene3D';
 import SkeletonLoader from './ui/SkeletonLoader';
+import TableZoomWrapper, { TableZoomRef } from './table/TableZoomWrapper';
 
 const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
 const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
@@ -96,6 +97,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [touchDragActive, setTouchDragActive] = useState(false);
   const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
   const touchGhostRef = useRef<HTMLDivElement | null>(null);
+  const tableZoomRef = useRef<TableZoomRef>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -164,6 +166,13 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
       setActiveElement(element);
       setIsElementPanelOpen(true);
 
+      // Trigger zoom to element if in grid mode
+      if (viewMode === 'grid') {
+        setTimeout(() => {
+          tableZoomRef.current?.zoomToElement(element.atomicNumber);
+        }, 100);
+      }
+
       if (isDifferentElement) {
         // Handle discovery
         const isNew = !discovered.includes(element.atomicNumber);
@@ -186,7 +195,7 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
         setLabPartnerMessage(reactions[Math.floor(Math.random() * reactions.length)]);
       }
     },
-    [activeElement, discovered, discover],
+    [activeElement, discovered, discover, viewMode],
   );
 
   const handleClosePanel = useCallback(() => {
@@ -597,41 +606,52 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     onHoverElement={setHoveredElement}
                     mode={table3DMode}
                   />
-                ) : tableMode === 'modern' ? (
-                  /* Modern mode uses the original PeriodicTable for full feature compat (group/period clicks) */
-                  <PeriodicTable
-                    elements={filteredElements}
-                    selectedElement={activeElement}
-                    favorites={favorites}
-                    onSelectElement={handleSelectElement}
-                    onHoverElement={setHoveredElement}
-                    selectedTrend={selectedTrend}
-                    isDraggable={isBuilderActive}
-                    onElementDragStart={handleDragStart}
-                    onElementDragEnd={handleDragEnd}
-                    onGroupClick={handleGroupClick}
-                    onPeriodClick={handlePeriodClick}
-                    onElementTouchStart={handleElementTouchStart}
-                    onElementTouchMove={handleElementTouchMove}
-                    onElementTouchEnd={handleElementTouchEnd}
-                  />
                 ) : (
-                  /* All other modes use the universal TableRenderer */
-                  <TableRenderer
-                    elements={filteredElements}
-                    selectedElement={activeElement}
-                    favorites={favorites}
-                    onSelectElement={handleSelectElement}
-                    onHoverElement={setHoveredElement}
-                    selectedTrend={selectedTrend}
-                    tableMode={tableMode}
-                    isDraggable={isBuilderActive}
-                    onElementDragStart={handleDragStart}
-                    onElementDragEnd={handleDragEnd}
-                    onElementTouchStart={handleElementTouchStart}
-                    onElementTouchMove={handleElementTouchMove}
-                    onElementTouchEnd={handleElementTouchEnd}
-                  />
+                  <TableZoomWrapper
+                    ref={tableZoomRef}
+                    mode={LAYOUT_META[tableMode].renderType === 'grid' ? 'spreadsheet' : 'transform'}
+                  >
+                    {(_scale, detailLevel) => (
+                      <>
+                        {tableMode === 'modern' ? (
+                          <PeriodicTable
+                            elements={filteredElements}
+                            selectedElement={activeElement}
+                            favorites={favorites}
+                            onSelectElement={handleSelectElement}
+                            onHoverElement={setHoveredElement}
+                            selectedTrend={selectedTrend}
+                            isDraggable={isBuilderActive}
+                            onElementDragStart={handleDragStart}
+                            onElementDragEnd={handleDragEnd}
+                            onGroupClick={handleGroupClick}
+                            onPeriodClick={handlePeriodClick}
+                            onElementTouchStart={handleElementTouchStart}
+                            onElementTouchMove={handleElementTouchMove}
+                            onElementTouchEnd={handleElementTouchEnd}
+                            detailLevel={detailLevel}
+                          />
+                        ) : (
+                          <TableRenderer
+                            elements={filteredElements}
+                            selectedElement={activeElement}
+                            favorites={favorites}
+                            onSelectElement={handleSelectElement}
+                            onHoverElement={setHoveredElement}
+                            selectedTrend={selectedTrend}
+                            tableMode={tableMode}
+                            isDraggable={isBuilderActive}
+                            onElementDragStart={handleDragStart}
+                            onElementDragEnd={handleDragEnd}
+                            onElementTouchStart={handleElementTouchStart}
+                            onElementTouchMove={handleElementTouchMove}
+                            onElementTouchEnd={handleElementTouchEnd}
+                            detailLevel={detailLevel}
+                          />
+                        )}
+                      </>
+                    )}
+                  </TableZoomWrapper>
                 )}
 
                 {hoveredElement && !activeElement && viewMode === 'grid' && (

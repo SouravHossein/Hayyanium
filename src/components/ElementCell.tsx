@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ElementData } from '../types/index';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
+import { TableDetailLevel } from './table/zoomTypes';
 
 interface ElementCellProps {
   element: ElementData;
@@ -17,6 +18,7 @@ interface ElementCellProps {
   onTouchStart?: (e: React.TouchEvent) => void;
   onTouchMove?: (e: React.TouchEvent) => void;
   onTouchEnd?: (e: React.TouchEvent) => void;
+  detailLevel?: TableDetailLevel;
 }
 
 const ElementCell: React.FC<ElementCellProps> = ({ 
@@ -33,6 +35,7 @@ const ElementCell: React.FC<ElementCellProps> = ({
   onTouchStart,
   onTouchMove,
   onTouchEnd,
+  detailLevel = 'medium',
 }) => {
   const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
   const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
@@ -55,7 +58,6 @@ const ElementCell: React.FC<ElementCellProps> = ({
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // If it's a normal click (not cmd/ctrl/middle click), intercept it for the SPA drawer
     if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
       e.preventDefault();
       onSelect(element);
@@ -77,32 +79,61 @@ const ElementCell: React.FC<ElementCellProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className={`relative p-1 rounded-md transition-all duration-500 ease-in-out transform hover:scale-110 hover:z-10 focus:scale-110 focus:z-10 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 scale-110 z-10' : 'block'} ${isDraggable ? 'cursor-grab' : ''} ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
+      id={`element-${element.atomicNumber}`}
+      className={`relative rounded-md transition-colors duration-200 focus:z-30 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} 
+        ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 z-30 shadow-[0_0_20px_rgba(6,182,212,0.6)]' : ''} 
+        ${isDraggable ? 'cursor-grab' : ''} 
+        ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
       style={{ 
         gridColumnStart: element.xpos, 
         gridRowStart: element.ypos,
         ...(trendStyle || {}),
-        display: isSelected ? 'flex' : 'block',
-        flexDirection: 'column'
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 'clamp(2px, calc(var(--table-cell-size, 56px) * 0.08), 6px)',
+        border: detailLevel === 'small' ? `1px solid rgba(255,255,255,0.12)` : undefined,
       }}
     >
-      <div className="absolute top-0.5 left-1 text-[10px] sm:text-xs font-medium">{element.atomicNumber}</div>
+      {detailLevel !== 'small' && (
+        <div className="absolute top-0.5 left-1 text-[9px] sm:text-[10px] font-bold opacity-70 leading-none">
+          {element.atomicNumber}
+        </div>
+      )}
 
       {isFavorite && (
-        <div className="absolute top-0.5 right-1 text-xs">
+        <div className="absolute top-0.5 right-1">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 fill-current text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
         </div>
       )}
 
-      {!trendStyle && <div className={`absolute top-0.5 right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm ${blockColor}`} ></div>}
+      {detailLevel === 'large' && !trendStyle && (
+        <div className={`absolute top-0.5 right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm ${blockColor}`} ></div>
+      )}
 
-      <div className="text-xl sm:text-2xl font-bold leading-tight mt-1">{element.symbol}</div>
-      <div className="text-[10px] sm:text-xs truncate">{element.name}</div>
-      <div className="text-[10px] sm:text-xs">{atomicMass}</div>
+      <div
+        className={`font-bold leading-none ${
+          detailLevel === 'small'
+            ? 'text-base sm:text-lg'
+            : detailLevel === 'medium'
+              ? 'text-lg sm:text-xl'
+              : 'text-xl sm:text-2xl mt-1'
+        }`}
+      >
+        {element.symbol}
+      </div>
+
+      {detailLevel === 'large' && (
+        <>
+          <div className="text-[10px] sm:text-xs truncate font-medium max-w-full">{element.name}</div>
+          <div className="text-[8px] sm:text-[10px] opacity-80">{atomicMass}</div>
+        </>
+      )}
     </Link>
   );
 };
 
-export default ElementCell;
+export default React.memo(ElementCell);

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ElementData } from '../types/index';
 import ElementCell from './ElementCell';
 import { Trend } from '../types';
+import { TableDetailLevel } from './table/zoomTypes';
 
 interface PeriodicTableProps {
   elements: ElementData[];
@@ -18,6 +19,7 @@ interface PeriodicTableProps {
   onElementTouchStart?: (element: ElementData, e: React.TouchEvent) => void;
   onElementTouchMove?: (e: React.TouchEvent) => void;
   onElementTouchEnd?: (e: React.TouchEvent) => void;
+  detailLevel?: TableDetailLevel;
 }
 
 const GROUP_LABELS: { [key: number]: string } = {
@@ -41,6 +43,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
   onElementTouchStart,
   onElementTouchMove,
   onElementTouchEnd,
+  detailLevel = 'medium',
 }) => {
     const [hoveredGroup, setHoveredGroup] = useState<number | null>(null);
     const [hoveredPeriod, setHoveredPeriod] = useState<number | null>(null);
@@ -106,15 +109,25 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
 
   return (
     <div 
-      className="w-full overflow-auto p-4 overscroll-contain touch-pan-x touch-pan-y hide-scrollbar scroll-smooth"
-      style={{ WebkitOverflowScrolling: 'touch' }}
+      className="inline-block align-top"
     >
-        <div className="grid gap-1 min-w-[1000px] lg:min-w-0" style={{gridTemplateColumns: 'auto repeat(18, minmax(0, 1fr))', gridTemplateRows: 'auto repeat(9, minmax(0, 1fr))'}}>
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: 'var(--table-label-size, 34px) repeat(18, var(--table-cell-size, 56px))',
+            gridTemplateRows: 'var(--table-label-size, 34px) repeat(9, var(--table-cell-size, 56px))',
+            gap: 'var(--table-gap-size, 4px)',
+          }}
+        >
         {/* Group Labels */}
         {Array.from({ length: 18 }, (_, i) => i + 1).map(groupNumber => (
             <button key={`group-${groupNumber}`} 
-                 className="text-center text-xs text-gray-500 dark:text-gray-400 flex flex-col justify-end pb-1 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500" 
-                 style={{ gridColumnStart: groupNumber + 1, gridRowStart: 1 }}
+                 className="text-center text-gray-500 dark:text-gray-400 flex flex-col justify-end pb-1 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                 style={{
+                   gridColumnStart: groupNumber + 1,
+                   gridRowStart: 1,
+                   fontSize: 'clamp(9px, calc(var(--table-label-size, 34px) * 0.26), 13px)',
+                 }}
                  onMouseEnter={() => setHoveredGroup(groupNumber)}
                  onMouseLeave={() => setHoveredGroup(null)}
                  onClick={() => onGroupClick(groupNumber)}
@@ -128,8 +141,12 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
         {/* Period Labels */}
         {Array.from({ length: 7 }, (_, i) => i + 1).map(periodNumber => (
             <button key={`period-${periodNumber}`}
-                 className="text-center text-xs text-gray-500 dark:text-gray-400 flex items-center justify-end pr-2 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                 style={{ gridRowStart: periodNumber + 1, gridColumnStart: 1 }}
+                 className="text-center text-gray-500 dark:text-gray-400 flex items-center justify-end pr-2 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                 style={{
+                   gridRowStart: periodNumber + 1,
+                   gridColumnStart: 1,
+                   fontSize: 'clamp(9px, calc(var(--table-label-size, 34px) * 0.3), 14px)',
+                 }}
                  onMouseEnter={() => setHoveredPeriod(periodNumber)}
                  onMouseLeave={() => setHoveredPeriod(null)}
                  onClick={() => onPeriodClick(periodNumber)}
@@ -161,6 +178,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
                     onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(element, e) : undefined}
                     onTouchMove={onElementTouchMove}
                     onTouchEnd={onElementTouchEnd}
+                    detailLevel={detailLevel}
                 />
             );
         })}
@@ -169,4 +187,4 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
   );
 };
 
-export default PeriodicTable;
+export default React.memo(PeriodicTable);
