@@ -67,6 +67,7 @@ const SceneContent: React.FC<Scene3DProps> = ({
             element={el}
             position={[item.x, item.y, item.z]}
             rotation={item.rotation}
+            mode={mode}
             isSelected={selectedElement?.atomicNumber === el.atomicNumber}
             isFavorite={favorites.includes(el.atomicNumber)}
             onSelect={onSelectElement}

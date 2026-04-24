@@ -4,6 +4,7 @@ import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { ElementData } from '../../types';
 import { CATEGORY_HEX_COLORS } from '../../constants';
+import { Table3DMode } from '../../layouts/3d/types';
 
 interface ElementMeshProps {
   element: ElementData;
@@ -13,6 +14,7 @@ interface ElementMeshProps {
   isFavorite: boolean;
   onSelect: (el: ElementData) => void;
   onHover: (el: ElementData | null) => void;
+  mode: Table3DMode;
 }
 
 const BLOCK_COLORS: Record<string, string> = {
@@ -23,7 +25,7 @@ const BLOCK_COLORS: Record<string, string> = {
 };
 
 const ElementMesh: React.FC<ElementMeshProps> = ({
-  element, position, rotation, isSelected, isFavorite, onSelect, onHover,
+  element, position, rotation, isSelected, isFavorite, onSelect, onHover, mode,
 }) => {
   const meshRef = useRef<THREE.Mesh>(null!);
   const [hovered, setHovered] = useState(false);
@@ -44,6 +46,9 @@ const ElementMesh: React.FC<ElementMeshProps> = ({
     meshRef.current.scale.setScalar(THREE.MathUtils.lerp(s, targetScale, 0.1));
   });
 
+  const isCubeMode = mode === 'stackedCube';
+  const geometry: [number, number, number] = isCubeMode ? [1.45, 1.45, 1.45] : [1.7, 1.7, 0.4];
+
   return (
     <mesh
       ref={meshRef}
@@ -53,7 +58,7 @@ const ElementMesh: React.FC<ElementMeshProps> = ({
       onPointerOver={(e) => { e.stopPropagation(); setHovered(true); onHover(element); document.body.style.cursor = 'pointer'; }}
       onPointerOut={() => { setHovered(false); onHover(null); document.body.style.cursor = 'auto'; }}
     >
-      <boxGeometry args={[1.7, 1.7, 0.4]} />
+      <boxGeometry args={geometry} />
       <meshStandardMaterial
         color={baseColor}
         emissive={hovered || isSelected ? emissiveColor : '#000000'}

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mendeleev's Periodic Table — 1869</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-outer:    #1a1208;
+            --vellum:      #f0e6cc;
+            --vellum-deep: #e2d4ae;
+            --vellum-mid:  #ead8b8;
+            --vellum-lt:   #f7f0e2;
+            --ink:         #16100a;
+            --ink-mid:     #3b2810;
+            --ink-faded:   #6b4e2a;
+            --ink-rust:    #7a3518;
+            --ink-red:     #5e1a1a;
+            --border:      #9a7840;
+            --border-dk:   #6b4e20;
+            --gold:        #a0813a;
+            --gold-lt:     #c4a45c;
+            --gap-blue:    #1e3a5f;
+            --gap-lt:      #e8f0f8;
+            --shadow:      rgba(22,16,10,0.28);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-outer);
+            background-image:
+                radial-gradient(ellipse 60% 60% at 15% 15%, #2a1e0e 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 85% 85%, #0e0a04 0%, transparent 70%);
+            min-height: 100vh;
+            font-family: 'IM Fell English', 'Palatino Linotype', Georgia, serif;
+            padding: 44px 18px 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ═══════════════════════════════
+           OUTER FRAME
+        ═══════════════════════════════ */
+        .frame {
+            position: relative;
+            max-width: 1380px;
+            width: 100%;
+        }
+
+        /* Decorative corner ornaments via pseudo-elements */
+        .frame::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--gold);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .frame::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border: 1px solid var(--border-dk);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .page {
+            background: var(--vellum);
+            background-image:
+                /* grain */
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
+                /* vignette */
+                radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(139,104,64,0.12) 100%);
+            box-shadow:
+                0 0 0 6px var(--vellum-deep),
+                0 0 0 8px var(--border-dk),
+                0 0 0 16px var(--vellum-deep),
+                0 12px 80px rgba(0,0,0,0.65),
+                inset 0 0 120px rgba(139,104,64,0.07);
+            padding: 52px 50px 60px;
+        }
+
+        /* ═══════════════════════════════
+           MASTHEAD
+        ═══════════════════════════════ */
+        .masthead {
+            text-align: center;
+            margin-bottom: 34px;
+            padding-bottom: 26px;
+            border-bottom: 1px solid var(--border-dk);
+            position: relative;
+        }
+
+        .masthead-ornament {
+            font-size: 1.3em;
+            color: var(--gold);
+            letter-spacing: 0.4em;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .journal-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 0.68em;
+            letter-spacing: 0.3em;
+            color: var(--ink-faded);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6em;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: 0.02em;
+            line-height: 1.15;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            font-size: 1.12em;
+            color: var(--ink-mid);
+            margin-bottom: 10px;
+        }
+
+        .author-block {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8em;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+        }
+
+        .divider-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 24px auto 0;
+            max-width: 480px;
+        }
+        .divider-bar .line { flex: 1; height: 1px; background: var(--border-dk); }
+        .divider-bar .gem  { color: var(--gold); font-size: 0.9em; }
+
+        /* ═══════════════════════════════
+           LAW STATEMENT
+        ═══════════════════════════════ */
+        .law-box {
+            border-top: 2px solid var(--border-dk);
+            border-bottom: 2px solid var(--border-dk);
+            padding: 16px 32px;
+            margin: 0 auto 34px;
+            max-width: 820px;
+            text-align: center;
+            background: var(--vellum-deep);
+        }
+        .law-box p {
+            font-style: italic;
+            font-size: 1.06em;
+            line-height: 1.72;
+            color: var(--ink);
+        }
+        .law-box cite {
+            display: block;
+            margin-top: 7px;
+            font-style: normal;
+            font-family: 'Cinzel', serif;
+            font-size: 0.68em;
+            letter-spacing: 0.1em;
+            color: var(--ink-faded);
+        }
+
+        /* ═══════════════════════════════
+           MAIN LAYOUT
+        ═══════════════════════════════ */
+        .body-grid {
+            display: grid;
+            grid-template-columns: 230px 1fr 230px;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* ═══════════════════════════════
+           SIDE PANELS
+        ═══════════════════════════════ */
+        .panel {
+            background: var(--vellum-mid);
+            border: 1px solid var(--border);
+            padding: 20px 18px;
+            box-shadow: inset 0 0 16px rgba(139,104,64,0.06), 2px 2px 10px var(--shadow);
+        }
+
+        .panel + .panel { margin-top: 18px; }
+
+        .panel h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72em;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ink-faded);
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 7px;
+            margin-bottom: 12px;
+        }
+
+        .panel p, .panel li {
+            font-size: 0.91em;
+            line-height: 1.72;
+            color: var(--ink);
+            margin-bottom: 9px;
+        }
+        .panel ul { padding-left: 14px; }
+        .panel li strong { color: var(--ink-rust); font-style: italic; }
+        .panel p em { color: var(--ink-mid); }
+
+        .badge {
+            display: inline-block;
+            background: var(--gap-blue);
+            color: #d4e8f8;
+            font-family: 'Cinzel', serif;
+            font-size: 0.58em;
+            letter-spacing: 0.1em;
+            padding: 1px 5px;
+            vertical-align: middle;
+            margin-left: 3px;
+        }
+
+        /* ═══════════════════════════════
+           TABLE AREA
+        ═══════════════════════════════ */
+        .table-section { overflow-x: auto; }
+
+        .orientation-note {
+            text-align: center;
+            font-style: italic;
+            font-size: 0.82em;
+            color: var(--ink-faded);
+            margin-bottom: 10px;
+            letter-spacing: 0.02em;
+        }
+
+        /*
+         * 1869 TABLE STRUCTURE
+         * Mendeleev's original: atomic weight increases DOWN each column.
+         * Columns = periods (vertical). Rows = chemical groups (horizontal).
+         * H stands alone at top. The heavy metals cluster at top-right.
+         * We render it faithfully: columns are periods, rows are groups.
+         *
+         * Source: D. Mendelejeff, Zeitschrift für Chemie 12, 405-406 (1869),
+         *         translated by Carmen Giunta (Le Moyne College).
+         */
+
+        table.mendeleev {
+            border-collapse: collapse;
+            width: 100%;
+            background: #faf3e0;
+            border: 3px double var(--border-dk);
+            box-shadow: 4px 6px 24px var(--shadow);
+            font-family: 'IM Fell English', Georgia, serif;
+        }
+
+        table.mendeleev thead th {
+            background: var(--vellum-deep);
+            border: 1px solid var(--border);
+            padding: 8px 4px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.62em;
+            letter-spacing: 0.14em;
+            color: var(--ink-faded);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        table.mendeleev td {
+            border: 1px solid var(--border);
+            padding: 10px 8px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            min-width: 78px;
+            transition: background 0.2s;
+        }
+
+        table.mendeleev tr:hover td { background: #f3e8cc; }
+        table.mendeleev td:empty,
+        table.mendeleev td.void {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        /* Group label cells */
+        td.group-label {
+            background: var(--vellum-deep);
+            border: 1px solid var(--border);
+            font-family: 'Cinzel', serif;
+            font-size: 0.65em;
+            letter-spacing: 0.1em;
+            color: var(--ink-faded);
+            font-style: italic;
+            text-align: left;
+            padding: 10px 10px;
+            min-width: 90px;
+        }
+
+        /* Individual element cell content */
+        .el-sym {
+            display: block;
+            font-size: 1.32em;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .el-wt {
+            display: block;
+            font-size: 0.78em;
+            color: var(--ink-faded);
+            font-style: italic;
+            margin-top: 3px;
+        }
+        .el-wt .uncertain { color: var(--ink-rust); }
+
+        /* Gap / predicted element */
+        td.gap {
+            background: #f0f4fa;
+            border: 1px dashed #7a9ab8;
+        }
+        td.gap .el-sym { color: var(--gap-blue); font-style: italic; }
+        td.gap .el-wt  { color: #4a7090; }
+
+        /* Anomalous / historically notable placement */
+        td.anomaly .el-sym { color: var(--ink-red); }
+
+        /* Corrected atomic weight (Mendeleev revised these) */
+        .corrected { color: var(--ink-rust); }
+
+        /* Heavy metals block — slight visual grouping */
+        td.heavy {
+            background: rgba(139,104,64,0.06);
+        }
+
+        /* Separator row between main table and rare-earth annex */
+        tr.annex-header td {
+            background: var(--vellum-deep);
+            border-top: 2px solid var(--border-dk);
+            border-bottom: 1px solid var(--border);
+            font-family: 'Cinzel', serif;
+            font-size: 0.62em;
+            letter-spacing: 0.14em;
+            color: var(--ink-faded);
+            text-align: center;
+            padding: 6px 4px;
+        }
+
+        /* ═══════════════════════════════
+           FOOTNOTES
+        ═══════════════════════════════ */
+        .footer-rule {
+            border: none;
+            border-top: 2px solid var(--border-dk);
+            margin: 36px 0 22px;
+        }
+
+        .footnotes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 40px;
+            font-size: 0.85em;
+            line-height: 1.68;
+            color: var(--ink-faded);
+        }
+        .footnotes p { font-style: italic; }
+        .footnotes strong { color: var(--ink-rust); font-style: normal; }
+        .fn-num {
+            font-family: 'Cinzel', serif;
+            font-size: 0.78em;
+            color: var(--gold);
+            margin-right: 5px;
+        }
+
+        .colophon {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.62em;
+            letter-spacing: 0.24em;
+            color: var(--border);
+            margin-top: 30px;
+        }
+
+        @media (max-width: 1100px) {
+            .body-grid { grid-template-columns: 1fr; }
+            .panel { max-width: 680px; margin-left: auto; margin-right: auto; width: 100%; }
+        }
+        @media (max-width: 640px) {
+            .page { padding: 26px 14px 36px; }
+            h1 { font-size: 1.8em; }
+            .footnotes { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="frame">
+<div class="page">
+
+    <!-- ─── MASTHEAD ─── -->
+    <div class="masthead">
+        <span class="masthead-ornament">✦ ✦ ✦</span>
+        <span class="journal-tag">Zhurnal Russkogo Fiziko-Khimicheskogo Obshchestva · Vol. I · St. Petersburg · 1869</span>
+        <h1>On the Relationship of the Properties<br>of the Elements to Their Atomic Weights</h1>
+        <p class="subtitle">Presented to the Russian Chemical Society, 6 March 1869</p>
+        <p class="author-block">Д. И. Менделеевъ &nbsp;·&nbsp; D. I. Mendeleev</p>
+        <div class="divider-bar">
+            <span class="line"></span>
+            <span class="gem">❧</span>
+            <span class="line"></span>
+        </div>
+    </div>
+
+    <!-- ─── LAW STATEMENT ─── -->
+    <blockquote class="law-box">
+        <p>"The elements, if arranged according to their atomic weights, exhibit an evident periodicity of properties.
+        Elements which are similar regarding their chemical properties either have similar atomic weights,
+        or have their atomic weights increasing regularly."</p>
+        <cite>— D. Mendeleev, March 1869 &nbsp;|&nbsp; Transl. Carmen Giunta, Le Moyne College</cite>
+    </blockquote>
+
+    <!-- ─── BODY GRID ─── -->
+    <div class="body-grid">
+
+        <!-- LEFT PANEL -->
+        <div>
+            <div class="panel">
+                <h2>How to Read This Table</h2>
+                <p>Mendeleev's 1869 arrangement is the <em>inverse</em> of modern convention:</p>
+                <ul>
+                    <li>Atomic weight increases <strong>downward</strong> within each vertical column.</li>
+                    <li>Each <strong>column</strong> is a period of increasing weight.</li>
+                    <li>Each <strong>horizontal row</strong> groups chemically analogous elements.</li>
+                    <li>H stands <strong>alone</strong> above all, its placement uncertain.</li>
+                </ul>
+                <p>This is opposite to today's table, where periods run horizontally and groups run vertically.</p>
+            </div>
+
+            <div class="panel">
+                <h2>Predicted Elements</h2>
+                <p>Gaps marked <span style="font-family:monospace; color:var(--gap-blue);">?=xx</span> are Mendeleev's deliberate predictions for undiscovered elements:</p>
+                <ul>
+                    <li><strong>?=68</strong> — Eka-aluminium<br>Discovered as <em>Gallium</em> in 1875.</li>
+                    <li><strong>?=70</strong> — Eka-silicon<br>Discovered as <em>Germanium</em> in 1886.</li>
+                    <li><strong>?=45</strong> — Eka-boron<br>Discovered as <em>Scandium</em> in 1879.</li>
+                    <li><strong>?=180</strong> — Heavy analogue of Ti/Zr; later resolved as Hafnium (178.5).</li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2>Archaic Symbols</h2>
+                <ul>
+                    <li><strong>J — Jod</strong><br>Iodine (I in modern use).</li>
+                    <li><strong>Ur — Uranium</strong><br>Now U; its atomic weight was corrected from 116 to 240 by Mendeleev himself.</li>
+                    <li><strong>Di — Didymium</strong><br>Later separated into Pr and Nd.</li>
+                    <li><strong>Yt — Yttrium</strong><br>Now Y; weight corrected.</li>
+                    <li><strong>Er — Erbium</strong><br>Atomic weight uncertain in 1869.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ─── TABLE ─── -->
+        <div class="table-section">
+            <p class="orientation-note">
+                ↓ Atomic weight increases downward within each column &nbsp;·&nbsp; Horizontal rows group analogous elements
+            </p>
+
+            <!--
+            =====================================================================
+            MENDELEEV 1869 TABLE — Exact transcription from:
+              D. Mendelejeff, Zeitschrift für Chemie 12, 405-406 (1869)
+              English translation by Carmen Giunta, Le Moyne College
+              https://web.lemoyne.edu/giunta/ea/mendeleevann.html
+
+            Structure: columns = periods (vertical, weight increasing downward)
+                        rows = chemical groups (horizontal)
+            H alone. Heavy metals at top-right.
+            =====================================================================
+            -->
+
+            <table class="mendeleev">
+                <thead>
+                    <tr>
+                        <th>Group / Series</th>
+                        <th>Series I</th>
+                        <th>Series II</th>
+                        <th>Series III</th>
+                        <th>Series IV</th>
+                        <th>Series V</th>
+                        <th>Series VI</th>
+                        <th>Series VII</th>
+                        <th>Series VIII</th>
+                        <th>Series IX</th>
+                        <th>Series X</th>
+                        <th>Series XI</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <!-- ROW A: Hydrogen alone -->
+                    <tr>
+                        <td class="group-label">— H —</td>
+                        <td>
+                            <span class="el-sym">H</span>
+                            <span class="el-wt">= 1</span>
+                        </td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td>
+                    </tr>
+
+                    <!-- ROW B: Heavy transition metals (top of original table) -->
+                    <tr>
+                        <td class="group-label">Ti · Zr group</td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Ti</span><span class="el-wt">= 50</span></td>
+                        <td class="heavy"><span class="el-sym">Zr</span><span class="el-wt">= 90</span></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="gap"><span class="el-sym">?</span><span class="el-wt">= 180</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">V · Nb · Ta group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">V</span><span class="el-wt">= 51</span></td>
+                        <td class="heavy"><span class="el-sym">Nb</span><span class="el-wt">= 94</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Ta</span><span class="el-wt">= 182</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Cr · Mo · W group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Cr</span><span class="el-wt">= 52</span></td>
+                        <td class="heavy"><span class="el-sym">Mo</span><span class="el-wt">= 96</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">W</span><span class="el-wt">= 186</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Mn · Rh · Pt group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Mn</span><span class="el-wt">= 55</span></td>
+                        <td class="heavy anomaly"><span class="el-sym">Rh</span><span class="el-wt">= 104.4</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="heavy anomaly"><span class="el-sym">Pt</span><span class="el-wt">= 197.4</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Fe · Ru · Ir group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Fe</span><span class="el-wt">= 56</span></td>
+                        <td class="heavy"><span class="el-sym">Ru</span><span class="el-wt">= 104.4</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Ir</span><span class="el-wt">= 198</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Ni=Co · Pd · Os group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="heavy anomaly"><span class="el-sym">Ni=Co</span><span class="el-wt">= 59</span></td>
+                        <td class="heavy"><span class="el-sym">Pd</span><span class="el-wt">= 106.6</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="heavy"><span class="el-sym">Os</span><span class="el-wt">= 199</span></td>
+                    </tr>
+
+                    <!-- ── MAIN TABLE ── -->
+
+                    <tr>
+                        <td class="group-label">H · Cu · Ag · Hg (Group I)</td>
+                        <td><span class="el-sym">H</span><span class="el-wt">= 1</span></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Cu</span><span class="el-wt">= 63.4</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Ag</span><span class="el-wt">= 108</span></td>
+                        <td><span class="el-sym">Hg</span><span class="el-wt">= 200</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Be · Mg · Zn · Cd (Group II)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Be</span><span class="el-wt">= 9.4</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Mg</span><span class="el-wt">= 24</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Zn</span><span class="el-wt">= 65.2</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Cd</span><span class="el-wt">= 112</span></td>
+                        <td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">B · Al · ?=68 · Ur · Au (Group III)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">B</span><span class="el-wt">= 11</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Al</span><span class="el-wt">= 27.4</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="gap"><span class="el-sym">?</span><span class="el-wt">= 68</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">Ur</span><span class="el-wt">= <span class="uncertain">116?</span></span></td>
+                        <td class="anomaly"><span class="el-sym">Au</span><span class="el-wt">= 197?</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">C · Si · ?=70 · Sn (Group IV)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">C</span><span class="el-wt">= 12</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Si</span><span class="el-wt">= 28</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="gap"><span class="el-sym">?</span><span class="el-wt">= 70</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Sn</span><span class="el-wt">= 118</span></td>
+                        <td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">N · P · As · Sb · Bi (Group V)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">N</span><span class="el-wt">= 14</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">P</span><span class="el-wt">= 31</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">As</span><span class="el-wt">= 75</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">Sb</span><span class="el-wt">= 122</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Bi</span><span class="el-wt">= 210?</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">O · S · Se · Te (Group VI)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">O</span><span class="el-wt">= 16</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">S</span><span class="el-wt">= 32</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Se</span><span class="el-wt">= 79.4</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">Te</span><span class="el-wt">= <span class="uncertain">128?</span></span></td>
+                        <td class="void"></td><td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">F · Cl · Br · J (Group VII)</td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">F</span><span class="el-wt">= 19</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Cl</span><span class="el-wt">= 35.5</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Br</span><span class="el-wt">= 80</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td><span class="el-sym">J</span><span class="el-wt">= 127</span></td>
+                        <td class="void"></td><td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Li · Na · K · Rb · Cs · Tl (Alkali)</td>
+                        <td><span class="el-sym">Li</span><span class="el-wt">= 7</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Na</span><span class="el-wt">= 23</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">K</span><span class="el-wt">= 39</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Rb</span><span class="el-wt">= 85.4</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Cs</span><span class="el-wt">= 133</span></td>
+                        <td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">Tl</span><span class="el-wt">= 204</span></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">Ca · Sr · Ba · Pb (Alkaline Earth)</td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Ca</span><span class="el-wt">= 40</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Sr</span><span class="el-wt">= 87.6</span></td>
+                        <td class="void"></td>
+                        <td><span class="el-sym">Ba</span><span class="el-wt">= 137</span></td>
+                        <td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">Pb</span><span class="el-wt">= 207</span></td>
+                    </tr>
+
+                    <!-- ANNEX: Rare earths & uncertain elements -->
+                    <tr class="annex-header">
+                        <td colspan="12">Rare Earths &amp; Uncertainly Placed Elements — Mendeleev conceded these did not fit the system and grouped them separately</td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">?=45 · Ce group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="gap"><span class="el-sym">?</span><span class="el-wt">= 45</span></td>
+                        <td class="anomaly"><span class="el-sym">Ce</span><span class="el-wt">= 92</span></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">?Er · La group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">?Er</span><span class="el-wt">= 56</span></td>
+                        <td class="anomaly"><span class="el-sym">La</span><span class="el-wt">= 94</span></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">?Yt · Di group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">?Yt</span><span class="el-wt">= 60</span></td>
+                        <td class="anomaly"><span class="el-sym">Di</span><span class="el-wt">= 95</span></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                    </tr>
+
+                    <tr>
+                        <td class="group-label">?In · Th group</td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                        <td class="anomaly"><span class="el-sym">?In</span><span class="el-wt">= 75.6</span></td>
+                        <td class="anomaly"><span class="el-sym">Th</span><span class="el-wt">= 118?</span></td>
+                        <td class="void"></td><td class="void"></td><td class="void"></td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+            <p style="text-align:center; margin-top:9px; font-style:italic; font-size:0.8em; color:var(--ink-faded);">
+                <span style="color:var(--gap-blue); font-weight:600;">Blue dashed cells</span> = predicted undiscovered elements &nbsp;·&nbsp;
+                <span style="color:var(--ink-red); font-weight:600;">Red symbols</span> = anomalous or incorrectly placed entries &nbsp;·&nbsp;
+                <span style="color:var(--ink-rust);">?</span> = weights Mendeleev flagged as uncertain
+            </p>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div>
+            <div class="panel">
+                <h2>Errors in the 1869 Table</h2>
+                <p>Mendeleev acknowledged and later corrected several mistakes:</p>
+                <ul>
+                    <li><strong>Tl (Thallium) &amp; Pb (Lead)</strong> placed below Cs and Ba — driven by their +1/+2 states; both were repositioned by 1871.</li>
+                    <li><strong>Hg &amp; Au</strong> wrongly placed; corrected in subsequent editions.</li>
+                    <li><strong>Ur (Uranium)</strong> listed at 116; Mendeleev later doubled it to 240 (modern: 238).</li>
+                    <li><strong>Te (Tellurium)</strong> flagged with "128?" — Mendeleev insisted the weight was wrong; in fact it is 127.6, and the anomaly is explained by isotopes (unknown until the 20th c.).</li>
+                    <li><strong>Rare earths</strong> (Ce, La, Di, Er, Yt) placed at incorrect atomic weights; corrected by 1870.</li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2>What Made It Revolutionary</h2>
+                <ul>
+                    <li><strong>Gaps for undiscovered elements</strong> — not mere tidying, but explicit scientific predictions with estimated weights and properties.</li>
+                    <li><strong>Property over weight</strong> — when weight and chemistry conflicted (Te/I), Mendeleev trusted chemistry and correctly predicted a measurement error.</li>
+                    <li><strong>Self-correction built in</strong> — unlike Newlands, Mendeleev revised atomic weights where needed, treating the system as falsifiable.</li>
+                    <li><strong>Formal law</strong> — periodic recurrence stated as a testable, quantitative law, not an analogy.</li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h2>Historical Reception</h2>
+                <p>Initially met with indifference. The discovery of <em>Gallium</em> (1875) by Lecoq de Boisbaudran — matching Mendeleev's eka-aluminium precisely — transformed scepticism into wide acceptance.</p>
+                <p>Mendeleev received the <em>Davy Medal</em> in 1882 and the <em>Copley Medal</em> in 1905. Element 101 was named <strong>Mendelevium</strong> in his honour in 1955.</p>
+            </div>
+        </div>
+
+    </div><!-- /body-grid -->
+
+    <!-- ─── FOOTNOTES ─── -->
+    <hr class="footer-rule">
+    <div class="footnotes">
+        <p><strong>Primary Source:</strong> D. Mendelejeff, "Ueber die Beziehungen der Eigenschaften zu den Atomgewichten der Elemente," <em>Zeitschrift für Chemie</em> 12 (1869), pp. 405–406. Original Russian: <em>Zhurnal Russkogo Fiziko-Khimicheskogo Obshchestva</em> 1 (1869), pp. 60–77.</p>
+        <p><strong>Translation:</strong> Carmen J. Giunta, Le Moyne College (web.lemoyne.edu/giunta/ea/mendeleevann.html). Table transcribed verbatim from this authoritative scholarly edition.</p>
+        <p><strong>Ni=Co:</strong> In 1869 these elements could not be clearly separated by atomic weight (both ≈59). Mendeleev listed them as a single entry, as Newlands had done before him.</p>
+        <p><strong>J (Iodine):</strong> The symbol J derives from the German <em>Jod</em>. Mendeleev placed it correctly after Te despite Te having a higher atomic weight — a remarkable chemical insight vindicated only by the discovery of isotopes.</p>
+    </div>
+
+    <p class="colophon">✦ &nbsp; Reproduced for Historical Study · Transcribed from Primary Sources · Anno Domini MMXXVI &nbsp; ✦</p>
+
+</div><!-- /page -->
+</div><!-- /frame -->
+</body>
+</html>

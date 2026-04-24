@@ -160,6 +160,9 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
     });
   }, [allElements, searchTerm, filters, dateFilter]);
 
+  const isHistoricalTableMode = viewMode === 'grid' && (tableMode === 'mendeleev' || tableMode === 'newland');
+  const visibleElements = isHistoricalTableMode ? allElements : filteredElements;
+
   const handleSelectElement = useCallback(
     (element: ElementData) => {
       const isDifferentElement = activeElement?.atomicNumber !== element.atomicNumber;
@@ -552,6 +555,8 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   allElements={allElements}
                   viewMode={viewMode}
                   onViewModeChange={setViewMode}
+                  controlsDisabled={isHistoricalTableMode}
+                  disabledMessage="Historical mode locked: search and filters are disabled to preserve exact 1860s layouts."
                 />
               </section>
 
@@ -592,14 +597,14 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
                 {viewMode === 'list' ? (
                   <ElementList
-                    elements={filteredElements}
+                    elements={visibleElements}
                     selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
                   />
                 ) : viewMode === '3d' ? (
                   <Scene3D
-                    elements={filteredElements}
+                    elements={visibleElements}
                     selectedElement={activeElement}
                     favorites={favorites}
                     onSelectElement={handleSelectElement}
@@ -615,7 +620,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                       <>
                         {tableMode === 'modern' ? (
                           <PeriodicTable
-                            elements={filteredElements}
+                            elements={visibleElements}
                             selectedElement={activeElement}
                             favorites={favorites}
                             onSelectElement={handleSelectElement}
@@ -633,7 +638,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                           />
                         ) : (
                           <TableRenderer
-                            elements={filteredElements}
+                            elements={visibleElements}
                             selectedElement={activeElement}
                             favorites={favorites}
                             onSelectElement={handleSelectElement}

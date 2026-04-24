@@ -5,6 +5,7 @@ import { getLayoutEngine } from '../../layouts';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../../constants';
 import Link from 'next/link';
 import { TableDetailLevel } from './zoomTypes';
+import { HISTORICAL_TABLES, HistoricalCell } from '../../layouts/historicalTables';
 
 interface TableRendererProps {
   elements: ElementData[];
@@ -165,6 +166,240 @@ const MiniCell: React.FC<MiniCellProps> = ({
 };
 
 const MemoMiniCell = React.memo(MiniCell);
+
+const HISTORICAL_MODES = new Set<TableMode>(['mendeleev', 'newland']);
+
+const isSimpleSymbol = (value: string) => /^[A-Z][a-z]?$/.test(value);
+
+const resolveHistoricalElement = (
+  cell: HistoricalCell,
+  byAtomicNumber: Map<number, ElementData>,
+  bySymbol: Map<string, ElementData[]>,
+): ElementData | null => {
+  if (cell.linkedAtomicNumber !== undefined) {
+    return byAtomicNumber.get(cell.linkedAtomicNumber) || null;
+  }
+  if (cell.cellKind !== 'element') return null;
+  if (!isSimpleSymbol(cell.symbolText)) return null;
+  const matches = bySymbol.get(cell.symbolText);
+  if (!matches || matches.length !== 1) return null;
+  return matches[0];
+};
+
+const historicalCellClassName = (
+  cell: HistoricalCell,
+  linkedElement: ElementData | null,
+  isSelected: boolean,
+): string => {
+  const base = 'relative rounded-md border overflow-hidden';
+  const selected = isSelected ? ' ring-2 ring-cyan-400 shadow-[0_0_16px_rgba(34,211,238,0.45)]' : '';
+  const anomaly = cell.emphasis === 'anomaly' ? ' border-rose-400/80' : '';
+  const heavy = cell.emphasis === 'heavy' ? ' shadow-[inset_0_0_0_1px_rgba(120,84,32,0.2)]' : '';
+
+  if (cell.cellKind === 'header') {
+    return `${base} bg-amber-100/70 dark:bg-amber-900/20 border-amber-400/70 text-amber-900 dark:text-amber-200 flex items-center justify-center uppercase tracking-wide font-semibold`;
+  }
+  if (cell.cellKind === 'headerNote') {
+    return `${base} bg-transparent border-amber-400/30 text-amber-700 dark:text-amber-300 flex items-center justify-center font-semibold`;
+  }
+  if (cell.cellKind === 'rowHeader') {
+    return `${base} bg-amber-50/70 dark:bg-amber-900/10 border-amber-400/70 text-amber-900 dark:text-amber-200 flex items-center`;
+  }
+  if (cell.cellKind === 'annexHeader') {
+    return `${base} bg-amber-200/60 dark:bg-amber-900/25 border-amber-500/70 text-amber-900 dark:text-amber-200 flex items-center justify-center`;
+  }
+  if (cell.cellKind === 'predicted') {
+    return `${base} bg-sky-50 dark:bg-sky-900/20 border-sky-500 border-dashed text-sky-900 dark:text-sky-200 flex flex-col items-center justify-center`;
+  }
+  if (cell.cellKind === 'composite') {
+    return `${base} bg-rose-50 dark:bg-rose-900/20 border-rose-400/70 text-rose-900 dark:text-rose-200 flex flex-col items-center justify-center`;
+  }
+  if (cell.cellKind === 'archaic') {
+    return `${base} bg-orange-50 dark:bg-orange-900/20 border-orange-400/70 text-orange-900 dark:text-orange-200 flex flex-col items-center justify-center`;
+  }
+  if (linkedElement) {
+    const colorClass = CATEGORY_COLORS[linkedElement.category] || 'bg-gray-700';
+    const textColorClass = CATEGORY_TEXT_COLORS[linkedElement.category] || 'text-white';
+    return `${base} ${colorClass} ${textColorClass} flex flex-col items-center justify-center transition-colors duration-150 hover:brightness-105${selected}${anomaly}${heavy}`;
+  }
+  return `${base} bg-amber-50 dark:bg-amber-900/15 border-amber-400/60 text-amber-900 dark:text-amber-200 flex flex-col items-center justify-center${anomaly}${heavy}`;
+};
+
+const HistoricalRenderer: React.FC<TableRendererProps> = (props) => {
+  const {
+    elements,
+    selectedElement,
+    favorites,
+    onSelectElement,
+    onHoverElement,
+    tableMode,
+    isDraggable,
+    onElementDragStart,
+    onElementDragEnd,
+    onElementTouchStart,
+    onElementTouchMove,
+    onElementTouchEnd,
+  } = props;
+
+  const spec = HISTORICAL_TABLES[tableMode as keyof typeof HISTORICAL_TABLES];
+  if (!spec) return null;
+
+  const bySymbol = useMemo(() => {
+    const map = new Map<string, ElementData[]>();
+    elements.forEach((element) => {
+      const current = map.get(element.symbol) || [];
+      current.push(element);
+      map.set(element.symbol, current);
+    });
+    return map;
+  }, [elements]);
+
+  const byAtomicNumber = useMemo(() => {
+    const map = new Map<number, ElementData>();
+    elements.forEach((element) => map.set(element.atomicNumber, element));
+    return map;
+  }, [elements]);
+
+  return (
+    <div className="inline-block align-top">
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns: spec.columnTemplate,
+          gridTemplateRows: `repeat(${spec.rows}, minmax(var(--table-cell-size, 56px), auto))`,
+          gap: 'var(--table-gap-size, 4px)',
+        }}
+      >
+        {spec.cells.map((cell, idx) => {
+          const linkedElement = resolveHistoricalElement(cell, byAtomicNumber, bySymbol);
+          const isSelected = Boolean(
+            linkedElement && selectedElement && linkedElement.atomicNumber === selectedElement.atomicNumber,
+          );
+          const className = historicalCellClassName(cell, linkedElement, isSelected);
+
+          const style: React.CSSProperties = {
+            gridRowStart: cell.row,
+            gridColumnStart: cell.col,
+            gridColumnEnd: cell.colSpan ? `span ${cell.colSpan}` : undefined,
+          };
+
+          if (linkedElement) {
+            const handleClick = (e: React.MouseEvent) => {
+              if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+                e.preventDefault();
+                onSelectElement(linkedElement);
+              }
+            };
+
+            const handleDrag = (e: React.DragEvent<HTMLAnchorElement>) => {
+              if (onElementDragStart) onElementDragStart(e, linkedElement);
+            };
+
+            return (
+              <Link
+                key={`historical-${cell.row}-${cell.col}-${idx}`}
+                href={`/element/${linkedElement.symbol}`}
+                id={`element-${linkedElement.atomicNumber}`}
+                style={style}
+                className={className}
+                draggable={isDraggable}
+                onClick={handleClick}
+                onMouseEnter={() => onHoverElement(linkedElement)}
+                onMouseLeave={() => onHoverElement(null)}
+                onDragStart={isDraggable ? handleDrag : undefined}
+                onDragEnd={isDraggable ? onElementDragEnd : undefined}
+                onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(linkedElement, e) : undefined}
+                onTouchMove={onElementTouchMove}
+                onTouchEnd={onElementTouchEnd}
+                aria-label={linkedElement.name}
+              >
+                <div className="w-full h-full flex flex-col items-center justify-center px-1 text-center">
+                  <span
+                    className="font-bold leading-none"
+                    style={{ fontSize: 'clamp(10px, calc(var(--table-cell-size, 56px) * 0.34), 26px)' }}
+                  >
+                    {cell.symbolText}
+                  </span>
+                  {cell.subText && (
+                    <span
+                      className="opacity-80 leading-none mt-0.5"
+                      style={{ fontSize: 'clamp(7px, calc(var(--table-cell-size, 56px) * 0.15), 12px)' }}
+                    >
+                      {cell.subText}
+                    </span>
+                  )}
+                  {favorites.includes(linkedElement.atomicNumber) && (
+                    <span className="absolute top-0.5 right-1 text-[9px] text-yellow-300">*</span>
+                  )}
+                </div>
+              </Link>
+            );
+          }
+
+          let content: React.ReactNode = null;
+          if (cell.cellKind === 'rowHeader') {
+            content = (
+              <span
+                className="px-2 leading-tight text-left w-full"
+                style={{ fontSize: 'clamp(8px, calc(var(--table-cell-size, 56px) * 0.18), 13px)' }}
+              >
+                {cell.symbolText}
+              </span>
+            );
+          } else if (cell.cellKind === 'annexHeader') {
+            content = (
+              <span
+                className="px-3 leading-tight text-center"
+                style={{ fontSize: 'clamp(8px, calc(var(--table-cell-size, 56px) * 0.16), 12px)' }}
+              >
+                {cell.symbolText}
+              </span>
+            );
+          } else if (cell.cellKind === 'header' || cell.cellKind === 'headerNote') {
+            content = (
+              <span
+                className="px-1 text-center leading-tight"
+                style={{ fontSize: 'clamp(8px, calc(var(--table-cell-size, 56px) * 0.16), 12px)' }}
+              >
+                {cell.symbolText}
+              </span>
+            );
+          } else {
+            content = (
+              <div className="w-full h-full flex flex-col items-center justify-center px-1 text-center">
+                <span
+                  className="font-bold leading-none"
+                  style={{ fontSize: 'clamp(10px, calc(var(--table-cell-size, 56px) * 0.34), 26px)' }}
+                >
+                  {cell.symbolText}
+                </span>
+                {cell.subText && (
+                  <span
+                    className="opacity-80 leading-none mt-0.5"
+                    style={{ fontSize: 'clamp(7px, calc(var(--table-cell-size, 56px) * 0.15), 12px)' }}
+                  >
+                    {cell.subText}
+                  </span>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={`historical-${cell.row}-${cell.col}-${idx}`}
+              style={style}
+              className={className}
+              onMouseEnter={() => onHoverElement(null)}
+            >
+              {content}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 // ─── GRID Renderer ─────────────────────────────────────────────────────
 const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (props) => {
@@ -430,6 +665,10 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
 
 // ─── MAIN TABLE RENDERER ───────────────────────────────────────────────
 const TableRenderer: React.FC<TableRendererProps> = (props) => {
+  if (HISTORICAL_MODES.has(props.tableMode)) {
+    return <HistoricalRenderer {...props} />;
+  }
+
   const meta = LAYOUT_META[props.tableMode];
 
   if (meta.renderType === 'spatial') {

@@ -1,4 +1,4 @@
-import { ElementData } from '../../types';
+﻿import { ElementData } from '../../types';
 
 export type Table3DMode =
   | 'grid3D'
@@ -6,7 +6,8 @@ export type Table3DMode =
   | 'sphere'
   | 'cylinder'
   | 'block3D'
-  | 'orbital';
+  | 'orbital'
+  | 'stackedCube';
 
 export interface Position3D {
   x: number;
@@ -74,8 +75,21 @@ export const LAYOUT_3D_META: Record<Table3DMode, Layout3DMeta> = {
     description: 'Elements positioned by quantum numbers',
     icon: '⚛️',
   },
+  stackedCube: {
+    id: 'stackedCube',
+    name: 'Stacked Cube Table',
+    shortName: 'Stacked',
+    description: 'Classic table with lanthanides/actinides stacked on La and Ac',
+    icon: '🗂️',
+  },
 };
 
 export const ALL_3D_MODES: Table3DMode[] = [
-  'grid3D', 'helix', 'sphere', 'cylinder', 'block3D', 'orbital',
+  'grid3D',
+  'helix',
+  'sphere',
+  'cylinder',
+  'block3D',
+  'orbital',
+  'stackedCube',
 ];

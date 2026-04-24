@@ -18,6 +18,8 @@ interface SearchBarAndFiltersProps {
   allElements: ElementData[];
   viewMode: 'grid' | 'list' | '3d';
   onViewModeChange: (mode: 'grid' | 'list' | '3d') => void;
+  controlsDisabled?: boolean;
+  disabledMessage?: string;
 }
 
 const categories: ElementCategory[] = [
@@ -42,6 +44,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   allElements,
   viewMode,
   onViewModeChange,
+  controlsDisabled = false,
+  disabledMessage,
 }) => {
   const [suggestions, setSuggestions] = useState<ElementData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -49,6 +53,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (controlsDisabled) return;
+
     const term = e.target.value;
     onSearchTermChange(term);
 
@@ -67,6 +73,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   };
 
   const handleSuggestionClick = (element: ElementData) => {
+    if (controlsDisabled) return;
     onSearchTermChange(element.name);
     setShowSuggestions(false);
   };
@@ -82,17 +89,20 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   }, []);
 
   const handleMinDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (controlsDisabled) return;
     const newMin = Number(e.target.value) || yearRange.min;
     onDateFilterChange((df) => ({ ...df, min: Math.min(newMin, df.max) }));
   };
 
   const handleMaxDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (controlsDisabled) return;
     const newMax = Number(e.target.value) || yearRange.max;
     onDateFilterChange((df) => ({ ...df, max: Math.max(newMax, df.min) }));
   };
 
   const commonSelectClasses = "w-full sm:w-auto px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm capitalize transition-all hover:border-cyan-400";
   const labelClasses = "text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1 block";
+  const disabledClasses = controlsDisabled ? "opacity-60 cursor-not-allowed" : "";
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -113,11 +123,12 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               placeholder="Search by name, symbol, or atomic number..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all placeholder:text-gray-400"
+              disabled={controlsDisabled}
+              className={`w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all placeholder:text-gray-400 ${disabledClasses}`}
             />
 
             {/* Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
+            {!controlsDisabled && showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 {suggestions.map(el => (
                   <button
@@ -176,6 +187,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             {/* Clear All Button */}
             <button
               onClick={onClear}
+              disabled={controlsDisabled}
               className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 border border-red-100 dark:border-red-900/30 transition-all"
               title="Clear all filters"
             >
@@ -185,6 +197,14 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             </button>
           </div>
         </div>
+
+        {controlsDisabled && (
+          <div className="px-4 lg:px-6 pb-3">
+            <div className="rounded-xl border border-amber-300/60 dark:border-amber-700/60 bg-amber-50/80 dark:bg-amber-900/20 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+              {disabledMessage || 'Historical mode locked: filters and search are disabled to preserve canonical layout.'}
+            </div>
+          </div>
+        )}
 
         {/* Filters Section - Desktop: Always visible, Mobile: Collapsible */}
         <div className={`${isMobileMenuOpen ? 'max-h-[1000px] opacity-100 border-t' : 'max-h-0 lg:max-h-none opacity-0 lg:opacity-100 lg:border-t'} overflow-hidden transition-all duration-500 ease-in-out border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20`}>
@@ -196,7 +216,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               <select
                 value={filters.category}
                 onChange={(e) => onFilterChange('category', e.target.value)}
-                className={commonSelectClasses}
+                disabled={controlsDisabled}
+                className={`${commonSelectClasses} ${disabledClasses}`}
               >
                 <option value="">All Categories</option>
                 {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -209,7 +230,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               <select
                 value={filters.state}
                 onChange={(e) => onFilterChange('state', e.target.value)}
-                className={commonSelectClasses}
+                disabled={controlsDisabled}
+                className={`${commonSelectClasses} ${disabledClasses}`}
               >
                 <option value="">All States</option>
                 {states.map(st => <option key={st} value={st}>{st}</option>)}
@@ -225,7 +247,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     type="number"
                     value={dateFilter.min}
                     onChange={handleMinDateChange}
-                    className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+                    disabled={controlsDisabled}
+                    className={`w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none ${disabledClasses}`}
                     placeholder="From"
                   />
                 </div>
@@ -235,7 +258,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     type="number"
                     value={dateFilter.max}
                     onChange={handleMaxDateChange}
-                    className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none"
+                    disabled={controlsDisabled}
+                    className={`w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none ${disabledClasses}`}
                     placeholder="To"
                   />
                 </div>
@@ -248,7 +272,8 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               <select
                 value={selectedTrend || ''}
                 onChange={(e) => onTrendChange(e.target.value === '' ? null : e.target.value as Trend)}
-                className={commonSelectClasses}
+                disabled={controlsDisabled}
+                className={`${commonSelectClasses} ${disabledClasses}`}
               >
                 <option value="">None (Default)</option>
                 <option value="atomicRadius_pm">Atomic Radius</option>

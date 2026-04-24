@@ -5,6 +5,7 @@ import { sphereLayout } from './sphere';
 import { cylinderLayout } from './cylinder';
 import { block3DLayout } from './block3d';
 import { orbitalLayout } from './orbital';
+import { stackedCubeLayout } from './stackedCube';
 
 const ENGINES_3D: Record<Table3DMode, LayoutEngine3D> = {
   grid3D: grid3DLayout,
@@ -13,6 +14,7 @@ const ENGINES_3D: Record<Table3DMode, LayoutEngine3D> = {
   cylinder: cylinderLayout,
   block3D: block3DLayout,
   orbital: orbitalLayout,
+  stackedCube: stackedCubeLayout,
 };
 
 export function get3DLayoutEngine(mode: Table3DMode): LayoutEngine3D {
