@@ -12,44 +12,50 @@ import { LayoutEngine, LayoutResult, LayoutPosition } from './types';
  */
 
 function getBlockPosition(el: ElementData): LayoutPosition {
-  const block = el.block;
+  // Thorium (90) and Actinium (89) etc. may sometimes be tagged with block 'd' 
+  // depending on dataset definitions. Force all lanthanides/actinides to the f-block
+  // for the purpose of the Block layout.
+  const block = (el.category === 'lanthanide' || el.category === 'actinide') ? 'f' : el.block;
 
   if (block === 's') {
-    // s-block: 2 columns, right side
-    const col = el.group === 1 ? 35 : 36;
+    // s-block: 2 columns, left side
+    const col = el.group === 1 ? 2 : 3;
     let row: number;
     if (el.atomicNumber === 2) row = 1; // Helium with H
     else row = el.period;
     return { x: col, y: row + 1 };
   }
 
-  if (block === 'p') {
-    // p-block: 6 columns
-    const col = 28 + (el.group - 13);
-    const row = el.period;
-    return { x: col, y: row + 1 };
-  }
-
-  if (block === 'd') {
-    // d-block: 10 columns
-    const col = 17 + (el.group - 3);
-    const row = el.period;
-    return { x: col, y: row + 1 };
-  }
-
   if (block === 'f') {
-    // f-block: 14 columns
+    // f-block: 14 columns max (cols 5-18)
+    let colOffset = 0;
     if (el.category === 'lanthanide') {
-      const col = 2 + (el.atomicNumber - 57);
-      return { x: col, y: 7 }; // row 6 (period 6's f-block)
+      colOffset = el.atomicNumber - 57;
+      if (colOffset > 13) colOffset = 13; // Clamp to 14 cols
+      return { x: 5 + colOffset, y: 7 }; // row 6 (period 6's f-block)
     } else {
-      const col = 2 + (el.atomicNumber - 89);
-      return { x: col, y: 8 }; // row 7 (period 7's f-block)
+      colOffset = el.atomicNumber - 89;
+      if (colOffset > 13) colOffset = 13;
+      return { x: 5 + colOffset, y: 8 }; // row 7 (period 7's f-block)
     }
   }
 
+  if (block === 'd') {
+    // d-block: 10 columns (20-29)
+    const col = 20 + (el.group - 3);
+    const row = el.period;
+    return { x: col, y: row + 1 };
+  }
+
+  if (block === 'p') {
+    // p-block: 6 columns (31-36)
+    const col = 31 + (el.group - 13);
+    const row = el.period;
+    return { x: col, y: row + 1 };
+  }
+
   // fallback
-  return { x: 35, y: el.period + 1 };
+  return { x: 2, y: el.period + 1 };
 }
 
 export const blockLayout: LayoutEngine = (elements: ElementData[]): LayoutResult => {
@@ -62,10 +68,10 @@ export const blockLayout: LayoutEngine = (elements: ElementData[]): LayoutResult
 
   // Block section labels
   labels.push(
-    { text: 'f-block', x: 8, y: 1, type: 'block' },
-    { text: 'd-block', x: 21, y: 1, type: 'block' },
-    { text: 'p-block', x: 30, y: 1, type: 'block' },
-    { text: 's-block', x: 35, y: 1, type: 'block' },
+    { text: 's-block', x: 2, y: 1, type: 'block' },
+    { text: 'f-block', x: 11, y: 1, type: 'block' },
+    { text: 'd-block', x: 24, y: 1, type: 'block' },
+    { text: 'p-block', x: 33, y: 1, type: 'block' },
   );
 
   return {

@@ -3,12 +3,10 @@ import { ElementData } from '../types';
 export type TableMode =
   | 'modern'
   | 'mendeleev'
+  | 'newland'
   | 'leftStep'
-  | 'compact'
   | 'triangular'
   | 'circular'
-  | 'spiral'
-  | 'ribbon'
   | 'block';
 
 export type RenderType = 'grid' | 'spatial';
@@ -61,6 +59,15 @@ export const LAYOUT_META: Record<TableMode, LayoutMeta> = {
     renderType: 'grid',
     themeClass: 'mendeleev-theme',
   },
+  newland: {
+    id: 'newland',
+    name: 'Newlands (1866)',
+    shortName: 'Newlands',
+    description: 'Law of Octaves (musical intervals)',
+    icon: '🎶',
+    renderType: 'grid',
+    themeClass: 'newland-theme',
+  },
   leftStep: {
     id: 'leftStep',
     name: 'Left-Step (Janet)',
@@ -69,14 +76,6 @@ export const LAYOUT_META: Record<TableMode, LayoutMeta> = {
     icon: '🧠',
     renderType: 'grid',
     themeClass: 'leftstep-theme',
-  },
-  compact: {
-    id: 'compact',
-    name: 'Compact (School)',
-    shortName: 'Compact',
-    description: '8-column beginner-friendly layout',
-    icon: '📦',
-    renderType: 'grid',
   },
   triangular: {
     id: 'triangular',
@@ -94,22 +93,6 @@ export const LAYOUT_META: Record<TableMode, LayoutMeta> = {
     icon: '🟠',
     renderType: 'spatial',
   },
-  spiral: {
-    id: 'spiral',
-    name: 'Spiral (Benfey)',
-    shortName: 'Spiral',
-    description: 'Continuous spiral by atomic number',
-    icon: '🌀',
-    renderType: 'spatial',
-  },
-  ribbon: {
-    id: 'ribbon',
-    name: 'Ribbon (Continuous)',
-    shortName: 'Ribbon',
-    description: 'Continuous horizontal strip',
-    icon: '🧵',
-    renderType: 'grid',
-  },
   block: {
     id: 'block',
     name: 'Block (Orbital)',
@@ -121,7 +104,7 @@ export const LAYOUT_META: Record<TableMode, LayoutMeta> = {
 };
 
 export const ALL_MODES: TableMode[] = [
-  'modern', 'mendeleev', 'leftStep', 'compact',
-  'triangular', 'circular', 'spiral',
-  'ribbon', 'block',
+  'modern', 'mendeleev', 'newland', 'leftStep',
+  'triangular', 'circular',
+  'block',
 ];

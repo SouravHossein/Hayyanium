@@ -1,23 +1,19 @@
 import { TableMode, LayoutEngine, LAYOUT_META, LayoutMeta } from './types';
 import { modernLayout } from './modern';
 import { mendeleevLayout } from './mendeleev';
+import { newlandLayout } from './newland';
 import { leftStepLayout } from './leftStep';
-import { compactLayout } from './compact';
 import { circularLayout } from './circular';
-import { spiralLayout } from './spiral';
 import { triangularLayout } from './triangular';
-import { ribbonLayout } from './ribbon';
 import { blockLayout } from './block';
 
 const ENGINES: Record<TableMode, LayoutEngine> = {
   modern: modernLayout,
   mendeleev: mendeleevLayout,
+  newland: newlandLayout,
   leftStep: leftStepLayout,
-  compact: compactLayout,
   circular: circularLayout,
-  spiral: spiralLayout,
   triangular: triangularLayout,
-  ribbon: ribbonLayout,
   block: blockLayout,
 };
 

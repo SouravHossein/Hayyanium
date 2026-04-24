@@ -10,26 +10,33 @@ export const circularLayout: LayoutEngine = (elements: ElementData[]): LayoutRes
   const size = 900;
   const cx = size / 2;
   const cy = size / 2;
-  const ringSpacing = 55;
-  const cellSize = 42;
+  const ringSpacing = 50;
+  const cellSize = 25;
 
   elements.forEach((el) => {
-    // Use period for radius, group for angle
     let period = el.period;
     let groupAngle: number;
+    let logicalGroup: number;
 
     if (el.category === 'lanthanide') {
-      period = 8.2;
-      const idx = el.atomicNumber - 57;
-      groupAngle = ((idx / 15) * 0.5 + 0.15) * Math.PI * 2;
+      const idx = el.atomicNumber - 57; // 0 to 14
+      logicalGroup = 3 + idx;
     } else if (el.category === 'actinide') {
-      period = 9.2;
-      const idx = el.atomicNumber - 89;
-      groupAngle = ((idx / 15) * 0.5 + 0.15) * Math.PI * 2;
+      const idx = el.atomicNumber - 89; // 0 to 14
+      logicalGroup = 3 + idx;
     } else {
-      // Spread 18 groups over full circle, starting from top
-      groupAngle = ((el.group - 1) / 18) * Math.PI * 2 - Math.PI / 2;
+      if (el.group <= 2) {
+        logicalGroup = el.group;
+      } else if (el.group === 3) {
+        logicalGroup = 17; // Align Sc and Y above Lu and Lr
+      } else {
+        // Group >= 4 shift outward by 14 blocks to make room for f-block
+        logicalGroup = 14 + el.group;
+      }
     }
+
+    // Spread 32 logical groups over full circle, starting from top and flowing LEFT
+    groupAngle = -(((logicalGroup - 1) / 32) * Math.PI * 2) - Math.PI / 2;
 
     const r = period * ringSpacing;
     const x = cx + r * Math.cos(groupAngle) - cellSize / 2;

@@ -1,0 +1,552 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newlands' Law of Octaves — 1866</title>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vellum:      #f2e8d5;
+            --vellum-deep: #e4d4b8;
+            --vellum-mid:  #ecddc6;
+            --ink:         #1e130c;
+            --ink-faded:   #4a3220;
+            --ink-rust:    #7a3b1e;
+            --ink-red:     #6b1a1a;
+            --border:      #8a6840;
+            --border-dark: #5c3d1e;
+            --gold:        #9e7a3a;
+            --shadow:      rgba(30,19,12,0.22);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #2a1f14;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, #3a2a1a 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, #1e1208 0%, transparent 60%);
+            min-height: 100vh;
+            font-family: 'IM Fell English', Georgia, serif;
+            color: var(--ink);
+            padding: 40px 20px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 36px;
+        }
+
+        /* ── PAGE FRAME ── */
+        .page {
+            background: var(--vellum);
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 6px var(--vellum-deep),
+                0 0 0 8px var(--border-dark),
+                0 0 0 14px var(--vellum-deep),
+                0 8px 60px rgba(0,0,0,0.5),
+                inset 0 0 80px rgba(139,104,64,0.08);
+            max-width: 1320px;
+            width: 100%;
+            padding: 50px 48px 56px;
+        }
+
+        /* ── MASTHEAD ── */
+        .masthead {
+            text-align: center;
+            border-bottom: 2px solid var(--border-dark);
+            padding-bottom: 28px;
+            margin-bottom: 36px;
+            position: relative;
+        }
+        .masthead::before,
+        .masthead::after {
+            content: '✦';
+            position: absolute;
+            bottom: -14px;
+            font-size: 0.9em;
+            color: var(--gold);
+            background: var(--vellum);
+            padding: 0 10px;
+        }
+        .masthead::before { left: 50%; transform: translateX(-50%); }
+
+        .journal-header {
+            font-family: 'Cinzel', serif;
+            font-size: 0.72em;
+            letter-spacing: 0.28em;
+            color: var(--ink-faded);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-family: 'IM Fell English SC', serif;
+            font-size: 2.8em;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+            color: var(--ink);
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.1em;
+            color: var(--ink-faded);
+            margin-bottom: 8px;
+        }
+
+        .author-line {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75em;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+        }
+
+        /* ── PULL QUOTE ── */
+        .law-statement {
+            border-left: 3px solid var(--border-dark);
+            border-right: 3px solid var(--border-dark);
+            margin: 0 auto 36px;
+            padding: 16px 28px;
+            max-width: 720px;
+            text-align: center;
+            background: var(--vellum-deep);
+        }
+        .law-statement p {
+            font-style: italic;
+            font-size: 1.12em;
+            line-height: 1.65;
+            color: var(--ink);
+        }
+        .law-statement cite {
+            display: block;
+            margin-top: 8px;
+            font-style: normal;
+            font-size: 0.82em;
+            color: var(--ink-faded);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── LAYOUT ── */
+        .content {
+            display: grid;
+            grid-template-columns: 260px 1fr 260px;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* ── SIDE PANELS ── */
+        .panel {
+            background: var(--vellum-mid);
+            border: 1px solid var(--border);
+            padding: 22px 20px;
+            box-shadow: inset 0 0 18px rgba(139,104,64,0.07), 2px 2px 8px var(--shadow);
+        }
+
+        .panel h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.78em;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--ink-faded);
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+        }
+
+        .panel p, .panel li {
+            font-size: 0.94em;
+            line-height: 1.7;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .panel ul {
+            padding-left: 16px;
+        }
+        .panel li { margin-bottom: 8px; }
+        .panel li strong {
+            color: var(--ink-rust);
+            font-style: italic;
+        }
+
+        .panel + .panel {
+            margin-top: 20px;
+        }
+
+        .correction-badge {
+            display: inline-block;
+            background: var(--ink-red);
+            color: #f9e8d5;
+            font-family: 'Cinzel', serif;
+            font-size: 0.6em;
+            letter-spacing: 0.1em;
+            padding: 1px 6px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .musical-notes {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 6px;
+        }
+        .note-cell {
+            width: 96px;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65em;
+            letter-spacing: 0.12em;
+            color: var(--gold);
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table.octaves {
+            border-collapse: collapse;
+            width: 100%;
+            background: #fdf6e8;
+            border: 3px double var(--border-dark);
+            box-shadow: 4px 4px 20px var(--shadow);
+        }
+
+        table.octaves thead tr th {
+            background: var(--vellum-deep);
+            border: 1px solid var(--border);
+            padding: 8px 6px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65em;
+            letter-spacing: 0.14em;
+            font-weight: 600;
+            color: var(--ink-faded);
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        table.octaves td {
+            border: 1px solid var(--border);
+            padding: 14px 10px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            transition: background 0.25s;
+            cursor: default;
+            min-width: 90px;
+        }
+
+        table.octaves tbody tr:first-child td {
+            background: rgba(139,104,64,0.06);
+        }
+
+        table.octaves td:hover {
+            background: #f5e8cb;
+        }
+
+        .el {
+            font-size: 1.45em;
+            font-weight: 600;
+            display: block;
+            color: var(--ink);
+            letter-spacing: 0.01em;
+        }
+
+        .el.anomaly {
+            color: var(--ink-red);
+            font-size: 1.1em;
+        }
+
+        .num {
+            font-style: italic;
+            font-size: 0.82em;
+            color: var(--border-dark);
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* octave group divider lines */
+        table.octaves td:nth-child(8) {
+            border-right: 3px solid var(--border-dark);
+        }
+
+        /* ── ROW LABELS (musical notes) ── */
+        .row-note {
+            font-family: 'Cinzel', serif;
+            font-size: 0.62em;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            writing-mode: horizontal-tb;
+        }
+
+        /* ── FOOTER ── */
+        .footer-rule {
+            border: none;
+            border-top: 2px solid var(--border-dark);
+            margin: 36px 0 24px;
+        }
+
+        .footnotes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 40px;
+            font-size: 0.86em;
+            line-height: 1.65;
+            color: var(--ink-faded);
+        }
+        .footnotes p { font-style: italic; }
+        .footnotes strong { color: var(--ink-rust); font-style: normal; }
+
+        .colophon {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65em;
+            letter-spacing: 0.2em;
+            color: var(--border);
+            margin-top: 28px;
+        }
+
+        @media (max-width: 1100px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .panel {
+                max-width: 700px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page { padding: 28px 18px 36px; }
+            h1 { font-size: 1.9em; }
+            .footnotes { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <!-- MASTHEAD -->
+    <div class="masthead">
+        <p class="journal-header">Chemical News &amp; Journal of Physical Science · London · 1866</p>
+        <h1>The Law of Octaves</h1>
+        <p class="subtitle">On the Relations of the Equivalent Numbers of the Elements</p>
+        <p class="author-line">John Alexander Reina Newlands, F.C.S.</p>
+    </div>
+
+    <!-- LAW STATEMENT -->
+    <blockquote class="law-statement">
+        <p>"The numbers of analogous elements generally differ either by 7 or by some multiple of seven; in other words,
+        members of the same group stand to each other in the same relation as the extremities of one or more octaves in music."</p>
+        <cite>— J. A. R. Newlands, read before the Chemical Society, March 1866</cite>
+    </blockquote>
+
+    <!-- MAIN LAYOUT -->
+    <div class="content">
+
+        <!-- LEFT PANEL -->
+        <div>
+            <div class="panel">
+                <h2>The Musical Analogy</h2>
+                <p>Newlands observed that if all known elements be arranged by increasing atomic weight and assigned an ordinal number,
+                every eighth element shares the physical and chemical character of the first — precisely as the eighth note of a musical scale
+                echoes the first.</p>
+                <p>He was the first person to assign ordinal numbers to the elements — what we now call atomic numbers —
+                perceiving periodicity as a numerical law rather than mere resemblance.</p>
+                <p>The analogy holds beautifully from Hydrogen through Calcium; beyond that point it breaks under the
+                weight of heavier elements whose spacing no longer fits so neat a rule.</p>
+            </div>
+
+            <div class="panel" style="margin-top:20px;">
+                <h2>Archaic Symbols</h2>
+                <ul>
+                    <li><strong>G — Glucinium</strong><br>The 19th-century name for Beryllium (Be).</li>
+                    <li><strong>Bo — Boron</strong><br>Now rendered simply as B.</li>
+                    <li><strong>Ro — Rhodium</strong><br>Now rendered as Rh.</li>
+                    <li><strong>Di — Didymium</strong><br>Later found to be a mixture of Praseodymium (Pr) and Neodymium (Nd).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-wrap">
+
+            <!-- Musical note column headers -->
+            <div class="musical-notes">
+                <div class="note-cell">Do (I)</div>
+                <div class="note-cell">Re (II)</div>
+                <div class="note-cell">Mi (III)</div>
+                <div class="note-cell">Fa (IV)</div>
+                <div class="note-cell">Sol (V)</div>
+                <div class="note-cell">La (VI)</div>
+                <div class="note-cell">Ti (VII)</div>
+                <div class="note-cell">Do′ (VIII)</div>
+            </div>
+
+            <table class="octaves">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                        <th>No.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                        Source: Giunta, "J.A.R. Newlands' Classification of the Elements," Bull. Hist. Chem. 24 (1999),
+                        reproducing Table I of Newlands' 1865 paper (the version published in Chemical News).
+                        Verified against Table II (1866 Chemical Society paper) where relevant.
+
+                        ORIGINAL TABLE I SEQUENCE (rows run ACROSS; period = column in modern sense):
+                        Row 1:  H 1   | F  8  | Cl 15 | Co&Ni 22 | Br 29 | Pd 36 | I  42 | Pt&Ir 50
+                        Row 2:  Li 2  | Na 9  | K  16 | Cu    23 | Rb 30 | Ag 37 | Cs 44 | Tl    53  ← was "Os 51" in prior HTML
+                        Row 3:  G  3  | Mg 10 | Ca 17 | Zn    25 | Sr 31 | Cd 38 |Ba&V 45| Pb    54  ← Zn was wrong (24→25); last col was Hg 52
+                        Row 4:  Bo 4  | Al 11 | Cr 19 | Y     24 | Ce&La 33 | U 40 | Ta 46 | Th  56  ← Y was wrong (25→24); last col was Tl 53
+                        Row 5:  C  5  | Si 12 | Ti 18 | In    26 | Zr    32 | Sn 39 | W 47 | Hg  52  ← last col was Pb 54
+                        Row 6:  N  6  | P  13 | Mn 20 | As    27 |Di&Mo  34 | Sb 41 | Nb 48 | Bi 55
+                        Row 7:  O  7  | S  14 | Fe 21 | Se    28 |Ro&Ru  35 | Te 43 | Au 49 | Os 51  ← last col was Th 56
+                    -->
+
+                    <!-- ROW 1 -->
+                    <tr>
+                        <td><span class="el">H</span><span class="num">1</span></td>
+                        <td><span class="el">F</span><span class="num">8</span></td>
+                        <td><span class="el">Cl</span><span class="num">15</span></td>
+                        <td><span class="el anomaly">Co &amp; Ni</span><span class="num">22</span></td>
+                        <td><span class="el">Br</span><span class="num">29</span></td>
+                        <td><span class="el">Pd</span><span class="num">36</span></td>
+                        <td><span class="el">I</span><span class="num">42</span></td>
+                        <td><span class="el anomaly">Pt &amp; Ir</span><span class="num">50</span></td>
+                    </tr>
+                    <!-- ROW 2  — CORRECTED: last col Tl 53 (was Os 51) -->
+                    <tr>
+                        <td><span class="el">Li</span><span class="num">2</span></td>
+                        <td><span class="el">Na</span><span class="num">9</span></td>
+                        <td><span class="el">K</span><span class="num">16</span></td>
+                        <td><span class="el">Cu</span><span class="num">23</span></td>
+                        <td><span class="el">Rb</span><span class="num">30</span></td>
+                        <td><span class="el">Ag</span><span class="num">37</span></td>
+                        <td><span class="el">Cs</span><span class="num">44</span></td>
+                        <td><span class="el">Tl</span><span class="num">53</span></td>
+                    </tr>
+                    <!-- ROW 3  — CORRECTED: Zn=25 (was 24), last col Pb 54 (was Hg 52) -->
+                    <tr>
+                        <td><span class="el">G</span><span class="num">3</span></td>
+                        <td><span class="el">Mg</span><span class="num">10</span></td>
+                        <td><span class="el">Ca</span><span class="num">17</span></td>
+                        <td><span class="el">Zn</span><span class="num">25</span></td>
+                        <td><span class="el">Sr</span><span class="num">31</span></td>
+                        <td><span class="el">Cd</span><span class="num">38</span></td>
+                        <td><span class="el anomaly">Ba &amp; V</span><span class="num">45</span></td>
+                        <td><span class="el">Pb</span><span class="num">54</span></td>
+                    </tr>
+                    <!-- ROW 4  — CORRECTED: Y=24 (was 25), last col Th 56 (was Tl 53) -->
+                    <tr>
+                        <td><span class="el">Bo</span><span class="num">4</span></td>
+                        <td><span class="el">Al</span><span class="num">11</span></td>
+                        <td><span class="el">Cr</span><span class="num">19</span></td>
+                        <td><span class="el">Y</span><span class="num">24</span></td>
+                        <td><span class="el anomaly">Ce &amp; La</span><span class="num">33</span></td>
+                        <td><span class="el">U</span><span class="num">40</span></td>
+                        <td><span class="el">Ta</span><span class="num">46</span></td>
+                        <td><span class="el">Th</span><span class="num">56</span></td>
+                    </tr>
+                    <!-- ROW 5  — CORRECTED: last col Hg 52 (was Pb 54) -->
+                    <tr>
+                        <td><span class="el">C</span><span class="num">5</span></td>
+                        <td><span class="el">Si</span><span class="num">12</span></td>
+                        <td><span class="el">Ti</span><span class="num">18</span></td>
+                        <td><span class="el">In</span><span class="num">26</span></td>
+                        <td><span class="el">Zr</span><span class="num">32</span></td>
+                        <td><span class="el">Sn</span><span class="num">39</span></td>
+                        <td><span class="el">W</span><span class="num">47</span></td>
+                        <td><span class="el">Hg</span><span class="num">52</span></td>
+                    </tr>
+                    <!-- ROW 6 -->
+                    <tr>
+                        <td><span class="el">N</span><span class="num">6</span></td>
+                        <td><span class="el">P</span><span class="num">13</span></td>
+                        <td><span class="el">Mn</span><span class="num">20</span></td>
+                        <td><span class="el">As</span><span class="num">27</span></td>
+                        <td><span class="el anomaly">Di &amp; Mo</span><span class="num">34</span></td>
+                        <td><span class="el">Sb</span><span class="num">41</span></td>
+                        <td><span class="el">Nb</span><span class="num">48</span></td>
+                        <td><span class="el">Bi</span><span class="num">55</span></td>
+                    </tr>
+                    <!-- ROW 7  — CORRECTED: last col Os 51 (was Th 56) -->
+                    <tr>
+                        <td><span class="el">O</span><span class="num">7</span></td>
+                        <td><span class="el">S</span><span class="num">14</span></td>
+                        <td><span class="el">Fe</span><span class="num">21</span></td>
+                        <td><span class="el">Se</span><span class="num">28</span></td>
+                        <td><span class="el anomaly">Ro &amp; Ru</span><span class="num">35</span></td>
+                        <td><span class="el">Te</span><span class="num">43</span></td>
+                        <td><span class="el">Au</span><span class="num">49</span></td>
+                        <td><span class="el">Os</span><span class="num">51</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="text-align:center; margin-top:10px; font-style:italic; font-size:0.82em; color:var(--ink-faded);">
+                Elements rendered in <span style="color:var(--ink-red); font-weight:600;">red</span> were placed two or more to a slot — a forced grouping revealing the table's limits.
+            </p>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div>
+            <div class="panel" style="margin-top:20px;">
+                <h2>Critical Anomalies</h2>
+                <ul>
+                    <li><strong>Beyond Calcium (17):</strong> The octave pattern collapses for all heavier elements; properties no longer recur at intervals of seven.</li>
+                    <li><strong>Forced Pairs:</strong> Co &amp; Ni, Pt &amp; Ir, Ba &amp; V, Ce &amp; La, Di &amp; Mo, Ro &amp; Ru occupy single slots — an admission the sequence cannot accommodate all elements.</li>
+                    <li><strong>No Noble Gases:</strong> He, Ne, Ar, and others remained undiscovered; the table has no Group 18 column.</li>
+                    <li><strong>Iron Misplaced:</strong> Fe shares a row with O and S — a non-metal group — while the similar Co &amp; Ni sit beside the halogens.</li>
+                </ul>
+            </div>
+
+            <div class="panel" style="margin-top:20px;">
+                <h2>Historical Reception</h2>
+                <p>Presented to the Chemical Society in March 1866, the table was met with mockery. Prof. G. C. Foster asked
+                Newlands whether he had examined the elements by their initial letters.</p>
+                <p>After Mendeleev's periodic law triumphed, the Royal Society awarded Newlands the <em>Davy Medal in 1887</em> for the
+                prior discovery of periodicity — five years after Mendeleev and Meyer received the same honour.</p>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+
+    <!-- FOOTNOTES -->
+    <hr class="footer-rule">
+    <div class="footnotes">
+        <p><strong>Source:</strong> J. A. R. Newlands, "On the Law of Octaves," <em>Chemical News</em>, vol. xiii (1866), pp. 130–1.
+        Table reproduced from Carmen J. Giunta, "J. A. R. Newlands' Classification of the Elements," <em>Bull. Hist. Chem.</em> 24 (1999), pp. 24–31.</p>
+        <p><strong>Note on orientation:</strong> In Newlands' original, <em>groups</em> of analogous elements run horizontally (across rows)
+        and <em>periods</em> run vertically (down columns) — the inverse of the modern periodic table convention.</p>
+        <p><strong>Di (Didymium):</strong> Not a true element. Later resolved by C. A. von Welsbach (1885) into Praseodymium and Neodymium.</p>
+        <p><strong>Prediction of Germanium (1864):</strong> Before this table, Newlands predicted an undiscovered element of atomic weight ~73
+        analogous to Si, Ti, and Sn — confirmed when Winkler isolated germanium in 1886.</p>
+    </div>
+
+    <p class="colophon">Reproduced for Historical Study · Corrected Against Primary Sources · Anno Domini MMXXVI</p>
+
+</div><!-- /page -->
+
+</body>
+</html>

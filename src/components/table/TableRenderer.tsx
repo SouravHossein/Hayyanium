@@ -94,9 +94,9 @@ const MiniCell: React.FC<MiniCellProps> = ({
   const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
   const blockColor =
     element.block === 's' ? 'bg-green-400' :
-    element.block === 'p' ? 'bg-blue-400' :
-    element.block === 'd' ? 'bg-yellow-400' :
-    element.block === 'f' ? 'bg-pink-400' : 'bg-green-400';
+      element.block === 'p' ? 'bg-blue-400' :
+        element.block === 'd' ? 'bg-yellow-400' :
+          element.block === 'f' ? 'bg-pink-400' : 'bg-green-400';
 
   const handleClick = (e: React.MouseEvent) => {
     if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
@@ -122,9 +122,8 @@ const MiniCell: React.FC<MiniCellProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
-      className={`relative rounded-md transition-all duration-300 transform hover:scale-110 hover:z-20 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${colorClass} ${textColorClass} ${
-        isSelected ? 'ring-2 ring-cyan-400 scale-110 z-20' : ''
-      } ${isDraggable ? 'cursor-grab' : ''}`}
+      className={`relative rounded-md transition-all duration-300 transform hover:scale-110 hover:z-20 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${colorClass} ${textColorClass} ${isSelected ? 'ring-2 ring-cyan-400 scale-110 z-20' : ''
+        } ${isDraggable ? 'cursor-grab' : ''}`}
       style={{
         ...style,
         ...(trendStyle || {}),
@@ -185,11 +184,10 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
         {layout.labels?.map((label, i) => (
           <div
             key={`label-${i}`}
-            className={`flex items-center justify-center text-[10px] font-bold ${
-              label.type === 'block'
+            className={`flex items-center justify-center text-[10px] font-bold ${label.type === 'block'
                 ? 'text-cyan-500 dark:text-cyan-400 text-[9px] uppercase tracking-wider'
                 : 'text-gray-400 dark:text-gray-500'
-            }`}
+              }`}
             style={{ gridColumnStart: label.x, gridRowStart: label.y }}
           >
             {label.text}
@@ -228,7 +226,7 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
               onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(element, e) : undefined}
               onTouchMove={onElementTouchMove}
               onTouchEnd={onElementTouchEnd}
-              compact={tableMode === 'compact' || tableMode === 'ribbon' || tableMode === 'leftStep' || tableMode === 'block'}
+              compact={tableMode === 'leftStep' || tableMode === 'block'}
             />
           );
         })}
@@ -237,7 +235,7 @@ const GridRenderer: React.FC<TableRendererProps & { themeClass?: string }> = (pr
   );
 };
 
-// ─── SPATIAL Renderer (circular, spiral, triangular) ───────────────────
+// ─── SPATIAL Renderer (circular, triangular) ───────────────────
 const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
   const {
     elements, selectedElement, favorites, onSelectElement, onHoverElement,
@@ -252,19 +250,107 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
   const containerW = layout.containerWidth || 900;
   const containerH = layout.containerHeight || 900;
 
+  // Spin rotation logic
+  const [rotation, setRotation] = React.useState(0);
+  const isSpinning = React.useRef(false);
+  const startAngle = React.useRef(0);
+  const hasDragged = React.useRef(false);
+
+  // Reset rotation when leaving circular mode
+  React.useEffect(() => {
+    if (tableMode !== 'circular') {
+      setRotation(0);
+    }
+  }, [tableMode]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (tableMode !== 'circular') return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    isSpinning.current = true;
+    hasDragged.current = false;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    startAngle.current = Math.atan2(e.clientY - cy, e.clientX - cx);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isSpinning.current) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    const currentAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+    let delta = currentAngle - startAngle.current;
+
+    // Handle wrapping around Math.PI / -Math.PI
+    if (delta > Math.PI) delta -= 2 * Math.PI;
+    else if (delta < -Math.PI) delta += 2 * Math.PI;
+
+    if (Math.abs(delta) > 0.02) {
+      hasDragged.current = true;
+    }
+
+    const deltaDeg = delta * (180 / Math.PI);
+    setRotation(prev => prev + deltaDeg);
+
+    startAngle.current = currentAngle;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isSpinning.current) {
+      isSpinning.current = false;
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDragged.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      hasDragged.current = false;
+    }
+  };
+
+  // Prevent default drag and drop breaking the spin action
+  const handleDragStartContainer = (e: React.DragEvent) => {
+    if (tableMode === 'circular') {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div
-      className="w-full overflow-auto overscroll-contain touch-pan-x touch-pan-y hide-scrollbar scroll-smooth"
+      className="w-full overflow-auto overscroll-contain hide-scrollbar"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div
-        className="relative mx-auto"
-        style={{ width: containerW, height: containerH, minWidth: containerW }}
+        className="mx-auto"
+        style={{
+          width: containerW,
+          height: containerH,
+          minWidth: containerW,
+          position: 'relative',
+          transform: tableMode === 'circular' ? `rotate(${rotation}deg)` : 'none',
+          touchAction: tableMode === 'circular' ? 'none' : 'auto', // Prevents scrolling while spinning
+          cursor: tableMode === 'circular' ? (isSpinning.current ? 'grabbing' : 'grab') : 'default'
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClickCapture={handleClickCapture}
+        onDragStart={handleDragStartContainer}
       >
-        {/* Center dot for circular/spiral */}
-        {(tableMode === 'circular' || tableMode === 'spiral') && (
+        {/* Center dot for circular */}
+        {tableMode === 'circular' && (
           <div
-            className="absolute w-3 h-3 bg-cyan-500 rounded-full opacity-40"
+            className="absolute w-3 h-3 bg-cyan-500 rounded-full opacity-40 pointer-events-none"
             style={{ left: containerW / 2 - 6, top: containerH / 2 - 6 }}
           />
         )}
@@ -277,29 +363,37 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
           const cellH = pos.h || 44;
 
           return (
-            <MiniCell
-              key={element.atomicNumber}
-              element={element}
-              isSelected={selectedElement?.atomicNumber === element.atomicNumber}
-              isFavorite={favorites.includes(element.atomicNumber)}
-              trendStyle={trendStyles[element.atomicNumber]}
+            <div
+              key={`wrapper-${element.atomicNumber}`}
               style={{
                 position: 'absolute',
                 left: pos.x,
                 top: pos.y,
                 width: cellW,
                 height: cellH,
+                // Inverse rotation so text stays upright
+                transform: tableMode === 'circular' ? `rotate(${-rotation}deg)` : 'none',
+                pointerEvents: 'auto',
+                transition: isSpinning.current ? 'none' : 'transform 0.1s ease-out'
               }}
-              onSelect={onSelectElement}
-              onHover={onHoverElement}
-              isDraggable={isDraggable}
-              onDragStart={onElementDragStart}
-              onDragEnd={onElementDragEnd}
-              onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(element, e) : undefined}
-              onTouchMove={onElementTouchMove}
-              onTouchEnd={onElementTouchEnd}
-              compact
-            />
+            >
+              <MiniCell
+                element={element}
+                isSelected={selectedElement?.atomicNumber === element.atomicNumber}
+                isFavorite={favorites.includes(element.atomicNumber)}
+                trendStyle={trendStyles[element.atomicNumber]}
+                style={{ display: 'block', width: '100%', height: '100%' }}
+                onSelect={onSelectElement}
+                onHover={onHoverElement}
+                isDraggable={isDraggable}
+                onDragStart={onElementDragStart}
+                onDragEnd={onElementDragEnd}
+                onTouchStart={onElementTouchStart ? (e) => onElementTouchStart(element, e) : undefined}
+                onTouchMove={onElementTouchMove}
+                onTouchEnd={onElementTouchEnd}
+                compact
+              />
+            </div>
           );
         })}
       </div>
