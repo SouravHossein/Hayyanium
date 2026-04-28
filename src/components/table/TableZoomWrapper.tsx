@@ -312,50 +312,49 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
     if (mode === 'spreadsheet') {
       return (
         <div className="relative w-full h-full overflow-hidden rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50">
-          <div className="absolute bottom-6 right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100">
-            <div className="flex flex-col bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden p-1 shadow-cyan-500/10">
+          <div className="absolute top-4 right-4 sm:bottom-6 sm:top-auto sm:right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100 items-end">
+            <div className="card flex flex-col p-1 gap-1">
               <button
                 onClick={() => updateTargetScale(targetScaleRef.current * 1.12)}
-                className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg transition-colors"
+                className="retro-btn px-4 py-2 font-bold"
                 title="Zoom In (+)"
               >
                 +
               </button>
-              <div className="h-[1px] bg-slate-200 dark:bg-slate-700 mx-2 my-1" />
               <button
                 onClick={() => updateTargetScale(targetScaleRef.current / 1.12)}
-                className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg transition-colors"
+                className="retro-btn px-4 py-2 font-bold"
                 title="Zoom Out (-)"
               >
                 -
               </button>
             </div>
-            <div className="flex items-center gap-1 rounded-xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-xl p-1">
+            <div className="card flex items-center gap-1 p-1">
               <button
                 onClick={() => updateTargetScale(fitScale)}
-                className="px-2 py-1 text-[10px] font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                className="retro-btn px-2 py-1 text-[10px] font-bold"
                 title="Fit Width"
               >
                 Fit
               </button>
               <button
                 onClick={() => updateTargetScale(mediumScale)}
-                className="px-2 py-1 text-[10px] font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                className="retro-btn px-2 py-1 text-[10px] font-bold"
                 title="Medium"
               >
-                Medium
+                Med
               </button>
               <button
                 onClick={() => updateTargetScale(detailScale)}
-                className="px-2 py-1 text-[10px] font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                className="retro-btn px-2 py-1 text-[10px] font-bold"
                 title="Detailed"
               >
-                Detailed
+                Det
               </button>
             </div>
             <button
               onClick={() => updateTargetScale(initialScale)}
-              className="flex items-center justify-center p-2.5 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors shadow-cyan-500/10"
+              className="retro-btn px-4 py-2 text-xs font-bold w-full"
               title="Reset View (0)"
             >
               {Math.round(currentScale * 100)}%
@@ -425,19 +424,18 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
         >
           {({ zoomIn, zoomOut, resetTransform, state: { scale } }) => (
             <>
-              <div className="absolute bottom-6 right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100">
-                <div className="flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden p-1 shadow-cyan-500/10">
+              <div className="absolute top-4 right-4 sm:bottom-6 sm:top-auto sm:right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100 items-end">
+                <div className="card flex flex-col p-1 gap-1">
                   <button
                     onClick={() => zoomIn(0.2)}
-                    className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg transition-colors"
+                    className="retro-btn px-4 py-2 font-bold"
                     title="Zoom In (+)"
                   >
                     +
                   </button>
-                  <div className="h-[1px] bg-slate-200 dark:bg-slate-700 mx-2 my-1" />
                   <button
                     onClick={() => zoomOut(0.2)}
-                    className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg transition-colors"
+                    className="retro-btn px-4 py-2 font-bold"
                     title="Zoom Out (-)"
                   >
                     -
@@ -445,7 +443,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
                 </div>
                 <button
                   onClick={() => resetTransform()}
-                  className="flex items-center justify-center p-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors shadow-cyan-500/10"
+                  className="retro-btn px-4 py-2 text-xs font-bold w-full"
                   title="Reset View (0)"
                 >
                   {Math.round(scale * 100)}%

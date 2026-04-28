@@ -453,21 +453,21 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               Explore the building blocks of the universe.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-              <div className="flex bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
+              <div className="flex items-center gap-2">
                 {user ? (
-                  <Link href="/profile" className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-cyan-600 dark:text-cyan-400">
+                  <Link href="/profile" className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all">
                     {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
+                      <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full border border-[var(--color-retro-stroke)]" />
                     ) : (
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white">
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white border border-[var(--color-retro-stroke)]">
                         {user.email?.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <span>Profile</span>
                   </Link>
                 ) : (
-                  <button onClick={() => setIsAuthModalOpen(true)} className="flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-semibold transition-all hover:bg-white dark:hover:bg-gray-700 text-cyan-600 dark:text-cyan-400">
+                  <button onClick={() => setIsAuthModalOpen(true)} className="flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Sign In</span>
                   </button>
@@ -476,36 +476,36 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
               <button
                 onClick={() => setTimelineModalOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all"
                 aria-label="Open historical timeline"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--color-alkali-metal)]" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
                 <span>Timeline</span>
               </button>
               <Link
                 href="/community"
-                className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm text-violet-600 dark:text-violet-400"
+                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
                 <span>Community</span>
               </Link>
               <Link
                 href="/quiz"
-                className="flex items-center gap-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm text-emerald-600 dark:text-emerald-400"
+                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-actinide)]"
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" /></svg>
                 <span>Quiz</span>
               </Link>
               <button
                 onClick={() => setIsBuilderActive(!isBuilderActive)}
-                className={`flex items-center gap-3 rounded-lg border px-4 py-2 text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${isBuilderActive
-                  ? 'bg-cyan-500 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                  : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700'
+                className={`flex items-center gap-3 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all ${isBuilderActive
+                  ? '!bg-cyan-500 !text-white'
+                  : ''
                   }`}
               >
-                <div className={`w-2 h-2 rounded-full ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
+                <div className={`w-2 h-2 rounded-full border border-[var(--color-retro-stroke)] ${isBuilderActive ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></div>
                 <span>Builder</span>
               </button>
               <ThemeToggleButton />
@@ -519,11 +519,11 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             </h1>
             <div className="flex items-center gap-2">
               {user ? (
-                <Link href="/profile" className="flex items-center gap-1.5 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 px-3 py-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 border border-gray-200 dark:border-gray-700">
+                <Link href="/profile" className="retro-btn flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs">
                   {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full" />
+                    <img src={user.user_metadata.avatar_url} alt="User avatar" className="w-5 h-5 rounded-full border border-[var(--color-retro-stroke)]" />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white border border-[var(--color-retro-stroke)]">
                       {user.email?.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -531,7 +531,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 px-3 py-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 border border-gray-200 dark:border-gray-700"
+                  className="flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs"
                   aria-label="Sign In"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>

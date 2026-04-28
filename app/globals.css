@@ -1,87 +1,178 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-sans: var(--font-space-grotesk), sans-serif;
+  --font-display: var(--font-syne), sans-serif;
 
-  --color-alkali-metal: #f4a261;
-  --color-alkaline-earth-metal: #e9c46a;
-  --color-lanthanide: #e76f51;
-  --color-actinide: #f4a261;
-  --color-transition-metal: #a8dadc;
-  --color-post-transition-metal: #457b9d;
-  --color-metalloid: #8ecae6;
-  --color-nonmetal: #2a9d8f;
-  --color-halogen: #264653;
-  --color-noble-gas: #a2d2ff;
-  --color-unknown: #d9d9d9;
+  /* --- Dynamic Semantic Colors --- */
+  --color-retro-bg: var(--bg-primary);
+  --color-retro-text: var(--text-primary);
+  --color-retro-card: var(--card-bg);
+  --color-retro-stroke: var(--stroke-color);
+
+  /* --- 70s Chemistry Palette --- */
+  --color-alkali-metal: #f4ac21;
+  /* Sunset Yellow */
+  --color-alkaline-earth-metal: #ffecb4;
+  /* Butter */
+  --color-lanthanide: #ffc663;
+  /* Apricot Glow */
+  --color-actinide: #6fcb9f;
+  /* Seafoam */
+  --color-transition-metal: #52b3b6;
+  /* Muted Turquoise */
+  --color-post-transition-metal: #ffd58e;
+  /* Honey */
+  --color-metalloid: #ff9b5a;
+  /* Burnt Peach */
+  --color-nonmetal: #f26249;
+  /* Terracotta */
+  --color-halogen: #5a3d2b;
+  /* Chocolate */
+  --color-noble-gas: #fffffc;
+  /* Off-White */
+}
+
+/* --- Variable Definitions for Light/Dark --- */
+:root {
+  --bg-primary: #fdf6ec;
+  /* Creamy Paper */
+  --text-primary: #5a3d2b;
+  /* Earthy Brown */
+  --card-bg: #ffffff;
+  --stroke-color: #5a3d2b;
+  --shadow-color: #5a3d2b;
+  --sticker-outline: #ffffff;
+}
+
+.dark {
+  --bg-primary: #1c1917;
+  /* Deep Stone/Espresso */
+  --text-primary: #ffecb4;
+  /* Butter Yellow Text */
+  --card-bg: #2d2a28;
+  /* Dark Warm Grey */
+  --stroke-color: #f4ac21;
+  /* Sunset Gold Stroke */
+  --shadow-color: #000000;
+  --sticker-outline: #2d2a28;
 }
 
 @layer base {
   html {
-    color-scheme: light;
-  }
-
-  html.dark {
-    color-scheme: dark;
+    color-scheme: light dark;
   }
 
   body {
     min-height: 100vh;
-    background:
-      radial-gradient(circle at top, rgba(34, 211, 238, 0.12), transparent 32%),
-      linear-gradient(180deg, #f4f8fb 0%, #e8eef7 100%);
-    color: #0f172a;
+    background-color: var(--color-retro-bg);
+    /* Grainy Texture */
+    background-image: url("https://www.transparenttextures.com/patterns/p6.png");
+    color: var(--color-retro-text);
+    font-family: var(--font-sans);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  .dark body {
-    background:
-      radial-gradient(circle at top, rgba(6, 182, 212, 0.18), transparent 28%),
-      linear-gradient(180deg, #020617 0%, #0f172a 100%);
-    color: #e2e8f0;
+  h1,
+  h2,
+  h3,
+  .display-font {
+    font-family: var(--font-display);
   }
 
+  /* Neo-Brutalist Components */
   button,
   input,
   select,
-  textarea {
-    font: inherit;
+  textarea,
+  .card,
+  .retro-btn {
+    background: var(--color-retro-card);
+    border: 2px solid var(--color-retro-stroke);
+    border-radius: 12px;
+    box-shadow: 2px 2px 0px var(--shadow-color);
+    color: var(--color-retro-text);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  button:hover,
+  .retro-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--shadow-color);
+    background-color: var(--color-alkaline-earth-metal);
+    color: #5a3d2b;
+    /* Keep text readable on hover */
+  }
+
+  button:active,
+  .retro-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px var(--shadow-color);
   }
 }
 
 @layer utilities {
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
+
+  /* Enhanced Sticker Effect */
+  .sticker-border {
+    outline: 6px solid var(--sticker-outline);
+    box-shadow: 0 0 0 8px var(--color-retro-stroke);
   }
 
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Animations */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  .retro-float {
+    animation: float 3s ease-in-out infinite;
   }
 
-  @keyframes quiz-correct-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
+  @keyframes quiz-pop {
+    0% {
+      transform: scale(0.9);
+    }
 
-  @keyframes quiz-wrong-shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+    50% {
+      transform: scale(1.1);
+    }
+
+    100% {
+      transform: scale(1);
+    }
   }
 
   .quiz-correct-pulse {
-    animation: quiz-correct-pulse 0.5s ease-in-out;
+    animation: quiz-pop 0.4s cubic-bezier(0.47, 0, 0.745, 0.715);
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-4px);
+    }
+
+    75% {
+      transform: translateX(4px);
+    }
   }
 
   .quiz-wrong-shake {
-    animation: quiz-wrong-shake 0.2s ease-in-out 2;
+    animation: shake 0.2s ease-in-out 0s 2;
   }
 }

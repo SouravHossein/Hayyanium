@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Syne } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import JsonLd from "@/components/JsonLd";
 
-const inter = Inter({ subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
+const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 
 export const viewport: Viewport = {
   themeColor: [
@@ -93,7 +94,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://raw.githubusercontent.com" />
       </head>
-      <body className={inter.className}>
+      <body className={`${spaceGrotesk.variable} ${syne.variable}`}>
         <JsonLd />
         <AuthProvider>
           <ThemeProvider>

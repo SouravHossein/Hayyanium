@@ -100,13 +100,13 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
     onDateFilterChange((df) => ({ ...df, max: Math.max(newMax, df.min) }));
   };
 
-  const commonSelectClasses = "w-full sm:w-auto px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm capitalize transition-all hover:border-cyan-400";
+  const commonSelectClasses = "w-full sm:w-auto px-3 py-2 font-bold capitalize transition-all";
   const labelClasses = "text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1 block";
   const disabledClasses = controlsDisabled ? "opacity-60 cursor-not-allowed" : "";
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden transition-all duration-300">
+      <div className="card overflow-hidden transition-all duration-300">
 
         {/* Main Header Area */}
         <div className="p-4 lg:p-6 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
@@ -124,7 +124,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               value={searchTerm}
               onChange={handleSearchChange}
               disabled={controlsDisabled}
-              className={`w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm transition-all placeholder:text-gray-400 ${disabledClasses}`}
+              className={`w-full pl-11 pr-4 py-3 font-bold placeholder:text-gray-400 ${disabledClasses}`}
             />
 
             {/* Suggestions Dropdown */}
@@ -150,24 +150,24 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
           {/* Controls Group */}
           <div className="flex items-center gap-2">
             {/* View Mode Toggles */}
-            <div className="flex bg-gray-100 dark:bg-gray-900/50 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex gap-2">
               <button
                 onClick={() => onViewModeChange('grid')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow-sm text-cyan-600 dark:text-cyan-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                className={`p-2 transition-all ${viewMode === 'grid' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
                 title="Grid View"
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
               </button>
               <button
                 onClick={() => onViewModeChange('list')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm text-cyan-600 dark:text-cyan-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                className={`p-2 transition-all ${viewMode === 'list' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
                 title="List View"
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
               </button>
               <button
                 onClick={() => onViewModeChange('3d')}
-                className={`p-2 rounded-lg transition-all ${viewMode === '3d' ? 'bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                className={`p-2 transition-all ${viewMode === '3d' ? '!bg-[var(--color-actinide)]' : ''}`}
                 title="3D View"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
@@ -177,18 +177,16 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             {/* Mobile Filter Toggle */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden p-2.5 rounded-xl border transition-all ${isMobileMenuOpen ? 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 text-cyan-600' : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 text-gray-500'}`}
+              className={`lg:hidden p-2.5 transition-all ${isMobileMenuOpen ? '!bg-[var(--color-alkali-metal)]' : ''}`}
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </button>
-
-            {/* Clear All Button */}
             <button
               onClick={onClear}
               disabled={controlsDisabled}
-              className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 border border-red-100 dark:border-red-900/30 transition-all"
+              className="p-2.5 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
               title="Clear all filters"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -248,7 +246,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     value={dateFilter.min}
                     onChange={handleMinDateChange}
                     disabled={controlsDisabled}
-                    className={`w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none ${disabledClasses}`}
+                    className={`w-full px-3 py-2 font-bold outline-none ${disabledClasses}`}
                     placeholder="From"
                   />
                 </div>
@@ -259,7 +257,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     value={dateFilter.max}
                     onChange={handleMaxDateChange}
                     disabled={controlsDisabled}
-                    className={`w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none ${disabledClasses}`}
+                    className={`w-full px-3 py-2 font-bold outline-none ${disabledClasses}`}
                     placeholder="To"
                   />
                 </div>
