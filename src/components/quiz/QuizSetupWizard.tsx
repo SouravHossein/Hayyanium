@@ -179,6 +179,7 @@ export default function QuizSetupWizard() {
       c.questionCount = settings.defaultQuestionCount || 10;
       c.optionCount = settings.defaultOptionCount;
       c.strictMode = settings.strictAnswerChecking;
+      c.showAtomicWeightDecimals = settings.showAtomicWeightDecimals;
     } else {
       c.questionCount = 10;
     }

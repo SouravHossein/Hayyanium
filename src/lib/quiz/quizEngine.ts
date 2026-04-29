@@ -66,20 +66,21 @@ export function filterByScope(
 }
 
 /* ── Format atomic mass for display ───────────────────────────── */
-export function formatWeight(w: number | string): string {
+export function formatWeight(w: number | string, showDecimals: boolean): string {
   if (typeof w === 'string') return w.replace(/[()]/g, '');
-  return w.toFixed(3);
+  return showDecimals ? w.toFixed(3) : Math.round(w).toString();
 }
 
 /* ── Generate prompt and correct answer for a direction ─────── */
 function buildPromptAnswer(
   element: ElementData,
-  direction: QuizDirection
+  direction: QuizDirection,
+  showDecimals: boolean
 ): { promptLabel: string; prompt: string; correctAnswer: string; acceptedAnswers: string[]; answerType: 'number' | 'text' | 'element-select' } {
   const name = element.name;
   const symbol = element.symbol;
   const number = String(element.atomicNumber);
-  const weight = formatWeight(element.atomicMass);
+  const weight = formatWeight(element.atomicMass, showDecimals);
   const nameAliases = NAME_ALIASES[name.toLowerCase()] ?? [];
 
   switch (direction) {
@@ -139,7 +140,8 @@ function generateDistractors(
   element: ElementData,
   direction: QuizDirection,
   allElements: ElementData[],
-  count: number
+  count: number,
+  showDecimals: boolean
 ): string[] {
   // Pick distractors that are plausible: same category first, nearby period, then random
   const sameCategory = allElements.filter(
@@ -190,7 +192,7 @@ function generateDistractors(
       case 'name-to-symbol':
         return e.symbol;
       case 'name-to-weight':
-        return formatWeight(e.atomicMass);
+        return formatWeight(e.atomicMass, showDecimals);
       case 'number-to-name':
       case 'symbol-to-name':
       case 'weight-to-name':
@@ -226,7 +228,7 @@ function buildExplanation(element: ElementData, direction: QuizDirection): strin
     case 'name-to-symbol':
       return `${base} Its symbol "${element.symbol}" comes from ${element.name.startsWith(element.symbol) ? 'its name' : 'its Latin name'}.`;
     case 'name-to-weight':
-      return `${base} Its atomic weight is ${formatWeight(element.atomicMass)}.`;
+      return `${base} Its atomic weight is ${formatWeight(element.atomicMass, true)}.`;
     default:
       return base;
   }
@@ -246,7 +248,7 @@ export function generateQuestions(
 
   return selected.map((element): QuizQuestion => {
     const { promptLabel, prompt, correctAnswer, acceptedAnswers, answerType } =
-      buildPromptAnswer(element, config.direction);
+      buildPromptAnswer(element, config.direction, config.showAtomicWeightDecimals);
 
     // Build options for multiple choice
     let options: QuizOption[] = [];
@@ -255,7 +257,8 @@ export function generateQuestions(
         element,
         config.direction,
         allElements,
-        config.optionCount - 1
+        config.optionCount - 1,
+        config.showAtomicWeightDecimals
       );
 
       const allOptions = [
@@ -361,4 +364,5 @@ export const DEFAULT_QUIZ_CONFIG: QuizConfig = {
   shuffleOptions: true,
   optionCount: 4,
   strictMode: false,
+  showAtomicWeightDecimals: true,
 };

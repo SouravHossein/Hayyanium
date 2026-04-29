@@ -54,8 +54,8 @@
   /* Butter Yellow Text */
   --card-bg: #2d2a28;
   /* Dark Warm Grey */
-  --stroke-color: #f4ac21;
-  /* Sunset Gold Stroke */
+  --stroke-color: #665948;
+  /* Desaturated bronze */
   --shadow-color: #000000;
   --sticker-outline: #2d2a28;
 }
@@ -114,6 +114,7 @@
 }
 
 @layer utilities {
+
   /* Scroll helpers */
   .hide-scrollbar {
     scrollbar-width: none;

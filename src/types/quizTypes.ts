@@ -47,6 +47,7 @@ export interface QuizConfig {
   shuffleOptions: boolean;
   optionCount: number; // 3, 4, 5, or 6 for multiple choice
   strictMode: boolean; // exact matching for text input
+  showAtomicWeightDecimals: boolean; // show full decimals or rounded
 }
 
 /* ── Quiz Question ───────────────────────────────────────────────── */

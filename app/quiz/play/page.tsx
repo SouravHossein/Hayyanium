@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/contexts/QuizContext';
+import { getQuizSettings } from '@/lib/quiz/quizSettings';
+import { QuizSettings } from '@/types/quizTypes';
 import QuizProgressBar from '@/components/quiz/QuizProgressBar';
 import MultipleChoiceQuestion from '@/components/quiz/MultipleChoiceQuestion';
 import TextInputQuestion from '@/components/quiz/TextInputQuestion';
@@ -12,6 +14,11 @@ import { ArrowRight, Atom, Flag } from '@/components/icons';
 export default function QuizPlayPage() {
   const router = useRouter();
   const { quizState, currentQuestion, submitAnswer, skipQuestion, nextQuestion, revealHint, finishQuiz } = useQuiz();
+  const [appSettings, setAppSettings] = useState<QuizSettings | null>(null);
+
+  useEffect(() => {
+    setAppSettings(getQuizSettings());
+  }, []);
 
   // Redirect if no active quiz
   useEffect(() => {
@@ -34,6 +41,54 @@ export default function QuizPlayPage() {
     }
   }, [quizState.state, quizState.result, finishQuiz]);
 
+  const isFeedback = quizState.state === 'feedback';
+  const lastAnswer = quizState.answers.length > 0 ? quizState.answers[quizState.answers.length - 1] : null;
+
+  // Feedback effects (Sound and Vibration)
+  useEffect(() => {
+    if (isFeedback && lastAnswer && appSettings) {
+      if (appSettings.vibrationEnabled && 'vibrate' in navigator) {
+        if (lastAnswer.isCorrect) {
+          navigator.vibrate(50);
+        } else {
+          navigator.vibrate([50, 100, 50]);
+        }
+      }
+      if (appSettings.soundEnabled && typeof window !== 'undefined') {
+        try {
+          const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+          if (AudioContext) {
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            if (lastAnswer.isCorrect) {
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.1);
+              gain.gain.setValueAtTime(0.1, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+              osc.start();
+              osc.stop(ctx.currentTime + 0.2);
+            } else {
+              osc.type = 'sawtooth';
+              osc.frequency.setValueAtTime(150, ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+              gain.gain.setValueAtTime(0.1, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+              osc.start();
+              osc.stop(ctx.currentTime + 0.2);
+            }
+          }
+        } catch (e) {
+          console.error('Audio playback failed', e);
+        }
+      }
+    }
+  }, [isFeedback, lastAnswer, appSettings]);
+
   if (!currentQuestion || !quizState.config) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -45,8 +100,6 @@ export default function QuizPlayPage() {
     );
   }
 
-  const isFeedback = quizState.state === 'feedback';
-  const lastAnswer = quizState.answers.length > 0 ? quizState.answers[quizState.answers.length - 1] : null;
   const userAnswerStr = isFeedback && lastAnswer ? lastAnswer.userAnswer : null;
 
   const handleNext = () => {
@@ -57,8 +110,11 @@ export default function QuizPlayPage() {
     }
   };
 
+  const fontClass = appSettings?.fontSize === 'large' ? 'text-lg' : appSettings?.fontSize === 'small' ? 'text-sm' : 'text-base';
+  const motionClass = appSettings?.reducedMotion ? '[&_*]:!transition-none [&_*]:!animate-none [&_*]:!duration-0' : '';
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className={`max-w-2xl mx-auto space-y-6 ${fontClass} ${motionClass}`}>
       {/* Progress */}
       <QuizProgressBar
         current={quizState.currentIndex}

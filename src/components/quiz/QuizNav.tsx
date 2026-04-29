@@ -27,8 +27,8 @@ export default function QuizNav() {
               <Link
                 key={item.href}
                 href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-            >
+                className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+              >
                 <item.icon className="h-5 w-5" />
                 <span className="text-[10px] font-semibold">{item.label}</span>
               </Link>
@@ -65,11 +65,11 @@ export function QuizSidebar() {
           </Link>
         );
       })}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      {/* <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Link href="/quiz/premium" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 hover:scale-[1.02] transition-all">
           <Sparkles className="h-4 w-4" /><span>Premium</span>
         </Link>
-      </div>
+      </div> */}
     </nav>
   );
 }

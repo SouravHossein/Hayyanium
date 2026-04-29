@@ -106,9 +106,9 @@ export default function ProfilePage() {
                   >
                     Log Out
                   </button>
-                  <button className="px-6 py-2.5 bg-actinide text-retro-stroke font-bold border-2 border-retro-stroke">
+                  {/* <button className="px-6 py-2.5 bg-actinide text-retro-stroke font-bold border-2 border-retro-stroke">
                     View Stats
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
