@@ -36,7 +36,9 @@ const QUESTION_COUNTS = [5, 10, 15, 20, 30, 50];
 
 const CATEGORIES = ['alkali metal', 'alkaline earth metal', 'transition metal', 'post-transition metal', 'metalloid', 'nonmetal', 'halogen', 'noble gas', 'lanthanide', 'actinide'];
 
-export default function QuizSetupPage() {
+import { Suspense } from 'react';
+
+function QuizSetupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { startQuiz } = useQuiz();
@@ -244,5 +246,13 @@ export default function QuizSetupPage() {
         {scopeCount < 2 && <p className="text-center text-xs text-red-500 mt-2">Need at least 2 elements in scope</p>}
       </div>
     </div>
+  );
+}
+
+export default function QuizSetupPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div></div>}>
+      <QuizSetupContent />
+    </Suspense>
   );
 }

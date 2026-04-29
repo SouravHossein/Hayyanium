@@ -82,6 +82,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -100,7 +101,9 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             {children}
-            <MainNav />
+            <Suspense fallback={null}>
+              <MainNav />
+            </Suspense>
           </ThemeProvider>
         </AuthProvider>
       </body>
