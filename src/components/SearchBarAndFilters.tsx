@@ -50,7 +50,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<ElementData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,86 +106,58 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   const disabledClasses = controlsDisabled ? "opacity-60 cursor-not-allowed" : "";
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-2">
       <div className="card overflow-hidden transition-all duration-300">
 
         {/* Main Header Area */}
-        <div className="p-4 lg:p-6 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+        <div className="p-2 lg:p-3 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
 
           {/* Search Section */}
-          <div className="relative flex-grow group" ref={searchWrapperRef}>
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-cyan-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+          <div className="flex flex-1 gap-2 " >
             <input
               type="text"
               placeholder="Search by name, symbol, or atomic number..."
               value={searchTerm}
               onChange={handleSearchChange}
               disabled={controlsDisabled}
-              className={`w-full pl-11 pr-4 py-3 font-bold placeholder:text-gray-400 ${disabledClasses}`}
+              className={`w-full flex-1 pl-11 pr-4 py-1.5 font-bold placeholder:text-gray-400 ${disabledClasses}`}
             />
-
-            {/* Suggestions Dropdown */}
-            {!controlsDisabled && showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                {suggestions.map(el => (
-                  <button
-                    key={el.atomicNumber}
-                    onClick={() => handleSuggestionClick(el)}
-                    className="w-full text-left px-4 py-3 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 flex items-center gap-4 transition-colors border-b last:border-0 border-gray-100 dark:border-gray-700"
-                  >
-                    <span className="text-2xl filter drop-shadow-sm">{CATEGORY_EMOJIS[el.category]}</span>
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 dark:text-white">{el.name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{el.symbol} • Atomic No. {el.atomicNumber}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Controls Group */}
-          <div className="flex items-center gap-2">
-            {/* View Mode Toggles */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => onViewModeChange('grid')}
-                className={`p-2 transition-all ${viewMode === 'grid' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
-                title="Grid View"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-              </button>
-              <button
-                onClick={() => onViewModeChange('list')}
-                className={`p-2 transition-all ${viewMode === 'list' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
-                title="List View"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
-              </button>
-              <button
-                onClick={() => onViewModeChange('3d')}
-                className={`p-2 transition-all ${viewMode === '3d' ? '!bg-[var(--color-actinide)]' : ''}`}
-                title="3D View"
-              >
-                {/* <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> */}
-                3D
-              </button>
-            </div>
-
-            {/* Mobile Filter Toggle */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden p-2.5 transition-all ${isMobileMenuOpen ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`flex items-center gap-1.5 p-1.5 px-3 text-xs font-bold uppercase shrink-0 transition-all ${isMenuOpen ? '!bg-[var(--color-alkali-metal)]' : ''}`}
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
+              <span className="hidden sm:inline">Filters</span>
+            </button>
+            <button
+              onClick={() => onViewModeChange('grid')}
+              className={`p-1.5 transition-all ${viewMode === 'grid' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              title="Grid View"
+            >
+              2D
+            </button>
+            <button
+              onClick={() => onViewModeChange('list')}
+              className={`p-1.5 transition-all ${viewMode === 'list' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              title="List View"
+            >
+              {/* <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg> */}
+              List
+            </button>
+            <button
+              onClick={() => onViewModeChange('3d')}
+              className={`p-1.5 text-xs transition-all ${viewMode === '3d' ? '!bg-[var(--color-actinide)]' : ''}`}
+              title="3D View"
+            >
+              3D
             </button>
           </div>
+          {/* </div> */}
+
+
+          {/* </div> */}
         </div>
 
         {controlsDisabled && (
@@ -196,9 +168,9 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
           </div>
         )}
 
-        {/* Filters Section - Desktop: Always visible, Mobile: Collapsible */}
-        <div className={`${isMobileMenuOpen ? 'max-h-[1000px] opacity-100 border-t' : 'max-h-0 lg:max-h-none opacity-0 lg:opacity-100 lg:border-t'} overflow-hidden transition-all duration-500 ease-in-out border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20`}>
-          <div className="p-4 lg:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Filters Section - Collapsible */}
+        <div className={`${isMenuOpen ? 'max-h-[1000px] opacity-100 border-t' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20`}>
+          <div className="p-2 lg:p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
             {/* Category Filter */}
             <div>
@@ -260,27 +232,27 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             <div className='flex gap-1 items-end'>
               <div className='flex flex-col w-full flex-1' >
 
-              <label className={labelClasses}>Property Visualization</label>
-              <select
-                value={selectedTrend || ''}
-                onChange={(e) => onTrendChange(e.target.value === '' ? null : e.target.value as Trend)}
-                disabled={controlsDisabled}
-                className={`${commonSelectClasses} ${disabledClasses}`}
-              >
-                <option value="">None (Default)</option>
-                <option value="atomicRadius_pm">Atomic Radius</option>
-                <option value="electronegativity">Electronegativity</option>
-                <option value="firstIonizationEnergy_kJ_mol">First Ionization Energy</option>
-              </select>
+                <label className={labelClasses}>Property Visualization</label>
+                <select
+                  value={selectedTrend || ''}
+                  onChange={(e) => onTrendChange(e.target.value === '' ? null : e.target.value as Trend)}
+                  disabled={controlsDisabled}
+                  className={`${commonSelectClasses} ${disabledClasses}`}
+                >
+                  <option value="">None (Default)</option>
+                  <option value="atomicRadius_pm">Atomic Radius</option>
+                  <option value="electronegativity">Electronegativity</option>
+                  <option value="firstIonizationEnergy_kJ_mol">First Ionization Energy</option>
+                </select>
               </div>
-            <button
-              onClick={onClear}
-              disabled={controlsDisabled}
-              className="p-2 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
-              title="Clear all filters"
-            >
-              < Trash2Icon className="h-6 w-6" />
-            </button>
+              <button
+                onClick={onClear}
+                disabled={controlsDisabled}
+                className="p-2 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
+                title="Clear all filters"
+              >
+                < Trash2Icon className="h-6 w-6" />
+              </button>
             </div>
 
           </div>

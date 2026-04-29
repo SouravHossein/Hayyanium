@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompoundGallery } from '@/hooks/useCompoundGallery';
@@ -46,7 +46,22 @@ export default function ProfilePage() {
       alert('Error submitting feedback. Please try again.');
     }
   };
+  const [streak, setStreak] = useState<number>(0);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchStreak = async () => {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('streak')
+        .eq('id', user.id)
+        .single();
+      if (data) {
+        setStreak(data.streak || 0);
+      }
+    };
+    fetchStreak();
+  }, [user?.id, supabase]);
   return (
     <div className="min-h-screen p-4 sm:p-8 pb-24 font-display">
       <div className="max-w-4xl mx-auto">
@@ -75,12 +90,12 @@ export default function ProfilePage() {
                   Lvl 5
                 </div>
               </div>
-              
+
               <div className="flex-1 text-center sm:text-left flex flex-col justify-center h-full mt-2 sm:mt-0">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
                   <h2 className="text-3xl font-black tracking-tight">{user.user_metadata?.full_name || user.email}</h2>
                   <div className="flex items-center justify-center gap-1 text-retro-stroke bg-alkaline-earth-metal px-3 py-1.5 rounded-xl w-max mx-auto sm:mx-0 border-2 border-retro-stroke font-bold">
-                    <span className="text-sm">3 Day Streak!</span>
+                    <span className="text-sm">{streak} Day Streak!</span>
                   </div>
                 </div>
                 <p className="text-sm font-bold opacity-80 mb-6">{user.email}</p>

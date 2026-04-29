@@ -221,15 +221,15 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
         // Add a fun reaction for the Lab Partner
         const reactions = isNew
           ? [
-              `NEW DISCOVERY! You found ${element.name}. That's ${discovered.length + 1} elements found!`,
-              `Eureka! ${element.name} added to your collection. Did you know it's a ${element.category}?`,
-              `First time seeing ${element.symbol}? Truly ${element.category} excellence!`,
-            ]
+            `NEW DISCOVERY! You found ${element.name}. That's ${discovered.length + 1} elements found!`,
+            `Eureka! ${element.name} added to your collection. Did you know it's a ${element.category}?`,
+            `First time seeing ${element.symbol}? Truly ${element.category} excellence!`,
+          ]
           : [
-              `Ah, the familiar ${element.symbol}. Density is ${element.density_g_cm3 || "mysterious"} g/cm³.`,
-              `${element.name} is a ${element.block}-block element. Still as ${element.category} as ever!`,
-              `Checking in on ${element.name}? ${element.everydayExample.split(".")[0]}.`,
-            ];
+            `Ah, the familiar ${element.symbol}. Density is ${element.density_g_cm3 || "mysterious"} g/cm³.`,
+            `${element.name} is a ${element.block}-block element. Still as ${element.category} as ever!`,
+            `Checking in on ${element.name}? ${element.everydayExample.split(".")[0]}.`,
+          ];
         setLabPartnerMessage(
           reactions[Math.floor(Math.random() * reactions.length)],
         );
@@ -513,14 +513,13 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
   return (
     <>
       <div
-        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${
-          isBuilderActive ? "pb-48 md:pb-32" : ""
-        } p-4 sm:p-6 lg:p-8 overflow-x-hidden`}
+        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${isBuilderActive ? "pb-48 md:pb-32" : ""
+          } p-2 sm:p-4 overflow-x-hidden`}
       >
         <div className="mx-auto max-w-screen-2xl">
           {/* ─── HEADER ─────────────────────────────────────────────────────── */}
-          {/* Desktop header: centered brand + all controls */}
-          <header className="items-center justify-between mb-6 hidden md:flex text-center">
+          {/* Desktop header:  brand + all controls */}
+          <header className="items-center justify-between mb-2 hidden md:flex text-center">
             <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
               Hayyanium
             </h1>
@@ -614,9 +613,8 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               </Link>
               <button
                 onClick={() => setIsBuilderActive(!isBuilderActive)}
-                className={`flex items-center gap-3 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all ${
-                  isBuilderActive ? "!bg-cyan-500 !text-white" : ""
-                }`}
+                className={`flex items-center gap-3 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all ${isBuilderActive ? "!bg-cyan-500 !text-white" : ""
+                  }`}
               >
                 <div
                   className={`w-2 h-2 rounded-full border border-[var(--color-retro-stroke)] ${isBuilderActive ? "bg-white animate-pulse" : "bg-gray-400"}`}
@@ -633,24 +631,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               Hayyanium
             </h1>
             <div className="flex items-center gap-2">
-              {user ? (
-                <Link
-                  href="/profile"
-                  className="retro-btn flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs"
-                >
-                  {user.user_metadata?.avatar_url ? (
-                    <img
-                      src={user.user_metadata.avatar_url}
-                      alt="User avatar"
-                      className="w-5 h-5 rounded-full border border-[var(--color-retro-stroke)]"
-                    />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-xs font-bold text-white border border-[var(--color-retro-stroke)]">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </Link>
-              ) : (
+              {!user ? (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs"
@@ -671,16 +652,15 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                   </svg>
                   <span className="text-xs">Sign In</span>
                 </button>
-              )}
+              ) : ""}
               <ThemeToggleButton />
             </div>
           </header>
 
           <div className="flex flex-row gap-6">
             <main
-              className={`flex-grow transition-all duration-500 ease-in-out ${
-                isElementPanelOpen ? "w-full lg:w-[calc(100%-28rem)]" : "w-full"
-              }`}
+              className={`flex-grow transition-all duration-500 ease-in-out ${isElementPanelOpen ? "w-full lg:w-[calc(100%-28rem)]" : "w-full"
+                }`}
             >
               <section
                 aria-label="Filters and controls"
@@ -767,7 +747,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
               <section
                 aria-label="Periodic table view"
-                className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar max-h-[calc(100dvh-22rem)] lg:max-h-[calc(100dvh-20rem)]"
+                className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-12rem)]"
               >
                 {viewMode === "list" ? (
                   <ElementList
@@ -893,9 +873,8 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
             {/* Desktop Panel */}
             <aside
-              className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${
-                isElementPanelOpen ? "lg:w-full lg:max-w-md" : "lg:w-0"
-              }`}
+              className={`hidden transition-all duration-500 ease-in-out lg:block lg:relative lg:inset-auto lg:items-start ${isElementPanelOpen ? "lg:w-full lg:max-w-md" : "lg:w-0"
+                }`}
             >
               <div className="relative z-10 w-full overflow-hidden lg:h-auto lg:max-w-md lg:rounded-none lg:shadow-none">
                 {activeElement && isElementPanelOpen && (
