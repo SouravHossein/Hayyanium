@@ -9,6 +9,7 @@ import React, {
   useState,
 } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import { Type } from '@google/genai';
 import { Drawer } from 'vaul';
 import PeriodicTable from './PeriodicTable';
@@ -40,7 +41,6 @@ const ElementPanel = dynamic(() => import('./ElementPanel'), { ssr: false });
 const ComparisonModal = dynamic(() => import('./ComparisonModal'), { ssr: false });
 const CompoundResultModal = dynamic(() => import('./CompoundResultModal'), { ssr: false });
 const TrendPlotModal = dynamic(() => import('./TrendPlotModal'), { ssr: false });
-const HistoricalTimelineModal = dynamic(() => import('./HistoricalTimelineModal'), { ssr: false });
 const AuthModal = dynamic(() => import('./AuthModal'), { ssr: false });
 
 interface ClientAppProps {
@@ -86,7 +86,6 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
     elements: ElementData[];
     title: string;
   }>({ isOpen: false, elements: [], title: '' });
-  const [isTimelineModalOpen, setTimelineModalOpen] = useState(false);
   const [labPartnerMessage, setLabPartnerMessage] = useState<string | null>(null);
   const { discovered, discover } = useDiscovery();
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -98,6 +97,16 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
   const touchGhostRef = useRef<HTMLDivElement | null>(null);
   const tableZoomRef = useRef<TableZoomRef>(null);
+  const searchParams = useSearchParams();
+  const builderParam = searchParams.get('builder');
+
+  useEffect(() => {
+    if (builderParam === '1') {
+      setIsBuilderActive(true);
+      return;
+    }
+    setIsBuilderActive(false);
+  }, [builderParam]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -446,13 +455,10 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
         <div className="mx-auto max-w-screen-2xl">
           {/* ─── HEADER ─────────────────────────────────────────────────────── */}
           {/* Desktop header: centered brand + all controls */}
-          <header className="relative mb-6 hidden md:block text-center">
+          <header className="items-center justify-between mb-6 hidden md:flex text-center">
             <h1 className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-4xl font-extrabold text-transparent dark:from-cyan-400 dark:to-blue-500 sm:text-5xl">
               Hayyanium
             </h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Explore the building blocks of the universe.
-            </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
               <div className="flex items-center gap-2">
                 {user ? (
@@ -474,16 +480,16 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 )}
               </div>
 
-              <button
-                onClick={() => setTimelineModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all"
+              <Link
+                href="/timeline"
+                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
                 aria-label="Open historical timeline"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[var(--color-alkali-metal)]" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
                 <span>Timeline</span>
-              </button>
+              </Link>
               <Link
                 href="/community"
                 className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
@@ -835,92 +841,11 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
           </Suspense>
         )}
 
-        {isTimelineModalOpen && (
-          <Suspense fallback={null}>
-            <HistoricalTimelineModal
-              elements={allElements}
-              onClose={() => setTimelineModalOpen(false)}
-            />
-          </Suspense>
-        )}
-
         <Suspense fallback={null}>
           <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
         </Suspense>
       </div>
 
-      {/* Mobile Bottom Navigation Dock */}
-      <div className="fixed bottom-0 left-0 right-0 z-[100] flex justify-around bg-white/90 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/95 dark:border-gray-800 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <button
-          id="nav-table"
-          onClick={() => { setIsBuilderActive(false); setTimelineModalOpen(false); }}
-          className={`flex flex-col items-center gap-1 p-2 ${!isBuilderActive && !isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
-          <span className="text-[10px] font-medium">Table</span>
-        </button>
-        <button
-          id="nav-builder"
-          onClick={() => { setIsBuilderActive(!isBuilderActive); setTimelineModalOpen(false); }}
-          className={`flex flex-col items-center gap-1 p-2 ${isBuilderActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-          <span className="text-[10px] font-medium">Builder</span>
-        </button>
-        <button
-          id="nav-timeline"
-          onClick={() => { setTimelineModalOpen(!isTimelineModalOpen); setIsBuilderActive(false); }}
-          className={`flex flex-col items-center gap-1 p-2 ${isTimelineModalOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-cyan-500 dark:text-gray-400'}`}
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
-          <span className="text-[10px] font-medium">Timeline</span>
-        </button>
-
-        <Link
-          id="nav-quiz"
-          href="/quiz"
-          className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" /></svg>
-          <span className="text-[10px] font-medium">Quiz</span>
-        </Link>
-
-        {/* Community tab */}
-        <Link
-          id="nav-community"
-          href="/community"
-          className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
-          <span className="text-[10px] font-medium">Community</span>
-        </Link>
-
-        {user ? (
-          <Link
-            id="nav-profile"
-            href="/profile"
-            className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
-          >
-            {user.user_metadata?.avatar_url ? (
-              <img src={user.user_metadata.avatar_url} alt="User" className="w-6 h-6 rounded-full" />
-            ) : (
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white">
-                {user.email?.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="text-[10px] font-medium">Profile</span>
-          </Link>
-        ) : (
-          <button
-            id="nav-profile-signin"
-            onClick={() => { setIsAuthModalOpen(true); setIsBuilderActive(false); setTimelineModalOpen(false); }}
-            className="flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-cyan-500 dark:text-gray-400"
-          >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            <span className="text-[10px] font-medium">Profile</span>
-          </button>
-        )}
-      </div>
       <LabPartner message={labPartnerMessage} />
     </>
   );

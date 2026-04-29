@@ -94,22 +94,6 @@ export default function QuizGamePage() {
         </div>
       </section>
 
-      {/* Info cards */}
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { icon: Atom, title: '118 Elements', desc: 'Complete periodic table' },
-          { icon: Gamepad2, title: '3 Quiz Modes', desc: 'MC, Text, Find on Table' },
-          { icon: TrendingUp, title: 'Progress Tracking', desc: 'Track your mastery' },
-          { icon: Zap, title: 'Instant Feedback', desc: 'Learn as you play' },
-        ].map(card => (
-          <div key={card.title} className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-4">
-            <card.icon className="h-6 w-6 mb-2 text-cyan-600 dark:text-cyan-400" />
-            <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{card.title}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{card.desc}</div>
-          </div>
-        ))}
-      </section>
-
       {/* Learn by block */}
         <section>
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Learn by Block</h2>

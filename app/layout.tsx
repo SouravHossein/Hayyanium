@@ -3,6 +3,7 @@ import { Space_Grotesk, Syne } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import JsonLd from "@/components/JsonLd";
+import MainNav from "@/components/MainNav";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
@@ -94,11 +95,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://raw.githubusercontent.com" />
       </head>
-      <body className={`${spaceGrotesk.variable} ${syne.variable}`}>
+      <body className={`${spaceGrotesk.variable} ${syne.variable}`} suppressHydrationWarning>
         <JsonLd />
         <AuthProvider>
           <ThemeProvider>
             {children}
+            <MainNav />
           </ThemeProvider>
         </AuthProvider>
       </body>

@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TableDetailLevel, TableZoomMode } from './zoomTypes';
+import { Fullscreen, Maximize, Maximize2 } from 'lucide-react';
 
 interface TableZoomWrapperProps {
   children: (scale: number, detailLevel: TableDetailLevel) => React.ReactNode;
@@ -63,6 +64,97 @@ const isInteractiveTarget = (target: EventTarget | null) => {
   );
 };
 
+
+
+
+
+// Zoom preset steps for the mobile stepper
+const ZOOM_STEPS = [
+  { key: 'fit', label: 'Fit', Icon: Fullscreen },
+  { key: 'med', label: 'Med', Icon: Maximize2 },
+] as const;
+
+type ZoomStepKey = typeof ZOOM_STEPS[number]['key'];
+
+/** Floating percentage toast — appears on zoom change, fades out after delay */
+const ZoomToast = ({ scale, visible }: { scale: number; visible: boolean }) => (
+  <div
+    aria-live="polite"
+    style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      pointerEvents: 'none',
+      zIndex: 60,
+      transition: 'opacity 0.35s ease, transform 0.35s ease',
+      opacity: visible ? 1 : 0,
+      transform: visible
+        ? 'translate(-50%, -50%) scale(1)'
+        : 'translate(-50%, -50%) scale(0.85)',
+    }}
+  >
+    <div
+      style={{
+        background: 'rgba(0,0,0,0.65)',
+        backdropFilter: 'blur(8px)',
+        color: '#fff',
+        fontVariantNumeric: 'tabular-nums',
+        fontSize: '1.5rem',
+        fontWeight: 700,
+        letterSpacing: '-0.02em',
+        padding: '0.35em 0.7em',
+        borderRadius: '0.6em',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {Math.round(scale * 100)}%
+    </div>
+  </div>
+);
+
+/** Mobile zoom toggle — single button that cycles  Med / Fit */
+const MobileZoomToggle = ({
+  activeStep,
+  onToggle,
+}: {
+  activeStep: ZoomStepKey;
+  onToggle: () => void;
+}) => {
+  const label = activeStep.toUpperCase();
+  return (
+    <button
+      onClick={onToggle}
+      aria-label={`Zoom level: ${label}. Tap to switch.`}
+      aria-pressed="true"
+      style={{
+        minWidth: 104,
+        height: 44,
+        padding: '0 14px',
+        borderRadius: '999px',
+        border: '1px solid rgba(255,255,255,0.18)',
+        background: 'rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 2px 16px rgba(0,0,0,0.18)',
+        color: 'rgba(255,255,255,0.95)',
+        fontWeight: 800,
+        userSelect: 'none',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <span style={{ fontSize: '12px', letterSpacing: '0.14em', lineHeight: 1 }}>
+        {label}
+      </span>
+    </button>
+  );
+};
+
 const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
   (
     {
@@ -85,6 +177,9 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
     const [detailLevel, setDetailLevel] = useState<TableDetailLevel>(detailLevelFromScale(initialScale));
     const [isDragging, setIsDragging] = useState(false);
 
+    // Toast visibility
+    const [toastVisible, setToastVisible] = useState(false);
+    const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const targetScaleRef = useRef(initialScale);
     const currentScaleRef = useRef(initialScale);
     const animationFrameRef = useRef<number | null>(null);
@@ -111,14 +206,44 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       [effectiveMaxScale, effectiveMinScale],
     );
 
+    const fitScale = effectiveMinScale;
+    const mediumScale = clampScale(1);
+
+    /** Show the zoom toast and auto-hide after 1.2 s */
+    const flashToast = useCallback(() => {
+      setToastVisible(true);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => {
+        setToastVisible(false);
+      }, 1200);
+    }, []);
+
     const updateTargetScale = useCallback(
       (value: number) => {
         const clamped = clampScale(value);
         targetScaleRef.current = clamped;
         setTargetScale(clamped);
+        flashToast();
       },
-      [clampScale],
+      [clampScale, flashToast],
     );
+
+    // Derive active mobile step from current scale
+    const activeMobileStep: ZoomStepKey = useMemo(() => {
+      const distFit = Math.abs(currentScale - fitScale);
+      const distMed = Math.abs(currentScale - mediumScale);
+      const min = Math.min(distFit, distMed);
+      if (min === distFit) return 'fit';
+      return 'med';
+    }, [currentScale, fitScale, mediumScale]);
+
+    const handleMobileStep = useCallback(() => {
+      if (activeMobileStep === 'fit') {
+        updateTargetScale(mediumScale);
+      } else {
+        updateTargetScale(fitScale);
+      }
+    }, [activeMobileStep, fitScale, mediumScale, updateTargetScale]);
 
     const recalcDynamicMinScale = useCallback(() => {
       if (mode !== 'spreadsheet') return;
@@ -193,6 +318,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
         if (animationFrameRef.current !== null) {
           cancelAnimationFrame(animationFrameRef.current);
         }
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       };
     }, []);
 
@@ -305,62 +431,49 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       [currentScale],
     );
 
-    const fitScale = effectiveMinScale;
-    const mediumScale = clampScale(1);
-    const detailScale = clampScale(1.8);
-
     if (mode === 'spreadsheet') {
       return (
         <div className="relative w-full h-full overflow-hidden rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50">
-          <div className="absolute top-4 right-4 sm:bottom-6 sm:top-auto sm:right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100 items-end">
-            <div className="card flex flex-col p-1 gap-1">
+
+          {/* ── Zoom percentage toast (center, both mobile & desktop) ── */}
+          <ZoomToast scale={currentScale} visible={toastVisible} />
+
+          {/* ── Desktop controls (hidden on mobile) ── */}
+          <div className="hidden sm:flex absolute bottom-6 right-6 border-none z-50 flex-col gap-2 items-end">
+            <div className=" flex flex-col  gap-1">
               <button
                 onClick={() => updateTargetScale(targetScaleRef.current * 1.12)}
-                className="retro-btn px-4 py-2 font-bold"
+                className="retro-btn px-2 text-xl font-bold"
                 title="Zoom In (+)"
               >
                 +
               </button>
               <button
                 onClick={() => updateTargetScale(targetScaleRef.current / 1.12)}
-                className="retro-btn px-4 py-2 font-bold"
+                className="retro-btn px-2 text-xl font-bold"
                 title="Zoom Out (-)"
               >
                 -
               </button>
-            </div>
-            <div className="card flex items-center gap-1 p-1">
+            </div>            <div className="card flex items-center gap-1 p-1">
               <button
                 onClick={() => updateTargetScale(fitScale)}
                 className="retro-btn px-2 py-1 text-[10px] font-bold"
                 title="Fit Width"
               >
-                Fit
+                <Fullscreen />
               </button>
               <button
                 onClick={() => updateTargetScale(mediumScale)}
                 className="retro-btn px-2 py-1 text-[10px] font-bold"
                 title="Medium"
               >
-                Med
-              </button>
-              <button
-                onClick={() => updateTargetScale(detailScale)}
-                className="retro-btn px-2 py-1 text-[10px] font-bold"
-                title="Detailed"
-              >
-                Det
+                <Maximize2 />
               </button>
             </div>
-            <button
-              onClick={() => updateTargetScale(initialScale)}
-              className="retro-btn px-4 py-2 text-xs font-bold w-full"
-              title="Reset View (0)"
-            >
-              {Math.round(currentScale * 100)}%
-            </button>
           </div>
 
+          {/* ── Scrollable viewport ── */}
           <div
             ref={spreadsheetViewportRef}
             className={`h-full w-full overflow-auto custom-scrollbar ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
@@ -370,7 +483,17 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
             onPointerUp={stopDragging}
             onPointerCancel={stopDragging}
           >
-            <div ref={spreadsheetContentRef} className="inline-block align-top" style={spreadsheetStyle}>
+            <div
+              ref={spreadsheetContentRef}
+              className=" inline-block align-top"
+              style={spreadsheetStyle}
+            >
+              <div className="sm:hidden absolute top-8 right-3 z-50">
+                <MobileZoomToggle
+                  activeStep={activeMobileStep}
+                  onToggle={handleMobileStep}
+                />
+              </div>
               {children(currentScale, detailLevel)}
             </div>
           </div>
@@ -378,8 +501,11 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       );
     }
 
+    // ── Non-spreadsheet mode (pan/pinch) ──
     return (
       <div className="relative w-full h-full overflow-hidden rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50">
+        <ZoomToast scale={currentScale} visible={toastVisible} />
+
         <TransformWrapper
           ref={transformComponentRef}
           initialScale={initialScale}
@@ -390,6 +516,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           onZoom={(api) => {
             setCurrentScale(api.state.scale);
             setDetailLevel(detailLevelFromScale(api.state.scale));
+            flashToast();
           }}
           onPanning={(api) => {
             setCurrentScale(api.state.scale);
@@ -424,27 +551,28 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
         >
           {({ zoomIn, zoomOut, resetTransform, state: { scale } }) => (
             <>
-              <div className="absolute top-4 right-4 sm:bottom-6 sm:top-auto sm:right-6 z-50 flex flex-col gap-2 scale-90 sm:scale-100 items-end">
+              {/* Desktop controls */}
+              <div className="hidden sm:flex absolute bottom-6 right-6 z-50 flex-col gap-2 items-end">
                 <div className="card flex flex-col p-1 gap-1">
                   <button
-                    onClick={() => zoomIn(0.2)}
+                    onClick={() => { zoomIn(0.2); flashToast(); }}
                     className="retro-btn px-4 py-2 font-bold"
-                    title="Zoom In (+)"
+                    title="Zoom In"
                   >
-                    +
+                    {/* <ZoomInIcon /> */}+
                   </button>
                   <button
-                    onClick={() => zoomOut(0.2)}
+                    onClick={() => { zoomOut(0.2); flashToast(); }}
                     className="retro-btn px-4 py-2 font-bold"
-                    title="Zoom Out (-)"
+                    title="Zoom Out"
                   >
-                    -
+                    {/* <ZoomOutIcon /> */}-
                   </button>
                 </div>
                 <button
                   onClick={() => resetTransform()}
                   className="retro-btn px-4 py-2 text-xs font-bold w-full"
-                  title="Reset View (0)"
+                  title="Reset View"
                 >
                   {Math.round(scale * 100)}%
                 </button>

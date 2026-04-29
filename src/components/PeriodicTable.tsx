@@ -133,8 +133,8 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
                  onClick={() => onGroupClick(groupNumber)}
                  aria-label={`Plot trends for group ${groupNumber}`}
             >
-                <div className="font-bold">{groupNumber}</div>
                 <div className="font-mono text-[10px]">{GROUP_LABELS[groupNumber]}</div>
+                <div className="font-bold">{groupNumber}</div>
             </button>
         ))}
         
