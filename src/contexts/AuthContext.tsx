@@ -17,9 +17,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   loading: true,
-  signInWithGoogle: async () => {},
-  signInWithLinkedIn: async () => {},
-  signOut: async () => {},
+  signInWithGoogle: async () => { },
+  signInWithLinkedIn: async () => { },
+  signOut: async () => { },
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,14 +44,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        // Sync profile to public.user_profiles table
+        // We use a try-catch and specific column check logic
+        const syncProfile = async () => {
+          const profileData = {
+            id: currentUser.id,
+            email: currentUser.email,
+            display_name: currentUser.user_metadata?.full_name || currentUser.email,
+            avatar_url: currentUser.user_metadata?.avatar_url,
+            updated_at: new Date().toISOString(),
+          };
+
+          const { error } = await supabase.from('user_profiles').upsert(profileData);
+
+          if (error) {
+            // If updated_at fails, try without it (in case column is missing)
+            if (error.message?.includes('updated_at')) {
+              const { error: error2 } = await supabase.from('user_profiles').upsert({
+                id: currentUser.id,
+                display_name: profileData.display_name,
+                avatar_url: profileData.avatar_url,
+              });
+              if (error2) console.error('Profile sync failed again:', error2.message, error2.code);
+            } else {
+              console.error('Profile sync error:', error.message, error.code, error.details);
+            }
+          }
+        };
+
+        syncProfile();
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase]);
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -64,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithLinkedIn = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: "linkedin_oidc", 
+      provider: "linkedin_oidc",
       options: {
         redirectTo: window.location.origin,
       },

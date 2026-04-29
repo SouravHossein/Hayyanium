@@ -9,8 +9,8 @@ import { LayoutEngine3D, Layout3DResult, Position3D } from './types';
  */
 export const stackedCubeLayout: LayoutEngine3D = (elements: ElementData[]): Layout3DResult => {
   const positions = new Map<number, Position3D>();
-  const spacing = 2.25;
-  const stackSpacing = 1.35;
+  const spacing = 2.5;
+  const stackSpacing = 2;
 
   const byAtomicNumber = new Map<number, ElementData>();
   for (const el of elements) {

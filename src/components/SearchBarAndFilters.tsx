@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ElementCategory, ElementData, Trend } from '../types';
 import { CATEGORY_EMOJIS } from '../constants';
+import { Cross, Trash, Trash2Icon } from 'lucide-react';
 
 interface SearchBarAndFiltersProps {
   searchTerm: string;
@@ -184,16 +185,6 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </button>
-            <button
-              onClick={onClear}
-              disabled={controlsDisabled}
-              className="p-2.5 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
-              title="Clear all filters"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -266,7 +257,9 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             </div>
 
             {/* Property Trend Filter */}
-            <div>
+            <div className='flex gap-1 items-end'>
+              <div className='flex flex-col w-full flex-1' >
+
               <label className={labelClasses}>Property Visualization</label>
               <select
                 value={selectedTrend || ''}
@@ -279,6 +272,15 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                 <option value="electronegativity">Electronegativity</option>
                 <option value="firstIonizationEnergy_kJ_mol">First Ionization Energy</option>
               </select>
+              </div>
+            <button
+              onClick={onClear}
+              disabled={controlsDisabled}
+              className="p-2 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
+              title="Clear all filters"
+            >
+              < Trash2Icon className="h-6 w-6" />
+            </button>
             </div>
 
           </div>

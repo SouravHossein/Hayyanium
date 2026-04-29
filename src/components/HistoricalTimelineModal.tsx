@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ElementData } from '../types';
 import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 
-interface HistoricalTimelineModalProps {
+interface HistoricalTimelineProps {
     elements: ElementData[];
-    onClose: () => void;
 }
 
 // ── Expandable ancient card (2-up grid) ───────────────────────────────────────
@@ -174,9 +173,8 @@ const SpineCard: React.FC<SpineCardProps> = ({ element, side, isOpen, onToggle }
 
 // ── Main modal ─────────────────────────────────────────────────────────────────
 
-const HistoricalTimelineModal: React.FC<HistoricalTimelineModalProps> = ({ elements, onClose }) => {
+const HistoricalTimelineModal: React.FC<HistoricalTimelineProps> = ({ elements }) => {
     const [openId, setOpenId] = useState<number | null>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
 
     const { ancient, dated } = useMemo(() => {
         const ancient = elements.filter(el => el.discoveryYear === 'Ancient');
@@ -186,109 +184,53 @@ const HistoricalTimelineModal: React.FC<HistoricalTimelineModalProps> = ({ eleme
         return { ancient, dated };
     }, [elements]);
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        document.addEventListener('keydown', handleKeyDown);
-        modalRef.current?.focus();
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [onClose]);
-
-    const toggle = useCallback((id: number) => {
+    const toggle = (id: number) => {
         setOpenId(prev => prev === id ? null : id);
-    }, []);
-
-    const handleBackdrop = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) onClose();
-    }, [onClose]);
+    };
 
     return (
-        <div
-            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-end sm:items-center sm:justify-center sm:p-6"
-            onClick={handleBackdrop}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="timeline-title"
-        >
-            <div
-                ref={modalRef}
-                tabIndex={-1}
-                className="
-                    bg-gray-50 dark:bg-gray-950
-                    w-full
-                    h-[92dvh]
-                    rounded-t-2xl
-                    sm:rounded-2xl sm:h-[88vh] sm:max-w-2xl
-                    flex flex-col
-                    outline-none
-                    border border-white/10
-                    overflow-hidden
-                "
-            >
-                {/* Header */}
-                <header className="relative flex-shrink-0 px-5 pt-5 pb-4 flex items-start justify-between border-b border-gray-200 dark:border-gray-800 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md">
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700 sm:hidden" />
-                    <div>
-                        <p className="text-[11px] uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-0.5">Discovery timeline</p>
-                        <h2 id="timeline-title" className="text-xl font-semibold text-gray-900 dark:text-white">
-                            Building blocks of matter
-                        </h2>
+        <div className="space-y-8">
+            {ancient.length > 0 && (
+                <section className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 sm:p-6">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                        <p className="text-[11px] uppercase tracking-widest text-slate-400 dark:text-slate-500">Ancient discoveries</p>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{ancient.length} elements</span>
                     </div>
-                    <button
-                        onClick={onClose}
-                        aria-label="Close"
-                        className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-700 dark:hover:text-white flex-shrink-0 mt-0.5"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </header>
-
-                {/* Scrollable content */}
-                <div className="flex-grow overflow-y-auto overscroll-contain">
-                    <div className="px-4 pt-5 pb-8">
-
-                        {/* Ancient */}
-                        {ancient.length > 0 && (
-                            <section className="mb-7">
-                                <p className="text-[11px] uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-3">Ancient discoveries</p>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                    {ancient.map(el => (
-                                        <AncientCard
-                                            key={el.atomicNumber}
-                                            element={el}
-                                            isOpen={openId === el.atomicNumber}
-                                            onToggle={() => toggle(el.atomicNumber)}
-                                        />
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-
-                        {/* Dated spine */}
-                        {dated.length > 0 && (
-                            <section>
-                                <p className="text-[11px] uppercase tracking-widest text-gray-400 dark:text-gray-600 mb-4">Dated discoveries</p>
-                                <div className="relative">
-                                    {/* Axis */}
-                                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-800 -translate-x-1/2" />
-
-                                    {dated.map((el, i) => (
-                                        <SpineCard
-                                            key={el.atomicNumber}
-                                            element={el}
-                                            side={i % 2 === 0 ? 'left' : 'right'}
-                                            isOpen={openId === el.atomicNumber}
-                                            onToggle={() => toggle(el.atomicNumber)}
-                                        />
-                                    ))}
-                                </div>
-                            </section>
-                        )}
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {ancient.map(el => (
+                            <AncientCard
+                                key={el.atomicNumber}
+                                element={el}
+                                isOpen={openId === el.atomicNumber}
+                                onToggle={() => toggle(el.atomicNumber)}
+                            />
+                        ))}
                     </div>
-                </div>
+                </section>
+            )}
+
+            {dated.length > 0 && (
+                <section className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/70 sm:p-6">
+                    <div className="mb-5 flex items-center justify-between gap-3">
+                        <p className="text-[11px] uppercase tracking-widest text-slate-400 dark:text-slate-500">Dated discoveries</p>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{dated.length} entries</span>
+                    </div>
+                    <div className="relative">
+                        <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-slate-200 dark:bg-slate-800" />
+
+                        {dated.map((el, i) => (
+                            <SpineCard
+                                key={el.atomicNumber}
+                                element={el}
+                                side={i % 2 === 0 ? 'left' : 'right'}
+                                isOpen={openId === el.atomicNumber}
+                                onToggle={() => toggle(el.atomicNumber)}
+                            />
+                        ))}
+                    </div>
+                </section>
+            )}
             </div>
-        </div>
     );
 };
 

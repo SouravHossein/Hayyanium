@@ -117,39 +117,63 @@ const ZoomToast = ({ scale, visible }: { scale: number; visible: boolean }) => (
 /** Mobile zoom toggle — single button that cycles  Med / Fit */
 const MobileZoomToggle = ({
   activeStep,
+  opacity,
   onToggle,
+  isVisible,
 }: {
   activeStep: ZoomStepKey;
+  opacity: number;
   onToggle: () => void;
+  isVisible: boolean;
 }) => {
-  const label = activeStep.toUpperCase();
+  const activeConfig = ZOOM_STEPS.find((step) => step.key === activeStep) ?? ZOOM_STEPS[0];
+  const ActiveIcon = activeConfig.Icon;
+
   return (
     <button
       onClick={onToggle}
-      aria-label={`Zoom level: ${label}. Tap to switch.`}
-      aria-pressed="true"
+      aria-label={`Zoom level: ${activeConfig.label}. Tap to switch.`}
+      data-no-pan="true"
       style={{
-        minWidth: 104,
-        height: 44,
-        padding: '0 14px',
-        borderRadius: '999px',
-        border: '1px solid rgba(255,255,255,0.18)',
-        background: 'rgba(255,255,255,0.12)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        boxShadow: '0 2px 16px rgba(0,0,0,0.18)',
-        color: 'rgba(255,255,255,0.95)',
-        fontWeight: 800,
-        userSelect: 'none',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
+        height: 42,
+        padding: '0 16px',
+        borderRadius: '21px',
+        border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(15,23,42,0.85)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.24), inset 0 1px 1px rgba(255,255,255,0.1)',
+        color: '#fff',
+        display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: '8px',
+        opacity: isVisible ? opacity : 0.6,
+        transition: 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.95)',
+        cursor: 'pointer',
+        pointerEvents: isVisible ? 'auto' : 'none',
+        zIndex: 100,
       }}
     >
-      <span style={{ fontSize: '12px', letterSpacing: '0.14em', lineHeight: 1 }}>
-        {label}
+      <ActiveIcon size={18} strokeWidth={2.5} className="text-cyan-400" />
+      <span style={{
+        fontSize: '13px',
+        fontWeight: 800,
+        letterSpacing: '0.02em',
+        textTransform: 'uppercase'
+      }}>
+        {activeConfig.label}
+      </span>
+      <div style={{
+        width: 1,
+        height: 12,
+        background: 'rgba(255,255,255,0.2)',
+        marginLeft: 2,
+        marginRight: 2
+      }} />
+      <span style={{ fontSize: '11px', fontWeight: 600, opacity: 0.6 }}>
+        TAP
       </span>
     </button>
   );
@@ -179,7 +203,10 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
 
     // Toast visibility
     const [toastVisible, setToastVisible] = useState(false);
+    const [mobileControlOpacity, setMobileControlOpacity] = useState(0.6);
+    const [mobileControlVisible, setMobileControlVisible] = useState(true);
     const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const mobileControlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const targetScaleRef = useRef(initialScale);
     const currentScaleRef = useRef(initialScale);
     const animationFrameRef = useRef<number | null>(null);
@@ -216,6 +243,16 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       toastTimerRef.current = setTimeout(() => {
         setToastVisible(false);
       }, 1200);
+    }, []);
+
+    const flashMobileControls = useCallback((opacity = 1) => {
+      setMobileControlVisible(true);
+      setMobileControlOpacity(opacity);
+
+      if (mobileControlTimerRef.current) clearTimeout(mobileControlTimerRef.current);
+      mobileControlTimerRef.current = setTimeout(() => {
+        setMobileControlOpacity(0.6);
+      }, 2000);
     }, []);
 
     const updateTargetScale = useCallback(
@@ -319,6 +356,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           cancelAnimationFrame(animationFrameRef.current);
         }
         if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        if (mobileControlTimerRef.current) clearTimeout(mobileControlTimerRef.current);
       };
     }, []);
 
@@ -326,15 +364,6 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       if (mode !== 'spreadsheet') return;
       setDetailLevel((prev) => getDetailLevelWithHysteresis(prev, currentScale));
     }, [currentScale, mode]);
-
-    const handleSpreadsheetWheel = useCallback(
-      (e: React.WheelEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        const factor = Math.exp(-e.deltaY * 0.0015);
-        updateTargetScale(targetScaleRef.current * factor);
-      },
-      [updateTargetScale],
-    );
 
     const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
       if (mode !== 'spreadsheet') return;
@@ -376,6 +405,28 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
         e.currentTarget.releasePointerCapture(e.pointerId);
       }
     }, []);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+      if (mode !== 'spreadsheet') return;
+      if (e.touches.length >= 2) {
+        flashMobileControls(1);
+        return;
+      }
+
+      flashMobileControls(0.6);
+    }, [flashMobileControls, mode]);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+      if (mode !== 'spreadsheet') return;
+      if (e.touches.length >= 2) {
+        flashMobileControls(1);
+      }
+    }, [flashMobileControls, mode]);
+
+    const handleTouchEnd = useCallback(() => {
+      if (mode !== 'spreadsheet') return;
+      flashMobileControls(0.6);
+    }, [flashMobileControls, mode]);
 
     useEffect(() => {
       if (mode !== 'spreadsheet') return;
@@ -477,25 +528,33 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           <div
             ref={spreadsheetViewportRef}
             className={`h-full w-full overflow-auto custom-scrollbar ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
-            onWheel={handleSpreadsheetWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={stopDragging}
             onPointerCancel={stopDragging}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+            onScroll={() => flashMobileControls(1)}
           >
             <div
               ref={spreadsheetContentRef}
               className=" inline-block align-top"
               style={spreadsheetStyle}
             >
-              <div className="sm:hidden absolute top-8 right-3 z-50">
-                <MobileZoomToggle
-                  activeStep={activeMobileStep}
-                  onToggle={handleMobileStep}
-                />
-              </div>
               {children(currentScale, detailLevel)}
             </div>
+          </div>
+
+          {/* ── Mobile fixed toggle ── */}
+          <div className="sm:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+            <MobileZoomToggle
+              activeStep={activeMobileStep}
+              opacity={mobileControlOpacity}
+              onToggle={handleMobileStep}
+              isVisible={mobileControlVisible}
+            />
           </div>
         </div>
       );
@@ -517,10 +576,12 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
             setCurrentScale(api.state.scale);
             setDetailLevel(detailLevelFromScale(api.state.scale));
             flashToast();
+            flashMobileControls(1);
           }}
           onPanning={(api) => {
             setCurrentScale(api.state.scale);
             setDetailLevel(detailLevelFromScale(api.state.scale));
+            flashMobileControls(1);
           }}
           wheel={{
             step: 0.05,
@@ -576,6 +637,16 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
                 >
                   {Math.round(scale * 100)}%
                 </button>
+              </div>
+
+              {/* Mobile fixed toggle */}
+              <div className="sm:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+                <MobileZoomToggle
+                  activeStep={activeMobileStep}
+                  opacity={mobileControlOpacity}
+                  onToggle={handleMobileStep}
+                  isVisible={mobileControlVisible}
+                />
               </div>
 
               <TransformComponent

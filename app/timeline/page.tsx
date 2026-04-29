@@ -1,30 +1,33 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Clock3 } from 'lucide-react';
 import HistoricalTimelineModal from '@/components/HistoricalTimelineModal';
 import { allElementsData } from '@/data/elements';
+import Link from 'next/link';
 
 export default function TimelinePage() {
-  const router = useRouter();
-
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pb-24">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pb-28">
       <div className="mx-auto max-w-5xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <Link href="/" className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold">
-            <ArrowLeft className="h-4 w-4" />
+                <header className="flex flex-col justify-between items-start  mb-8 gap-4 flex-wrap">
+          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity font-bold">
+            <ArrowLeft className="w-5 h-5" />
             <span>Back to Table</span>
           </Link>
-          <div className="flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/70 px-4 py-2 text-sm font-semibold">
-            <Clock3 className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
-            <span>Discovery Timeline</span>
+          <div>
+
+            <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+              <Clock3 className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+              <span>Discovery Timeline</span>
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Explore how the elements were discovered across ancient history and the modern era.
+            </p>
           </div>
         </header>
 
-        <HistoricalTimelineModal elements={allElementsData} onClose={() => router.push('/')} />
+        <HistoricalTimelineModal elements={allElementsData} />
       </div>
     </div>
   );

@@ -14,6 +14,12 @@ type BadgeType = 'confirmed' | 'planned' | 'wont_fix' | 'done' | null;
 
 const DEVELOPER_EMAIL = process.env.NEXT_PUBLIC_DEVELOPER_EMAIL ?? '';
 
+type PublicProfile = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
 export default function CommunityPage() {
   const { user } = useAuth();
   const supabase = createClient();
@@ -32,9 +38,24 @@ export default function CommunityPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  const resolveAuthorFallback = useCallback((postUserId: string | null) => {
+    if (!postUserId || !user || postUserId !== user.id) {
+      return { author_name: null, author_avatar_url: null };
+    }
+
+    return {
+      author_name: user.user_metadata?.full_name || user.email || 'Community contributor',
+      author_avatar_url: user.user_metadata?.avatar_url || null,
+    };
+  }, [user]);
+
   const fetchPosts = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from('community_posts').select('*');
+    
+    // 1. Fetch posts joined with author profiles
+    let query = supabase
+      .from('community_posts')
+      .select('*, author:user_profiles(display_name, avatar_url)');
 
     if (filterType !== 'all') {
       query = query.eq('type', filterType);
@@ -54,19 +75,35 @@ export default function CommunityPage() {
       return;
     }
 
+    // 2. Fetch user upvotes if logged in
+    let upvotedIds = new Set<string>();
     if (user && data && data.length > 0) {
       const { data: upvotes } = await supabase
         .from('community_upvotes')
         .select('post_id')
         .eq('user_id', user.id);
-
-      const upvotedIds = new Set((upvotes ?? []).map((u: { post_id: string }) => u.post_id));
-      setPosts(data.map((post: CommunityPostData) => ({ ...post, user_has_upvoted: upvotedIds.has(post.id) })));
-    } else {
-      setPosts(data ?? []);
+      
+      if (upvotes) {
+        upvotedIds = new Set(upvotes.map(u => u.post_id));
+      }
     }
+
+    // 3. Map everything to the local state
+    const mappedPosts = (data || []).map((post: any) => {
+      const author = post.author as { display_name: string | null; avatar_url: string | null } | null;
+      const fallback = resolveAuthorFallback(post.user_id);
+
+      return {
+        ...post,
+        author_name: author?.display_name ?? fallback.author_name,
+        author_avatar_url: author?.avatar_url ?? fallback.author_avatar_url,
+        user_has_upvoted: upvotedIds.has(post.id),
+      };
+    });
+
+    setPosts(mappedPosts);
     setLoading(false);
-  }, [supabase, filterType, sortBy, user]);
+  }, [resolveAuthorFallback, supabase, filterType, sortBy, user]);
 
   useEffect(() => {
     fetchPosts();
@@ -160,8 +197,8 @@ export default function CommunityPage() {
         </header>
 
         <section className="card p-6 sm:p-8 mb-8">
-          <p className="text-sm font-bold opacity-80 mb-5">
-            Share bugs, request features, and upvote what matters most for Hayyanium.
+          <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
+            This board belongs to the people using Hayyanium every day. Share bug reports, request features, and upvote the ideas that would make the app better for everyone.
           </p>
           <div className="flex gap-3 flex-wrap">
             <span className="text-sm font-black bg-actinide text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Users className="w-4 h-4" /> {posts.length} Posts</span>
@@ -280,7 +317,9 @@ export default function CommunityPage() {
         ) : posts.length === 0 ? (
           <div className="card p-10 text-center">
             <h3 className="text-lg font-black mb-2">No posts yet</h3>
-            <p className="text-sm font-bold opacity-80 mb-5">Be the first to share a bug report or feature request.</p>
+            <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
+              This space starts with you. Be the first to share a bug report or feature request, and help set the direction for the app.
+            </p>
             <button
               onClick={() => {
                 if (!user) {

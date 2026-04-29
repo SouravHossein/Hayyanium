@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowBigUp } from 'lucide-react';
 import React, { useState } from 'react';
 
 type PostType = 'bug' | 'feature';
@@ -8,6 +9,8 @@ type BadgeType = 'confirmed' | 'planned' | 'wont_fix' | 'done' | null;
 export interface CommunityPostData {
   id: string;
   user_id: string | null;
+  author_name?: string | null;
+  author_avatar_url?: string | null;
   type: PostType;
   title: string;
   description: string;
@@ -41,6 +44,8 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
   const [showBadgeMenu, setShowBadgeMenu] = useState(false);
   const typeConf = TYPE_CONFIG[post.type];
   const badgeConf = post.badge ? BADGE_CONFIG[post.badge] : null;
+  const authorName = post.author_name || 'Community contributor';
+  const authorInitial = authorName.trim().charAt(0).toUpperCase() || '?';
 
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
@@ -54,15 +59,33 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
 
   return (
     <div className="card p-5 relative">
-      <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${typeConf.className}`}>
-          {typeConf.label}
-        </span>
-        {badgeConf && (
-          <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${badgeConf.className}`}>
-            {badgeConf.label}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-retro-stroke bg-white">
+            {post.author_avatar_url ? (
+              <img src={post.author_avatar_url} alt={authorName} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-alkali-metal text-sm font-black text-retro-stroke">
+                {authorInitial}
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-black uppercase tracking-[0.28em] opacity-60">Posted by</p>
+            <h4 className="truncate text-sm font-black">{authorName}</h4>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${typeConf.className}`}>
+            {typeConf.label}
           </span>
-        )}
+          {badgeConf && (
+            <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${badgeConf.className}`}>
+              {badgeConf.label}
+            </span>
+          )}
+        </div>
       </div>
 
       <h3 className="font-black text-base mb-1 leading-snug">{post.title}</h3>
@@ -110,16 +133,16 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
               )}
             </div>
           )}
-
-          <button
-            onClick={() => onUpvote(post.id, post.user_has_upvoted ?? false)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-black border-2 border-retro-stroke ${post.user_has_upvoted ? 'bg-lanthanide text-retro-stroke' : 'bg-white text-retro-stroke'}`}
-          >
-            <svg className="w-4 h-4" fill={post.user_has_upvoted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-            </svg>
-            <span>{post.upvotes}</span>
-          </button>
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => onUpvote(post.id, post.user_has_upvoted ?? false)}
+              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-black border-2 border-retro-stroke ${post.user_has_upvoted ? 'bg-lanthanide text-retro-stroke' : 'bg-white text-retro-stroke'}`}
+            >
+              <ArrowBigUp className={`w-4 h-4 ${post.user_has_upvoted ? 'text-retro-stroke' : ''}`} />
+              <span>{post.upvotes}</span>
+            </button>
+            <span className="font-bold text-[10px] mt-1 opacity-70">Upvote</span>
+          </div>
         </div>
       </div>
     </div>

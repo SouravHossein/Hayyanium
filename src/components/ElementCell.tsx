@@ -5,135 +5,150 @@ import { CATEGORY_COLORS, CATEGORY_TEXT_COLORS } from '../constants';
 import { TableDetailLevel } from './table/zoomTypes';
 
 interface ElementCellProps {
-  element: ElementData;
-  isSelected: boolean;
-  isFavorite: boolean;
-  onSelect: (element: ElementData) => void;
-  onHover: (element: ElementData | null) => void;
-  trendStyle?: React.CSSProperties;
-  isDraggable?: boolean;
-  onDragStart?: (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => void;
-  onDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
-  isHighlighted?: boolean;
-  onTouchStart?: (e: React.TouchEvent) => void;
-  onTouchMove?: (e: React.TouchEvent) => void;
-  onTouchEnd?: (e: React.TouchEvent) => void;
-  detailLevel?: TableDetailLevel;
+    element: ElementData;
+    isSelected: boolean;
+    isFavorite: boolean;
+    onSelect: (element: ElementData) => void;
+    onHover: (element: ElementData | null) => void;
+    trendStyle?: React.CSSProperties;
+    isDraggable?: boolean;
+    onDragStart?: (event: React.DragEvent<HTMLAnchorElement>, element: ElementData) => void;
+    onDragEnd?: (event: React.DragEvent<HTMLAnchorElement>) => void;
+    isHighlighted?: boolean;
+    onTouchStart?: (e: React.TouchEvent) => void;
+    onTouchMove?: (e: React.TouchEvent) => void;
+    onTouchEnd?: (e: React.TouchEvent) => void;
+    detailLevel?: TableDetailLevel;
 }
 
-const ElementCell: React.FC<ElementCellProps> = ({ 
-  element, 
-  isSelected, 
-  isFavorite, 
-  onSelect, 
-  onHover, 
-  trendStyle,
-  isDraggable,
-  onDragStart,
-  onDragEnd,
-  isHighlighted,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  detailLevel = 'medium',
+const ElementCell: React.FC<ElementCellProps> = ({
+    element,
+    isSelected,
+    isFavorite,
+    onSelect,
+    onHover,
+    trendStyle,
+    isDraggable,
+    onDragStart,
+    onDragEnd,
+    isHighlighted,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    detailLevel = 'medium',
 }) => {
-  const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
-  const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
-  
-  const atomicMass = typeof element.atomicMass === 'string' 
-    ? element.atomicMass 
-    : element.atomicMass.toFixed(3);
+    const colorClass = trendStyle ? '' : CATEGORY_COLORS[element.category] || 'bg-gray-700';
+    const textColorClass = trendStyle ? '' : CATEGORY_TEXT_COLORS[element.category] || 'text-white';
 
-  const blockColor = 
-    element.block ==="s" ? 'bg-green-400' :
-    element.block ==="p"?  'bg-blue-400' :
-    element.block ==="d" ? 'bg-yellow-400' :
-    element.block ==="f" ? 'bg-pink-400':
-    "bg-green-400"
+  const atomicMass = React.useMemo(() => {
+    if (typeof element.atomicMass === 'number') return element.atomicMass.toFixed(1);
+    // Handle numeric strings, but preserve non-numeric ones like "[286]"
+    const num = parseFloat(element.atomicMass);
+    return isNaN(num) || !/^\d+(\.\d+)?$/.test(element.atomicMass.toString()) 
+      ? element.atomicMass 
+      : num.toFixed(1);
+  }, [element.atomicMass]);
 
-  const handleDragStart = (e: React.DragEvent<HTMLAnchorElement>) => {
-    if (onDragStart) {
-      onDragStart(e, element);
-    }
-  };
+    const blockColor =
+        element.block === "s" ? 'bg-green-400' :
+            element.block === "p" ? 'bg-blue-400' :
+                element.block === "d" ? 'bg-yellow-400' :
+                    element.block === "f" ? 'bg-pink-400' :
+                        "bg-green-400"
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
-      e.preventDefault();
-      onSelect(element);
-    }
-  };
+    const handleDragStart = (e: React.DragEvent<HTMLAnchorElement>) => {
+        if (onDragStart) {
+            onDragStart(e, element);
+        }
+    };
 
-  return (
-    <Link
-      href={`/element/${element.symbol}`}
-      onClick={handleClick}
-      onMouseEnter={() => onHover(element)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(element)}
-      onBlur={() => onHover(null)}
-      aria-label={element.name}
-      draggable={isDraggable}
-      onDragStart={isDraggable ? handleDragStart : undefined}
-      onDragEnd={isDraggable ? onDragEnd : undefined}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      id={`element-${element.atomicNumber}`}
-      className={`relative rounded-md transition-colors duration-200 focus:z-30 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} 
+    const handleClick = (e: React.MouseEvent) => {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
+            e.preventDefault();
+            onSelect(element);
+        }
+    };
+
+    return (
+        <Link
+            href={`/element/${element.symbol}`}
+            onClick={handleClick}
+            onMouseEnter={() => onHover(element)}
+            onMouseLeave={() => onHover(null)}
+            onFocus={() => onHover(element)}
+            onBlur={() => onHover(null)}
+            aria-label={element.name}
+            draggable={isDraggable}
+            onDragStart={isDraggable ? handleDragStart : undefined}
+            onDragEnd={isDraggable ? onDragEnd : undefined}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            id={`element-${element.atomicNumber}`}
+            className={`relative rounded-md transition-colors duration-200 focus:z-30 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-300 ${colorClass} ${textColorClass} 
         ${isSelected ? 'ring-4 ring-cyan-500 dark:ring-cyan-300 z-30 shadow-[0_0_20px_rgba(6,182,212,0.6)]' : ''} 
         ${isDraggable ? 'cursor-grab' : ''} 
         ${isHighlighted ? 'shadow-[0_0_15px_3px_rgba(56,189,248,0.7)] z-20' : ''}`}
-      style={{ 
-        gridColumnStart: element.xpos, 
-        gridRowStart: element.ypos,
-        ...(trendStyle || {}),
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 'clamp(2px, calc(var(--table-cell-size, 56px) * 0.08), 6px)',
-        border: detailLevel === 'small' ? `1px solid rgba(255,255,255,0.12)` : undefined,
-      }}
-    >
-      {detailLevel !== 'small' && (
-        <div className="absolute top-0.5 left-1 text-[9px] sm:text-[10px] font-bold opacity-70 leading-none">
-          {element.atomicNumber}
-        </div>
-      )}
+            style={{
+                gridColumnStart: element.xpos,
+                gridRowStart: element.ypos,
+                ...(trendStyle || {}),
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 'clamp(2px, calc(var(--table-cell-size, 56px) * 0.08), 6px)',
+                border: detailLevel === 'small' ? `1px solid rgba(255,255,255,0.12)` : undefined,
+            }}
+        >
+            {detailLevel !== 'small' && (
+                <div className="absolute top-0.5 left-1 text-[9px] sm:text-[10px] font-bold opacity-70 leading-none">
+                    {element.atomicNumber}
+                </div>
+            )}
 
-      {isFavorite && (
-        <div className="absolute top-0.5 right-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 fill-current text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        </div>
-      )}
+            {isFavorite && (
+                <div className="absolute top-0.5 right-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 fill-current text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                </div>
+            )}
 
-      {detailLevel === 'large' && !trendStyle && (
-        <div className={`absolute top-0.5 right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm ${blockColor}`} ></div>
-      )}
+            {detailLevel === 'large' && !trendStyle && (
+                <div className={`absolute top-0.5 right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm ${blockColor}`} ></div>
+            )}
 
-      <div
-        className={`font-bold leading-none ${
-          detailLevel === 'small'
-            ? 'text-base sm:text-lg'
-            : detailLevel === 'medium'
-              ? 'text-lg sm:text-xl'
-              : 'text-xl sm:text-2xl mt-1'
-        }`}
-      >
-        {element.symbol}
-      </div>
+            <div
+                className={`font-bold leading-none ${detailLevel === 'small'
+                        ? 'text-base sm:text-lg'
+                        : detailLevel === 'medium'
+                            ? 'text-lg sm:text-xl'
+                            : 'text-xl sm:text-2xl mt-1'
+                    }`}
+            >
+                {element.symbol}
+            </div>
 
-      {detailLevel === 'large' && (
-        <>
-          <div className="text-[10px] sm:text-xs truncate font-medium max-w-full">{element.name}</div>
-          <div className="text-[8px] sm:text-[10px] opacity-80">{atomicMass}</div>
-        </>
-      )}
-    </Link>
-  );
+            {detailLevel === 'medium' && (
+                <>
+                    <div className="text-[9px] sm:text-[11px] truncate font-semibold max-w-full mt-0.5 opacity-90">
+                        {element.name}
+                    </div>
+                    <div className="text-[8px] sm:text-[10px] font-medium opacity-75 tabular-nums">
+                        {atomicMass}
+                    </div>
+                </>
+            )}
+
+            {detailLevel === 'large' && (
+                <>
+                    <div className="text-[10px] sm:text-xs truncate font-medium max-w-full">{element.name}</div>
+                    <div className="text-[8px] sm:text-[10px] opacity-80">{atomicMass}</div>
+                </>
+            )}
+        </Link>
+    );
 };
 
 export default React.memo(ElementCell);
