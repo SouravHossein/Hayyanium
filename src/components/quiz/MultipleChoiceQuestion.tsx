@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { QuizQuestion, QuizOption } from '../../types/quizTypes';
+import { Check, X, Lightbulb } from '@/components/icons';
 
 interface MultipleChoiceQuestionProps {
   question: QuizQuestion;
@@ -54,18 +55,14 @@ export default function MultipleChoiceQuestion({
     if (option.isCorrect) {
       return (
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
+          <Check className="h-4 w-4" />
         </div>
       );
     }
     if (selected === option.value && !option.isCorrect) {
       return (
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white shrink-0">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-4 w-4" />
         </div>
       );
     }
@@ -127,9 +124,9 @@ export default function MultipleChoiceQuestion({
 
       {/* Explanation */}
       {showFeedback && (
-        <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-4 animate-[fadeIn_0.3s_ease-out]">
+          <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-4 animate-[fadeIn_0.3s_ease-out]">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            <span className="font-semibold text-gray-800 dark:text-gray-200">💡 </span>
+            <span className="inline-flex items-center gap-2 font-semibold text-gray-800 dark:text-gray-200"><Lightbulb className="h-4 w-4" /></span>
             {question.explanation}
           </p>
         </div>

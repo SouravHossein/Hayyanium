@@ -9,11 +9,18 @@ import { DEFAULT_QUIZ_CONFIG } from '@/lib/quiz/quizEngine';
 import { getQuizSettings } from '@/lib/quiz/quizSettings';
 import { getWeakElements } from '@/lib/quiz/quizStorage';
 import { useFavorites } from '@/hooks/useFavorites';
+import { ArrowRight, ArrowLeft, CircleDot, FlaskConical, Map, PencilLine, Sparkles, Target, Flame, Shuffle, Rocket } from '@/components/icons';
 
-const FORMATS: { value: QuizFormat; label: string; icon: string; desc: string }[] = [
-  { value: 'multiple-choice', label: 'Multiple Choice', icon: '🔘', desc: 'Pick the correct answer from options' },
-  { value: 'text-input', label: 'Type Answer', icon: '✍️', desc: 'Type the answer with autocomplete' },
-  { value: 'find-on-table', label: 'Find on Table', icon: '🗺️', desc: 'Tap the correct element on the table' },
+const FORMAT_ICONS: Record<QuizFormat, React.ComponentType<{ className?: string }>> = {
+  'multiple-choice': CircleDot,
+  'text-input': PencilLine,
+  'find-on-table': Map,
+};
+
+const FORMATS: { value: QuizFormat; label: string; desc: string }[] = [
+  { value: 'multiple-choice', label: 'Multiple Choice', desc: 'Pick the correct answer from options' },
+  { value: 'text-input', label: 'Type Answer', desc: 'Type the answer with autocomplete' },
+  { value: 'find-on-table', label: 'Find on Table', desc: 'Tap the correct element on the table' },
 ];
 
 const DIRECTIONS: { value: QuizDirection; label: string }[] = [
@@ -100,7 +107,10 @@ export default function QuizSetupPage() {
           {FORMATS.map(f => (
             <button key={f.value} onClick={() => updateConfig({ format: f.value })}
               className={`rounded-xl border-2 p-4 text-left transition-all ${config.format === f.value ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 ring-1 ring-cyan-500/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-cyan-300 dark:hover:border-cyan-600'}`}>
-              <div className="text-2xl mb-2">{f.icon}</div>
+              {(() => {
+                const FormatIcon = FORMAT_ICONS[f.value];
+                return <FormatIcon className="h-6 w-6 mb-2 text-cyan-600 dark:text-cyan-400" />;
+              })()}
               <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{f.label}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{f.desc}</div>
             </button>
@@ -142,7 +152,7 @@ export default function QuizSetupPage() {
             {(['all', 'favorites', 'weak'] as const).map(t => (
               <button key={t} onClick={() => updateConfig({ scope: { type: t } })}
                 className={`rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-all ${config.scope.type === t ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
-                {t === 'all' ? 'All 118' : t === 'favorites' ? `★ Favorites (${favorites.length})` : `⚠ Weak (${typeof window !== 'undefined' ? getWeakElements().length : 0})`}
+              {t === 'all' ? 'All 118' : t === 'favorites' ? <span className="inline-flex items-center gap-1"><Sparkles className="h-3.5 w-3.5" /> Favorites ({favorites.length})</span> : <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5" /> Weak ({typeof window !== 'undefined' ? getWeakElements().length : 0})</span>}
               </button>
             ))}
           </div>
@@ -186,7 +196,10 @@ export default function QuizSetupPage() {
           {(['easy','normal','hard'] as QuizDifficulty[]).map(d => (
             <button key={d} onClick={() => updateConfig({ difficulty: d })}
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-bold capitalize transition-all ${config.difficulty === d ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
-              {d === 'easy' ? '😊 Easy' : d === 'normal' ? '🧠 Normal' : '🔥 Hard'}
+                <span className="inline-flex items-center gap-2">
+                  {d === 'easy' ? <Sparkles className="h-4 w-4" /> : d === 'normal' ? <Target className="h-4 w-4" /> : <Flame className="h-4 w-4" />}
+                  {d === 'easy' ? 'Easy' : d === 'normal' ? 'Normal' : 'Hard'}
+                </span>
             </button>
           ))}
         </div>
@@ -198,7 +211,7 @@ export default function QuizSetupPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           {/* Timer toggle */}
           <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-            <div><div className="text-sm font-bold text-gray-800 dark:text-gray-200">⏱️ Timer</div><div className="text-xs text-gray-500 dark:text-gray-400">Time limit per question</div></div>
+            <div><div className="text-sm font-bold text-gray-800 dark:text-gray-200 inline-flex items-center gap-2"><FlaskConical className="h-4 w-4" /> Timer</div><div className="text-xs text-gray-500 dark:text-gray-400">Time limit per question</div></div>
             <button onClick={() => updateConfig({ timerEnabled: !config.timerEnabled })}
               className={`relative h-6 w-11 rounded-full transition-colors ${config.timerEnabled ? 'bg-cyan-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
               <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${config.timerEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
@@ -213,7 +226,7 @@ export default function QuizSetupPage() {
           )}
           {/* Shuffle */}
           <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
-            <div><div className="text-sm font-bold text-gray-800 dark:text-gray-200">🔀 Shuffle</div><div className="text-xs text-gray-500 dark:text-gray-400">Randomize questions</div></div>
+            <div><div className="text-sm font-bold text-gray-800 dark:text-gray-200 inline-flex items-center gap-2"><Shuffle className="h-4 w-4" /> Shuffle</div><div className="text-xs text-gray-500 dark:text-gray-400">Randomize questions</div></div>
             <button onClick={() => updateConfig({ shuffleQuestions: !config.shuffleQuestions })}
               className={`relative h-6 w-11 rounded-full transition-colors ${config.shuffleQuestions ? 'bg-cyan-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
               <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${config.shuffleQuestions ? 'translate-x-5' : 'translate-x-0.5'}`} />
@@ -226,7 +239,7 @@ export default function QuizSetupPage() {
       <div className="pt-4 pb-8">
         <button onClick={handleStart} disabled={scopeCount < 2}
           className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 text-lg font-extrabold text-white shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100">
-          🚀 Start Quiz ({Math.min(config.questionCount, scopeCount)} questions)
+          <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Start Quiz ({Math.min(config.questionCount, scopeCount)} questions)</span>
         </button>
         {scopeCount < 2 && <p className="text-center text-xs text-red-500 mt-2">Need at least 2 elements in scope</p>}
       </div>

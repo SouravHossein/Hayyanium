@@ -5,6 +5,7 @@ import { QuizQuestion } from '../../types/quizTypes';
 import { allElementsData } from '../../data/elements';
 import { CATEGORY_HEX_COLORS } from '../../constants';
 import { ElementData, ElementCategory } from '../../types';
+import { Check, Lightbulb, X } from '@/components/icons';
 
 interface Props {
   question: QuizQuestion;
@@ -54,11 +55,11 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
       {/* Hint button */}
       {!showFeedback && !hintRevealed && (
         <div className="flex justify-center">
-          <button onClick={onRevealHint} className="rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40">💡 Hint</button>
+          <button onClick={onRevealHint} className="rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 inline-flex items-center gap-2"><Lightbulb className="h-4 w-4" /> Hint</button>
         </div>
       )}
       {hintRevealed && (
-        <div className="text-center rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 p-2 text-xs text-amber-700 dark:text-amber-300"><span className="font-bold">💡</span> {question.hint}</div>
+        <div className="text-center rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 p-2 text-xs text-amber-700 dark:text-amber-300 inline-flex items-center justify-center gap-2"><Lightbulb className="h-4 w-4" /><span>{question.hint}</span></div>
       )}
 
       {/* Periodic Table Grid */}
@@ -101,11 +102,11 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
               ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
               : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
           }`}>
-            <span className="text-lg">{selected === correctAtomicNumber ? '✅' : '❌'}</span>
+            {selected === correctAtomicNumber ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
             <span>{selected === correctAtomicNumber ? `Correct! That's ${question.element.name}!` : `That's not right. ${question.element.name} (${question.element.symbol}) is element #${correctAtomicNumber}.`}</span>
           </div>
           <div className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400"><span className="font-semibold text-gray-800 dark:text-gray-200">💡 </span>{question.explanation}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 inline-flex gap-2"><Lightbulb className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" /><span>{question.explanation}</span></p>
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import ElectronConfigurationViewer from './ElectronConfigurationViewer';
 import IsotopesViewer from './IsotopesViewer';
 import CrystalStructureSection from './CrystalStructureSection';
 import SkeletonLoader from './ui/SkeletonLoader';
+import { ArrowRight, Copy, Flame, Plus, Rocket, Star, X } from '@/components/icons';
 
 const RealLifeApplications = lazy(() => import('./RealLifeApplications'));
 
@@ -113,9 +114,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       {/* <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-1 lg:hidden"></div> */}
 
       <button onClick={onClose} aria-label="Close element details" className="sticky top-4 right-4 float-right text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors z-10 mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X className="h-8 w-8" />
       </button>
 
       {/* Header */}
@@ -135,12 +134,12 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
 
         <div className="flex flex-wrap gap-2 mb-6">
           <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+            <Star className="h-4 w-4" />
             <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
           </button>
-          <button onClick={handleCopySummary} className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors">Copy Summary</button>
+          <button onClick={handleCopySummary} className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors inline-flex items-center gap-2">
+            <Copy className="h-4 w-4" /> Copy Summary
+          </button>
           <button
             onClick={() => onAddToCompare(element)}
             disabled={isInCompare || isCompareFull}
@@ -149,9 +148,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
                 : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
+            <Plus className="h-4 w-4" />
             <span>{isInCompare ? 'In Compare' : (isCompareFull ? 'Compare Full' : 'Compare')}</span>
           </button>
           <button
@@ -162,9 +159,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
                 : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
+            <Flame className="h-4 w-4" />
             <span>{isInBuilder ? 'In Builder' : (isBuilderFull ? 'Builder Full' : 'Add to Builder')}</span>
           </button>
           <button
@@ -172,14 +167,14 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
             disabled={!ai || isGeneratingMessage}
             className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
           >
-            <span>🔥 Roast</span>
+            <span className="inline-flex items-center gap-2"><Flame className="h-4 w-4" /> Roast</span>
           </button>
           <button
             onClick={() => generateAiMessage('hype')}
             disabled={!ai || isGeneratingMessage}
             className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
           >
-            <span>🚀 Hype</span>
+            <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Hype</span>
           </button>
         </div>
 
@@ -193,7 +188,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
         {(aiMessage || isGeneratingMessage) && (
           <div className={`mb-6 p-4 rounded-lg border ${messageType === 'roast' ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800' : 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'}`}>
             <div className="flex items-center space-x-2 mb-2">
-              <span className="text-xl">{messageType === 'roast' ? '🔥' : '🚀'}</span>
+              {messageType === 'roast' ? <Flame className="h-5 w-5" /> : <Rocket className="h-5 w-5" />}
               <h4 className={`font-bold ${messageType === 'roast' ? 'text-orange-700 dark:text-orange-400' : 'text-purple-700 dark:text-purple-400'}`}>
                 {messageType === 'roast' ? 'AI Roast' : 'AI Hype'}
               </h4>

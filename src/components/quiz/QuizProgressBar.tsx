@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Clock3, Flame, Star } from '@/components/icons';
 
 interface QuizProgressBarProps {
   current: number;
@@ -34,16 +35,14 @@ export default function QuizProgressBar({
 
           {/* Score */}
           <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 border border-emerald-200 dark:border-emerald-700/50">
-            <svg className="h-4 w-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+            <Star className="h-4 w-4 text-emerald-500" />
             <span className="font-bold text-emerald-700 dark:text-emerald-300">{score}</span>
           </div>
 
           {/* Streak */}
           {streak > 0 && (
             <div className="flex items-center gap-1 rounded-full bg-orange-50 dark:bg-orange-900/30 px-3 py-1 border border-orange-200 dark:border-orange-700/50 animate-[pulse_1.5s_ease-in-out_infinite]">
-              <span className="text-base">🔥</span>
+              <Flame className="h-4 w-4 text-orange-500" />
               <span className="font-bold text-orange-600 dark:text-orange-300">{streak}</span>
             </div>
           )}
@@ -58,9 +57,7 @@ export default function QuizProgressBar({
                 : 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
             }`}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock3 className="h-4 w-4" />
             <span>{timeRemaining}s</span>
           </div>
         )}

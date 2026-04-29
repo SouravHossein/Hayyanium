@@ -7,6 +7,7 @@ import QuizProgressBar from '@/components/quiz/QuizProgressBar';
 import MultipleChoiceQuestion from '@/components/quiz/MultipleChoiceQuestion';
 import TextInputQuestion from '@/components/quiz/TextInputQuestion';
 import FindOnTableQuestion from '@/components/quiz/FindOnTableQuestion';
+import { ArrowRight, Atom, Flag } from '@/components/icons';
 
 export default function QuizPlayPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function QuizPlayPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
-          <div className="text-4xl animate-spin">⚛️</div>
+          <Atom className="mx-auto h-10 w-10 animate-spin" />
           <p className="text-gray-500 dark:text-gray-400">Loading quiz...</p>
         </div>
       </div>
@@ -113,7 +114,10 @@ export default function QuizPlayPage() {
             onClick={handleNext}
             className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
           >
-            {quizState.currentIndex >= quizState.questions.length - 1 ? '🏁 Finish Quiz' : '→ Next Question'}
+            <span className="inline-flex items-center justify-center gap-2">
+              {quizState.currentIndex >= quizState.questions.length - 1 ? <Flag className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+              {quizState.currentIndex >= quizState.questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+            </span>
           </button>
         )}
 
@@ -122,7 +126,7 @@ export default function QuizPlayPage() {
             onClick={skipQuestion}
             className="ml-auto rounded-xl border-2 border-gray-200 dark:border-gray-600 px-5 py-2.5 text-sm font-semibold text-gray-500 dark:text-gray-400 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
           >
-            Skip →
+            <span className="inline-flex items-center gap-2">Skip <ArrowRight className="h-4 w-4" /></span>
           </button>
         )}
       </div>

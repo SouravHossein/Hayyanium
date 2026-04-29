@@ -3,13 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BookOpenText, ChartColumn, FlaskConical, House, Settings, Sparkles } from '@/components/icons';
 
 const NAV_ITEMS = [
-  { href: '/quiz', label: 'Game', icon: '🏠' },
-  { href: '/quiz/setup', label: 'Quiz', icon: '🧪' },
-  { href: '/quiz/history', label: 'History', icon: '📊' },
-  { href: '/quiz/settings', label: 'Settings', icon: '⚙️' },
-  { href: '/', label: 'Study', icon: '📚' },
+  { href: '/quiz', label: 'Game', icon: House },
+  { href: '/quiz/setup', label: 'Quiz', icon: FlaskConical },
+  { href: '/quiz/history', label: 'History', icon: ChartColumn },
+  { href: '/quiz/settings', label: 'Settings', icon: Settings },
+  { href: '/', label: 'Study', icon: BookOpenText },
 ];
 
 export default function QuizNav() {
@@ -26,9 +27,9 @@ export default function QuizNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-              >
-                <span className="text-lg">{item.icon}</span>
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            >
+                <item.icon className="h-5 w-5" />
                 <span className="text-[10px] font-semibold">{item.label}</span>
               </Link>
             );
@@ -59,14 +60,14 @@ export function QuizSidebar() {
             href={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-700/50' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30 hover:text-gray-900 dark:hover:text-gray-200'}`}
           >
-            <span className="text-base">{item.icon}</span>
+            <item.icon className="h-4 w-4" />
             <span>{item.label}</span>
           </Link>
         );
       })}
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Link href="/quiz/premium" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50 hover:scale-[1.02] transition-all">
-          <span className="text-base">✨</span><span>Premium</span>
+          <Sparkles className="h-4 w-4" /><span>Premium</span>
         </Link>
       </div>
     </nav>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { createClient } from '../lib/supabase/client';
+import { Bug, CheckCircle2, Sparkles, X } from '@/components/icons';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -56,9 +57,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
           className="absolute right-4 top-4 rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
           aria-label="Close"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="w-5 h-5" />
         </button>
 
         <div className="mb-6">
@@ -68,7 +67,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
 
         {success ? (
           <div className="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-            <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <CheckCircle2 className="w-12 h-12 mb-2" />
             <p className="font-bold">Thank you for your feedback!</p>
             <p className="text-sm mt-1">We appreciate your help.</p>
           </div>
@@ -80,14 +79,14 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
                 onClick={() => setType('bug')}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${type === 'bug' ? 'bg-white dark:bg-gray-700 shadow-sm text-red-600 dark:text-red-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
               >
-                🐛 Bug Report
+                <span className="inline-flex items-center gap-2"><Bug className="h-4 w-4" /> Bug Report</span>
               </button>
               <button
                 type="button"
                 onClick={() => setType('feature')}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${type === 'feature' ? 'bg-white dark:bg-gray-700 shadow-sm text-cyan-600 dark:text-cyan-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
               >
-                ✨ Feature Request
+                <span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4" /> Feature Request</span>
               </button>
             </div>
             

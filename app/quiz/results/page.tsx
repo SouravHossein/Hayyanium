@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/contexts/QuizContext';
 import QuizResultsCard from '@/components/quiz/QuizResultsCard';
+import { Check, Clock3, X } from '@/components/icons';
 
 export default function QuizResultsPage() {
   const router = useRouter();
@@ -43,7 +44,6 @@ export default function QuizResultsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Main results card */}
       <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
         <QuizResultsCard
           result={result}
@@ -54,7 +54,6 @@ export default function QuizResultsPage() {
         />
       </div>
 
-      {/* Answer review */}
       {showReview && (
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Answer Review</h3>
@@ -62,11 +61,26 @@ export default function QuizResultsPage() {
             const question = quizState.questions[i];
             if (!question) return null;
             return (
-              <div key={answer.questionId} className={`rounded-xl border-2 p-4 ${answer.isCorrect ? 'border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/50 dark:bg-emerald-900/10' : answer.skipped ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50' : 'border-red-200 dark:border-red-700/50 bg-red-50/50 dark:bg-red-900/10'}`}>
+              <div
+                key={answer.questionId}
+                className={`rounded-xl border-2 p-4 ${
+                  answer.isCorrect
+                    ? 'border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/50 dark:bg-emerald-900/10'
+                    : answer.skipped
+                      ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
+                      : 'border-red-200 dark:border-red-700/50 bg-red-50/50 dark:bg-red-900/10'
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm">{answer.isCorrect ? '✅' : answer.skipped ? '⏭️' : '❌'}</span>
+                      {answer.isCorrect ? (
+                        <Check className="h-4 w-4 text-emerald-500" />
+                      ) : answer.skipped ? (
+                        <Clock3 className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-500" />
+                      )}
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">{question.promptLabel}</span>
                     </div>
                     <p className="font-bold text-gray-900 dark:text-white">{question.prompt}</p>

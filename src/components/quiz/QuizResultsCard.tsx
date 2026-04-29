@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { QuizResult } from '../../types/quizTypes';
+import { Award, Clock3, Flame, RotateCcw, Sparkles, Star, ThumbsUp, Trophy, BookOpenText, FileText } from '@/components/icons';
 
 interface Props {
   result: QuizResult;
@@ -24,7 +25,15 @@ export default function QuizResultsCard({ result, onStudyAgain, onRetry, onNewQu
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="text-4xl">{result.accuracy >= 80 ? '🎉' : result.accuracy >= 50 ? '👍' : '💪'}</div>
+        <div className="flex justify-center">
+          {result.accuracy >= 80 ? (
+            <Trophy className="h-10 w-10 text-amber-500" />
+          ) : result.accuracy >= 50 ? (
+            <ThumbsUp className="h-10 w-10 text-cyan-500" />
+          ) : (
+            <Flame className="h-10 w-10 text-orange-500" />
+          )}
+        </div>
         <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">
           {result.accuracy >= 80 ? 'Excellent!' : result.accuracy >= 50 ? 'Good Job!' : 'Keep Practicing!'}
         </h2>
@@ -50,13 +59,13 @@ export default function QuizResultsCard({ result, onStudyAgain, onRetry, onNewQu
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Score', value: `${result.correctCount}/${result.totalQuestions}`, icon: '⭐' },
-          { label: 'Best Streak', value: String(result.bestStreak), icon: '🔥' },
-          { label: 'Time', value: formatTime(result.totalTime), icon: '⏱️' },
-          { label: 'Fastest', value: result.fastestAnswer > 0 ? formatTime(result.fastestAnswer) : 'N/A', icon: '⚡' },
+          { label: 'Score', value: `${result.correctCount}/${result.totalQuestions}`, icon: Star },
+          { label: 'Best Streak', value: String(result.bestStreak), icon: Flame },
+          { label: 'Time', value: formatTime(result.totalTime), icon: Clock3 },
+          { label: 'Fastest', value: result.fastestAnswer > 0 ? formatTime(result.fastestAnswer) : 'N/A', icon: Sparkles },
         ].map(stat => (
           <div key={stat.label} className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 text-center">
-            <div className="text-lg">{stat.icon}</div>
+            <stat.icon className="mx-auto h-5 w-5 text-cyan-600 dark:text-cyan-400" />
             <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
           </div>
@@ -83,10 +92,18 @@ export default function QuizResultsCard({ result, onStudyAgain, onRetry, onNewQu
 
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-3">
-        <button onClick={onReview} className="rounded-xl border-2 border-gray-200 dark:border-gray-600 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all col-span-2">📋 Review Answers</button>
-        <button onClick={onRetry} className="rounded-xl border-2 border-cyan-300 dark:border-cyan-600 bg-cyan-50 dark:bg-cyan-900/20 px-4 py-3 text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-all">🔄 Retry Same Quiz</button>
-        <button onClick={onNewQuiz} className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all">✨ New Quiz</button>
-        <button onClick={onStudyAgain} className="rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 px-4 py-3 text-sm font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all col-span-2">📚 Study Periodic Table</button>
+        <button onClick={onReview} className="rounded-xl border-2 border-gray-200 dark:border-gray-600 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all col-span-2 inline-flex items-center justify-center gap-2">
+          <FileText className="h-4 w-4" /> Review Answers
+        </button>
+        <button onClick={onRetry} className="rounded-xl border-2 border-cyan-300 dark:border-cyan-600 bg-cyan-50 dark:bg-cyan-900/20 px-4 py-3 text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-all inline-flex items-center justify-center gap-2">
+          <RotateCcw className="h-4 w-4" /> Retry Same Quiz
+        </button>
+        <button onClick={onNewQuiz} className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all inline-flex items-center justify-center gap-2">
+          <Sparkles className="h-4 w-4" /> New Quiz
+        </button>
+        <button onClick={onStudyAgain} className="rounded-xl border-2 border-purple-300 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 px-4 py-3 text-sm font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all col-span-2 inline-flex items-center justify-center gap-2">
+          <BookOpenText className="h-4 w-4" /> Study Periodic Table
+        </button>
       </div>
     </div>
   );

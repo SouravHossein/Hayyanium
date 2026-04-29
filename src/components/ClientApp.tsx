@@ -601,7 +601,10 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 </div>
               )}
 
-              <section aria-label="Periodic table view" className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar">
+              <section
+                aria-label="Periodic table view"
+                className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar max-h-[calc(100dvh-22rem)] lg:max-h-[calc(100dvh-20rem)]"
+              >
                 {viewMode === 'list' ? (
                   <ElementList
                     elements={visibleElements}

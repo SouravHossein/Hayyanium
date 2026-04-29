@@ -587,7 +587,7 @@ const SpatialRenderer: React.FC<TableRendererProps> = (props) => {
 
   return (
     <div
-      className="w-full overscroll-contain hide-scrollbar"
+      className="w-full hide-scrollbar"
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <div

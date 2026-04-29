@@ -4,19 +4,20 @@ import React, { useMemo, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getQuizProgress, getQuizHistory } from '@/lib/quiz/quizStorage';
 import { QuizProgress, QuizResult } from '@/types/quizTypes';
+import { ArrowRight, Atom, BookOpenText, ChartColumn, Flame, FlaskConical, Gamepad2, Rocket, Star, Target, TrendingUp, Zap, PencilLine, CircleDot, Map } from '@/components/icons';
 
 const QUICK_MODES = [
-  { label: 'Name → Symbol', direction: 'name-to-symbol', format: 'multiple-choice', icon: '🔤', color: 'from-cyan-500 to-blue-500' },
-  { label: 'Number → Name', direction: 'number-to-name', format: 'multiple-choice', icon: '🔢', color: 'from-purple-500 to-pink-500' },
-  { label: 'Find on Table', direction: 'name-to-number', format: 'find-on-table', icon: '🗺️', color: 'from-emerald-500 to-teal-500' },
-  { label: 'Symbol → Name', direction: 'symbol-to-name', format: 'text-input', icon: '✍️', color: 'from-orange-500 to-red-500' },
+  { label: 'Name → Symbol', direction: 'name-to-symbol', format: 'multiple-choice', icon: CircleDot, color: 'from-cyan-500 to-blue-500' },
+  { label: 'Number → Name', direction: 'number-to-name', format: 'multiple-choice', icon: Target, color: 'from-purple-500 to-pink-500' },
+  { label: 'Find on Table', direction: 'name-to-number', format: 'find-on-table', icon: Map, color: 'from-emerald-500 to-teal-500' },
+  { label: 'Symbol → Name', direction: 'symbol-to-name', format: 'text-input', icon: PencilLine, color: 'from-orange-500 to-red-500' },
 ];
 
 const BLOCK_SHORTCUTS = [
-  { label: 's-block', value: 's', emoji: '🟡', desc: 'Groups 1-2' },
-  { label: 'p-block', value: 'p', emoji: '🟢', desc: 'Groups 13-18' },
-  { label: 'd-block', value: 'd', emoji: '🔵', desc: 'Groups 3-12' },
-  { label: 'f-block', value: 'f', emoji: '🟣', desc: 'Lanthanides & Actinides' },
+  { label: 's-block', value: 's', icon: CircleDot, desc: 'Groups 1-2' },
+  { label: 'p-block', value: 'p', icon: Target, desc: 'Groups 13-18' },
+  { label: 'd-block', value: 'd', icon: ChartColumn, desc: 'Groups 3-12' },
+  { label: 'f-block', value: 'f', icon: Atom, desc: 'Lanthanides & Actinides' },
 ];
 
 export default function QuizGamePage() {
@@ -35,8 +36,8 @@ export default function QuizGamePage() {
       {/* Hero */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 p-8 sm:p-12 text-white">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-4 right-8 text-8xl font-extrabold opacity-20 select-none">⚛️</div>
-          <div className="absolute bottom-4 left-8 text-6xl font-extrabold opacity-15 select-none">🧪</div>
+          <Atom className="absolute top-4 right-8 h-20 w-20 opacity-20" />
+          <FlaskConical className="absolute bottom-4 left-8 h-16 w-16 opacity-15" />
         </div>
         <div className="relative z-10 max-w-xl">
           <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight">
@@ -47,10 +48,10 @@ export default function QuizGamePage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/quiz/setup" className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-600 shadow-lg shadow-black/20 transition-all hover:scale-105 hover:shadow-xl active:scale-95">
-              🚀 Start Quiz
+              <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Start Quiz</span>
             </Link>
             <Link href="/" className="rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-white/25 hover:scale-105 active:scale-95">
-              📚 Study Table
+              <span className="inline-flex items-center gap-2"><BookOpenText className="h-4 w-4" /> Study Table</span>
             </Link>
           </div>
         </div>
@@ -60,13 +61,13 @@ export default function QuizGamePage() {
       {mounted && progress && progress.totalQuizzes > 0 && (
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Quizzes Taken', value: progress.totalQuizzes, icon: '📝' },
-            { label: 'Accuracy', value: `${Math.round(progress.overallAccuracy)}%`, icon: '🎯' },
-            { label: 'Mastered', value: `${progress.masteredCount}/118`, icon: '⭐' },
-            { label: 'Day Streak', value: progress.currentStreak, icon: '🔥' },
+            { label: 'Quizzes Taken', value: progress.totalQuizzes, icon: Gamepad2 },
+            { label: 'Accuracy', value: `${Math.round(progress.overallAccuracy)}%`, icon: Target },
+            { label: 'Mastered', value: `${progress.masteredCount}/118`, icon: Star },
+            { label: 'Day Streak', value: progress.currentStreak, icon: Flame },
           ].map(s => (
             <div key={s.label} className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 text-center shadow-sm">
-              <div className="text-2xl mb-1">{s.icon}</div>
+              <s.icon className="mx-auto h-6 w-6 mb-1 text-cyan-600 dark:text-cyan-400" />
               <div className="text-xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label}</div>
             </div>
@@ -85,7 +86,7 @@ export default function QuizGamePage() {
               className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-center transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             >
               <div className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${mode.color} text-2xl shadow-sm`}>
-                {mode.icon}
+                <mode.icon className="h-6 w-6 text-white" />
               </div>
               <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{mode.label}</div>
             </Link>
@@ -94,15 +95,15 @@ export default function QuizGamePage() {
       </section>
 
       {/* Info cards */}
-      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: '🧬', title: '118 Elements', desc: 'Complete periodic table' },
-          { icon: '🎮', title: '3 Quiz Modes', desc: 'MC, Text, Find on Table' },
-          { icon: '📈', title: 'Progress Tracking', desc: 'Track your mastery' },
-          { icon: '⚡', title: 'Instant Feedback', desc: 'Learn as you play' },
+          { icon: Atom, title: '118 Elements', desc: 'Complete periodic table' },
+          { icon: Gamepad2, title: '3 Quiz Modes', desc: 'MC, Text, Find on Table' },
+          { icon: TrendingUp, title: 'Progress Tracking', desc: 'Track your mastery' },
+          { icon: Zap, title: 'Instant Feedback', desc: 'Learn as you play' },
         ].map(card => (
           <div key={card.title} className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-4">
-            <div className="text-2xl mb-2">{card.icon}</div>
+            <card.icon className="h-6 w-6 mb-2 text-cyan-600 dark:text-cyan-400" />
             <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{card.title}</div>
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{card.desc}</div>
           </div>
@@ -110,16 +111,16 @@ export default function QuizGamePage() {
       </section>
 
       {/* Learn by block */}
-      <section>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Learn by Block</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <section>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Learn by Block</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {BLOCK_SHORTCUTS.map(block => (
             <Link
               key={block.value}
               href={`/quiz/setup?scope=block&scopeValue=${block.value}`}
               className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
             >
-              <div className="text-2xl mb-1">{block.emoji}</div>
+              <block.icon className="h-6 w-6 mb-1 text-cyan-600 dark:text-cyan-400" />
               <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{block.label}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{block.desc}</div>
             </Link>
@@ -132,7 +133,7 @@ export default function QuizGamePage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Scores</h2>
-            <Link href="/quiz/history" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">View all →</Link>
+            <Link href="/quiz/history" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1">View all <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <div className="space-y-2">
             {recentResults.map(r => (
