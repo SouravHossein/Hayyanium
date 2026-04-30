@@ -1,139 +1,225 @@
 'use client';
 
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { getQuizProgress, getQuizHistory } from '@/lib/quiz/quizStorage';
-import { QuizProgress, QuizResult } from '@/types/quizTypes';
-import { ArrowRight, Atom, BookOpenText, ChartColumn, Flame, FlaskConical, Gamepad2, Rocket, Star, Target, TrendingUp, Zap, PencilLine, CircleDot, Map } from '@/components/icons';
+import {
+  PlayerProgress,
+  ZoneProgress,
+  DailyMissionSet,
+  MissionType,
+} from '@/types/progressionTypes';
+import {
+  getPlayerProgress,
+  getAllZoneProgress,
+  getDailyMissions,
+} from '@/lib/quiz/progressionStorage';
+import { getStreak } from '@/lib/quiz/quizStorage';
+import { getRecommendedAction, computeLevel, LEVEL_TABLE } from '@/lib/quiz/progressionEngine';
+import { ZONE_DEFINITIONS } from '@/data/zones';
 
-const QUICK_MODES = [
-  { label: 'Name → Symbol', direction: 'name-to-symbol', format: 'multiple-choice', icon: CircleDot, color: 'from-cyan-500 to-blue-500' },
-  { label: 'Symbol → Name', direction: 'symbol-to-name', format: 'text-input', icon: PencilLine, color: 'from-orange-500 to-red-500' },
-  { label: 'Number → Name', direction: 'number-to-name', format: 'multiple-choice', icon: Target, color: 'from-purple-500 to-pink-500' },
-  { label: 'Find on Table', direction: 'name-to-number', format: 'find-on-table', icon: Map, color: 'from-emerald-500 to-teal-500' },
+import PlayerXpBar from '@/components/quiz/PlayerXpBar';
+import ZoneCard from '@/components/quiz/ZoneCard';
+import BossCard from '@/components/quiz/BossCard';
+import DailyMissionCard from '@/components/quiz/DailyMissionCard';
+
+type Tab = 'story' | 'daily' | 'boss';
+
+const TABS: { id: Tab; label: string; emoji: string }[] = [
+  { id: 'story',  label: 'Story Path',    emoji: '🗺️' },
+  { id: 'daily',  label: 'Daily Lab',     emoji: '🧪' },
+  { id: 'boss',   label: 'Boss Battles',  emoji: '💀' },
 ];
 
-const BLOCK_SHORTCUTS = [
-  { label: 's-block', value: 's', icon: CircleDot, desc: 'Groups 1-2' },
-  { label: 'p-block', value: 'p', icon: Target, desc: 'Groups 13-18' },
-  { label: 'd-block', value: 'd', icon: ChartColumn, desc: 'Groups 3-12' },
-  { label: 'f-block', value: 'f', icon: Atom, desc: 'Lanthanides & Actinides' },
-];
-
-export default function QuizGamePage() {
-  const [progress, setProgress] = useState<QuizProgress | null>(null);
-  const [recentResults, setRecentResults] = useState<QuizResult[]>([]);
+export default function QuizAcademyPage() {
   const [mounted, setMounted] = useState(false);
+  const [tab, setTab] = useState<Tab>('story');
+  const [progress, setProgress] = useState<PlayerProgress | null>(null);
+  const [allZp, setAllZp] = useState<Record<string, ZoneProgress>>({});
+  const [daily, setDaily] = useState<DailyMissionSet | null>(null);
+  const [streak, setStreak] = useState({ current: 0, longest: 0 });
 
   useEffect(() => {
     setMounted(true);
-    setProgress(getQuizProgress());
-    setRecentResults(getQuizHistory().slice(0, 3));
+    const p = getPlayerProgress();
+    const zp = getAllZoneProgress();
+    const d = getDailyMissions();
+    const s = getStreak();
+    setProgress(p);
+    setAllZp(zp);
+    setDaily(d);
+    setStreak(s);
   }, []);
 
-  return (
-    <div className="space-y-8">
-      {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 p-8 sm:p-12 text-white">
-        <div className="absolute inset-0 opacity-10">
-          <Atom className="absolute top-4 right-8 h-20 w-20 opacity-20" />
-          <FlaskConical className="absolute bottom-4 left-8 h-16 w-16 opacity-15" />
-        </div>
-        <div className="relative z-10 max-w-xl">
-          <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight">
-            Master the<br />Periodic Table
-          </h1>
-          <p className="mt-3 text-cyan-100 text-sm sm:text-base leading-relaxed">
-            Test your chemistry knowledge with interactive quizzes. Learn element names, symbols, atomic numbers, and weights through practice.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/quiz/setup" className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-600 shadow-lg shadow-black/20 transition-all hover:scale-105 hover:shadow-xl active:scale-95">
-              <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Start Quiz</span>
-            </Link>
-            <Link href="/" className="rounded-xl bg-white/15 backdrop-blur-sm border border-white/25 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-white/25 hover:scale-105 active:scale-95">
-              <span className="inline-flex items-center gap-2"><BookOpenText className="h-4 w-4" /> Study Table</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+  const recommendedAction = useMemo(() => {
+    if (!progress) return 'Welcome to the Quiz Academy!';
+    return getRecommendedAction(progress, allZp);
+  }, [progress, allZp]);
 
-      {/* Stats row */}
-      {mounted && progress && progress.totalQuizzes > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Quizzes Taken', value: progress.totalQuizzes, icon: Gamepad2 },
-            { label: 'Accuracy', value: `${Math.round(progress.overallAccuracy)}%`, icon: Target },
-            { label: 'Mastered', value: `${progress.masteredCount}/118`, icon: Star },
-            { label: 'Day Streak', value: progress.currentStreak, icon: Flame },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 text-center shadow-sm">
-              <s.icon className="mx-auto h-6 w-6 mb-1 text-cyan-600 dark:text-cyan-400" />
-              <div className="text-xl font-extrabold text-gray-900 dark:text-white">{s.value}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label}</div>
-            </div>
-          ))}
-        </section>
+  const { xpIntoLevel, xpForNext } = mounted && progress
+    ? computeLevel(progress.playerXp)
+    : { xpIntoLevel: 0, xpForNext: 150 };
+
+  const nextLevelXp = progress
+    ? (LEVEL_TABLE.find(l => l.level === progress.playerLevel + 1)?.xpRequired ?? progress.playerXp)
+    : 150;
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-amber-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 pb-8">
+
+      {/* ── Recommended Action Banner ─────────────────────────── */}
+      <div className="rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 p-4 text-white flex items-center gap-3 shadow-lg shadow-blue-200 dark:shadow-blue-900">
+        <span className="text-2xl flex-shrink-0">🧭</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold opacity-80 uppercase tracking-wider">Recommended</p>
+          <p className="font-bold text-sm leading-snug">{recommendedAction}</p>
+        </div>
+        <Link
+          href="/quiz/setup"
+          className="flex-shrink-0 rounded-xl bg-white/20 hover:bg-white/30 px-3 py-2 text-xs font-bold transition-colors"
+        >
+          Free Play →
+        </Link>
+      </div>
+
+      {/* ── Player XP Bar ─────────────────────────────────────── */}
+      {progress && (
+        <div className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+          <PlayerXpBar
+            xp={progress.playerXp}
+            level={progress.playerLevel}
+            rank={progress.playerRank}
+            animate={false}
+          />
+        </div>
       )}
 
-      {/* Quick-start modes */}
-      <section>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Popular Quiz Modes</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {QUICK_MODES.map(mode => (
-            <Link
-              key={mode.label}
-              href={`/quiz/setup?format=${mode.format}&direction=${mode.direction}`}
-              className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-center transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
-            >
-              <div className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${mode.color} text-2xl shadow-sm`}>
-                <mode.icon className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{mode.label}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* ── Tab Navigation ────────────────────────────────────── */}
+      <div className="flex gap-1 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all
+              ${tab === t.id
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+          >
+            <span>{t.emoji}</span>
+            <span className="hidden sm:inline">{t.label}</span>
+          </button>
+        ))}
+      </div>
 
-      {/* Learn by block */}
-        <section>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Learn by Block</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {BLOCK_SHORTCUTS.map(block => (
-            <Link
-              key={block.value}
-              href={`/quiz/setup?scope=block&scopeValue=${block.value}`}
-              className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 transition-all hover:scale-[1.03] hover:shadow-lg active:scale-[0.98]"
-            >
-              <block.icon className="h-6 w-6 mb-1 text-cyan-600 dark:text-cyan-400" />
-              <div className="text-sm font-bold text-gray-800 dark:text-gray-200">{block.label}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{block.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Recent results */}
-      {mounted && recentResults.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Scores</h2>
-            <Link href="/quiz/history" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1">View all <ArrowRight className="h-4 w-4" /></Link>
+      {/* ── Story Path Tab ────────────────────────────────────── */}
+      {tab === 'story' && progress && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-gray-900 dark:text-white">Zone Campaign</h2>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {Object.values(allZp).filter(z => z.bossCleared).length} / {ZONE_DEFINITIONS.length} cleared
+            </span>
           </div>
-          <div className="space-y-2">
-            {recentResults.map(r => (
-              <div key={r.id} className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
-                <div>
-                  <div className="text-sm font-bold text-gray-800 dark:text-gray-200 capitalize">{r.config.format.replace(/-/g, ' ')}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{new Date(r.date).toLocaleDateString()} · {r.config.direction.replace(/-/g, ' ')}</div>
-                </div>
-                <div className={`text-lg font-extrabold ${r.accuracy >= 80 ? 'text-emerald-500' : r.accuracy >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
-                  {Math.round(r.accuracy)}%
-                </div>
+
+          {/* Period zones first, then blocks, then categories */}
+          {(['period', 'block', 'category'] as const).map(scopeType => {
+            const zones = ZONE_DEFINITIONS.filter(z => z.scopeType === scopeType);
+            const sectionLabel = scopeType === 'period' ? '📅 Period Tracks'
+              : scopeType === 'block' ? '🔷 Block Tracks' : '🏷️ Category Tracks';
+            return (
+              <div key={scopeType} className="space-y-2">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider pt-2">{sectionLabel}</p>
+                {zones.map(zone => (
+                  <ZoneCard
+                    key={zone.id}
+                    zone={zone}
+                    zoneProgress={allZp[zone.id] ?? { zoneId: zone.id, visitedMissions: [], masteryScore: 0, coverageCount: 0, totalElements: zone.totalElements, bossUnlocked: false, bossCleared: false, badgeEarned: false }}
+                    playerLevel={progress.playerLevel}
+                    unlockedMissionTypes={progress.unlockedMissionTypes as MissionType[]}
+                    isActive={zone.id === progress.activeZoneId}
+                  />
+                ))}
               </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Daily Lab Tab ──────────────────────────────────────── */}
+      {tab === 'daily' && daily && progress && (
+        <div>
+          <DailyMissionCard
+            dailySet={daily}
+            streakCount={streak.current}
+            streakFreezeCount={progress.streakFreezeCount}
+          />
+        </div>
+      )}
+
+      {/* ── Boss Battles Tab ───────────────────────────────────── */}
+      {tab === 'boss' && progress && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-gray-900 dark:text-white">Boss Battles</h2>
+            {progress.playerLevel < 5 && (
+              <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-full px-2 py-0.5 font-semibold">
+                Reach Level 5 to unlock
+              </span>
+            )}
+          </div>
+
+          {/* Grid of boss cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {ZONE_DEFINITIONS.map(zone => (
+              <BossCard
+                key={zone.id}
+                zone={zone}
+                zoneProgress={allZp[zone.id] ?? { zoneId: zone.id, visitedMissions: [], masteryScore: 0, coverageCount: 0, totalElements: zone.totalElements, bossUnlocked: false, bossCleared: false, badgeEarned: false }}
+                playerLevel={progress.playerLevel}
+              />
             ))}
           </div>
-        </section>
+        </div>
       )}
+
+      {/* ── Quick free-play shortcut ────────────────────────────── */}
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Quick Start</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href="/quiz/setup"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all active:scale-95"
+          >
+            ⚙️ <span>Custom Setup</span>
+          </Link>
+          <Link
+            href="/quiz/history"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all active:scale-95"
+          >
+            📊 <span>History</span>
+          </Link>
+          <Link
+            href="/quiz/setup?scope=weak"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all active:scale-95"
+          >
+            💊 <span>Weak Elements</span>
+          </Link>
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all active:scale-95"
+          >
+            🏅 <span>Profile</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

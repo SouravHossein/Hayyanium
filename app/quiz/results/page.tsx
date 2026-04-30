@@ -1,24 +1,89 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuiz } from '@/contexts/QuizContext';
 import QuizResultsCard from '@/components/quiz/QuizResultsCard';
+import XpRewardPanel from '@/components/quiz/XpRewardPanel';
+import Link from 'next/link';
 import { Check, Clock3, X } from '@/components/icons';
+import { applyMissionResult } from '@/lib/quiz/progressionStorage';
+import { allElementsData } from '@/data/elements';
+import type { MissionResult, RewardUnlock, XpEvent } from '@/types/progressionTypes';
+
+interface StoredMissionContext {
+  missionId: string;
+  zoneId: string;
+  missionType: string;
+  xpReward: number;
+}
 
 export default function QuizResultsPage() {
   const router = useRouter();
   const { quizState, resetQuiz, startQuiz } = useQuiz();
   const [showReview, setShowReview] = useState(false);
+  const [missionResult, setMissionResult] = useState<MissionResult | null>(null);
+  const [rewards, setRewards] = useState<RewardUnlock[]>([]);
+  const [xpEvents, setXpEvents] = useState<XpEvent[]>([]);
+  const [xpBefore, setXpBefore] = useState(0);
+  const progressionApplied = useRef(false);
 
   const result = quizState.result;
+
+  useEffect(() => {
+    if (!result || progressionApplied.current) return;
+
+    // Read active mission context from sessionStorage
+    try {
+      const raw = typeof window !== 'undefined' ? sessionStorage.getItem('hayyanium_active_mission') : null;
+      if (!raw) return;
+
+      const ctx: StoredMissionContext = JSON.parse(raw);
+      progressionApplied.current = true;
+
+      // Retrieve XP before applying
+      const { getPlayerProgress } = require('@/lib/quiz/progressionStorage');
+      const pBefore = getPlayerProgress();
+      setXpBefore(pBefore.playerXp);
+
+      const { missionResult: mr, rewards: rw } = applyMissionResult(
+        {
+          correctCount: result.correctCount,
+          totalQuestions: result.totalQuestions,
+          accuracy: result.accuracy,
+          bestStreak: result.bestStreak,
+          weakElements: result.weakElements,
+          answers: result.answers,
+        },
+        ctx.missionId,
+        ctx.zoneId,
+        ctx.missionType as any,
+        ctx.xpReward,
+      );
+
+      setMissionResult(mr);
+      setRewards(rw);
+
+      // Build xp events for display (simplified)
+      const evts: XpEvent[] = [];
+      const baseXp = result.correctCount * 10;
+      evts.push({ source: 'correct-answer', amount: baseXp, label: `${result.correctCount} correct answers` });
+      if (result.bestStreak >= 3) evts.push({ source: 'streak-bonus', amount: result.bestStreak * 5, label: `${result.bestStreak}× streak bonus` });
+      if (mr.comebackElements.length > 0) evts.push({ source: 'comeback', amount: mr.comebackElements.length * 15, label: `${mr.comebackElements.length} elements recovered` });
+      setXpEvents(evts);
+
+      sessionStorage.removeItem('hayyanium_active_mission');
+    } catch { /* non-mission quiz — no progression */ }
+  }, [result]);
 
   if (!result) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
           <p className="text-gray-500 dark:text-gray-400">No quiz results to show.</p>
-          <a href="/quiz/setup" className="inline-block rounded-xl bg-cyan-500 px-6 py-3 text-sm font-bold text-white">Start a Quiz</a>
+          <Link href="/quiz" className="inline-block rounded-xl bg-cyan-500 px-6 py-3 text-sm font-bold text-white">
+            Go to Academy
+          </Link>
         </div>
       </div>
     );
@@ -26,8 +91,7 @@ export default function QuizResultsPage() {
 
   const handleRetry = () => {
     if (quizState.config) {
-      const { default: allElements } = require('@/data/elements');
-      startQuiz(quizState.config, allElements.allElementsData || []);
+      startQuiz(quizState.config, allElementsData);
       router.push('/quiz/play');
     }
   };
@@ -44,6 +108,7 @@ export default function QuizResultsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Core results card */}
       <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
         <QuizResultsCard
           result={result}
@@ -54,6 +119,51 @@ export default function QuizResultsPage() {
         />
       </div>
 
+      {/* XP reward panel (only if mission context was present) */}
+      {missionResult && (
+        <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>⭐</span> Rewards
+          </h2>
+          <XpRewardPanel
+            missionResult={missionResult}
+            rewards={rewards}
+            xpEvents={xpEvents}
+            totalXpBefore={xpBefore}
+          />
+        </div>
+      )}
+
+      {/* Weak elements revenge CTA */}
+      {result.weakElements.length >= 3 && (
+        <div className="rounded-2xl border-2 border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-5 flex items-start gap-4">
+          <span className="text-2xl flex-shrink-0">💊</span>
+          <div className="flex-1">
+            <p className="font-bold text-purple-800 dark:text-purple-200">Revenge Run Available</p>
+            <p className="text-sm text-purple-700 dark:text-purple-400 mt-0.5">
+              {result.weakElements.length} elements need work. Launch a recovery mission to bounce back!
+            </p>
+            <Link
+              href="/quiz/setup?scope=weak"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white hover:bg-purple-700 transition-colors active:scale-95"
+            >
+              💊 Practice Weak Elements
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Academy return */}
+      <div className="text-center">
+        <Link
+          href="/quiz"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+        >
+          🗺️ Back to Quiz Academy
+        </Link>
+      </div>
+
+      {/* Answer review */}
       {showReview && (
         <div className="space-y-3">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Answer Review</h3>

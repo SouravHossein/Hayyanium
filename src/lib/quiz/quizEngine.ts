@@ -10,6 +10,23 @@ import {
   UserAnswer,
 } from '../../types/quizTypes';
 
+/* ── Default quiz config ────────────────────────────────────────── */
+export const DEFAULT_QUIZ_CONFIG: QuizConfig = {
+  format: 'multiple-choice',
+  direction: 'name-to-symbol',
+  questionCount: 10,
+  scope: { type: 'all' },
+  difficulty: 'normal',
+  timerEnabled: false,
+  timerSeconds: 30,
+  soundEnabled: false,
+  shuffleQuestions: true,
+  shuffleOptions: true,
+  optionCount: 4,
+  strictMode: false,
+  showAtomicWeightDecimals: false,
+};
+
 /* ── Helper: Generate a unique ID ──────────────────────────────── */
 function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
