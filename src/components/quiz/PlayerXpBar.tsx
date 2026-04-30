@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { PlayerRank } from '@/types/progressionTypes';
 import { computeLevel } from '@/lib/quiz/progressionEngine';
 import RankBadge from './RankBadge';
+import { Star } from '@/components/icons';
 
 interface PlayerXpBarProps {
   xp: number;
@@ -41,8 +42,9 @@ export default function PlayerXpBar({ xp, level, rank, animate = true, compact =
   if (compact) {
     return (
       <div className="flex items-center gap-2 min-w-0">
-        <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 dark:bg-amber-500 text-xs font-black text-white shadow">
-          {level}
+        <div className="flex-shrink-0 relative flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 dark:bg-amber-500 text-xs font-black text-white shadow">
+          <Star className="absolute inset-0 w-full h-full p-1 opacity-40 fill-white" />
+          <span className="relative z-10">{level}</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -62,8 +64,9 @@ export default function PlayerXpBar({ xp, level, rank, animate = true, compact =
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           {/* Level circle */}
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black text-lg shadow-md shadow-amber-200 dark:shadow-amber-900 flex-shrink-0">
-            {level}
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white font-black text-lg shadow-md shadow-amber-200 dark:shadow-amber-900 flex-shrink-0 overflow-hidden">
+            <Star className="absolute inset-0 w-full h-full p-1 opacity-30 fill-white" />
+            <span className="relative z-10">{level}</span>
           </div>
           <div>
             <RankBadge rank={rank} size="sm" />

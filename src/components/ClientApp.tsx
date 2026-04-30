@@ -36,6 +36,7 @@ import TableModeSwitcher3D from "./table/TableModeSwitcher3D";
 import Scene3D from "./3d/Scene3D";
 import SkeletonLoader from "./ui/SkeletonLoader";
 import TableZoomWrapper, { TableZoomRef } from "./table/TableZoomWrapper";
+import { applyStreakFreezeIfNeeded } from "../lib/quiz/progressionStorage";
 
 const ElementPanel = dynamic(() => import("./ElementPanel"), { ssr: false });
 const ComparisonModal = dynamic(() => import("./ComparisonModal"), {
@@ -58,6 +59,14 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
     useState<ElementData[]>(initialElements);
   const [activeElement, setActiveElement] = useState<ElementData | null>(null);
   const [isElementPanelOpen, setIsElementPanelOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      applyStreakFreezeIfNeeded();
+    } catch (e) {
+      console.error("Streak freeze check failed", e);
+    }
+  }, []);
   const [hoveredElement, setHoveredElement] = useState<ElementData | null>(
     null,
   );

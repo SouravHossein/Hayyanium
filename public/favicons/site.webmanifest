@@ -1,0 +1,19 @@
+{
+  "name": "Hayyanium",
+  "short_name": "Hayyanium",
+  "icons": [
+    {
+      "src": "/favicons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#081220",
+  "background_color": "#081220",
+  "display": "standalone"
+}

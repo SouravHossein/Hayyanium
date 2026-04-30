@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { DailyMissionSet } from '@/types/progressionTypes';
+import { Rocket, RotateCcw, Zap, Flame, Shield, CheckCircle2, ChevronRight } from '@/components/icons';
 
 const DAILY_MISSION_META = [
-  { emoji: '🌱', theme: 'Easy Win',   colorClass: 'from-green-400 to-emerald-500',  border: 'border-green-300 dark:border-green-700', bg: 'bg-green-50 dark:bg-green-900/20' },
-  { emoji: '💊', theme: 'Weak Repair', colorClass: 'from-purple-400 to-violet-500', border: 'border-purple-300 dark:border-purple-700', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-  { emoji: '⚡', theme: 'Challenge',   colorClass: 'from-amber-400 to-orange-500',  border: 'border-amber-300 dark:border-amber-700', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  { icon: Rocket,    theme: 'Easy Win',   colorClass: 'from-green-400 to-emerald-500',  border: 'border-green-300 dark:border-green-700', bg: 'bg-green-50 dark:bg-green-900/20' },
+  { icon: RotateCcw, theme: 'Weak Repair', colorClass: 'from-purple-400 to-violet-500', border: 'border-purple-300 dark:border-purple-700', bg: 'bg-purple-50 dark:bg-purple-900/20' },
+  { icon: Zap,       theme: 'Challenge',   colorClass: 'from-amber-400 to-orange-500',  border: 'border-amber-300 dark:border-amber-700', bg: 'bg-amber-50 dark:bg-amber-900/20' },
 ];
 
 interface DailyMissionCardProps {
@@ -26,13 +27,13 @@ export default function DailyMissionCard({ dailySet, streakCount, streakFreezeCo
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700">
-            <span className="text-lg">🔥</span>
+            <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
             <span className="font-black text-orange-700 dark:text-orange-300 text-lg">{streakCount}</span>
             <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">day streak</span>
           </div>
           {streakFreezeCount > 0 && (
             <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700">
-              <span className="text-sm">🧊</span>
+              <Shield className="w-4 h-4 text-blue-500 fill-blue-500/20" />
               <span className="text-xs font-bold text-blue-700 dark:text-blue-300">×{streakFreezeCount}</span>
             </div>
           )}
@@ -65,8 +66,8 @@ export default function DailyMissionCard({ dailySet, streakCount, streakFreezeCo
               }`}
             >
               {/* Icon */}
-              <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${meta.colorClass} flex items-center justify-center text-xl shadow`}>
-                {done ? '✅' : meta.emoji}
+              <div className={`flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${meta.colorClass} flex items-center justify-center text-white shadow`}>
+                {done ? <CheckCircle2 className="w-6 h-6" /> : <meta.icon className="w-5 h-5" />}
               </div>
 
               {/* Info */}
@@ -81,7 +82,7 @@ export default function DailyMissionCard({ dailySet, streakCount, streakFreezeCo
 
               {/* Arrow or checkmark */}
               <div className="flex-shrink-0 text-gray-400">
-                {done ? <span className="text-emerald-500">✓</span> : <span>›</span>}
+                {done ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <ChevronRight className="w-5 h-5" />}
               </div>
             </div>
           );

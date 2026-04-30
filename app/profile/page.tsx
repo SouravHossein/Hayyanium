@@ -14,6 +14,11 @@ import { ZONE_DEFINITIONS } from '@/data/zones';
 import PlayerXpBar from '@/components/quiz/PlayerXpBar';
 import BadgeDisplay from '@/components/quiz/BadgeDisplay';
 import RankBadge from '@/components/quiz/RankBadge';
+import HayyaniumLogo from '@/components/HayyaniumLogo';
+import { 
+  ArrowLeft, Flame, Skull, Medal, Check, 
+  MessageSquare, Bug, Sparkles, Users, ChevronRight, FlaskConical 
+} from '@/components/icons';
 import type { PlayerProgress, ZoneProgress } from '@/types/progressionTypes';
 
 export default function ProfilePage() {
@@ -85,10 +90,10 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity font-bold">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            <ArrowLeft className="w-5 h-5" />
             <span>Back to Table</span>
           </Link>
-          <h1 className="text-2xl font-bold">Your Profile</h1>
+          <HayyaniumLogo size={100} className="sm:scale-125" />
         </header>
         <CollectionProgress total={118} count={discovered.length} />
 
@@ -96,8 +101,10 @@ export default function ProfilePage() {
         {rpgProgress && (
           <section className="card p-6 sm:p-8 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black flex items-center gap-2">⚗️ Quiz Academy</h3>
-              <Link href="/quiz" className="text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:underline">View Academy →</Link>
+              <h3 className="text-xl font-black flex items-center gap-2">
+                <FlaskConical className="w-6 h-6 text-cyan-500" /> Quiz Academy
+              </h3>
+              <Link href="/quiz" className="text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">View Academy <ChevronRight className="w-4 h-4" /></Link>
             </div>
 
             {/* XP bar */}
@@ -111,18 +118,20 @@ export default function ProfilePage() {
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3 mt-5">
               <div className="text-center rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 py-3">
-                <div className="text-2xl font-black text-orange-600 dark:text-orange-400">🔥 {localStreak.current}</div>
+                <div className="text-2xl font-black text-orange-600 dark:text-orange-400 flex items-center justify-center gap-2">
+                  <Flame className="w-6 h-6 fill-orange-500" /> {localStreak.current}
+                </div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Day Streak</div>
               </div>
               <div className="text-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 py-3">
-                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                  {Object.values(allZp).filter(z => z.bossCleared).length}
+                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
+                  <Skull className="w-6 h-6 fill-emerald-500/20" /> {Object.values(allZp).filter(z => z.bossCleared).length}
                 </div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Bosses Cleared</div>
               </div>
               <div className="text-center rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 py-3">
-                <div className="text-2xl font-black text-purple-600 dark:text-purple-400">
-                  {rpgProgress.earnedBadges.length}
+                <div className="text-2xl font-black text-purple-600 dark:text-purple-400 flex items-center justify-center gap-2">
+                  <Medal className="w-6 h-6 fill-purple-500/20" /> {rpgProgress.earnedBadges.length}
                 </div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Badges</div>
               </div>
@@ -226,7 +235,7 @@ export default function ProfilePage() {
           <div className="flex justify-between items-end mb-6">
             <h3 className="text-2xl font-black flex items-center gap-3">
               <span className="p-2 bg-transition-metal text-retro-stroke border-2 border-retro-stroke rounded-xl transform -rotate-3">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" /></svg>
+                <FlaskConical className="w-6 h-6" />
               </span>
               Saved Compounds
             </h3>
@@ -275,7 +284,7 @@ export default function ProfilePage() {
         <section className="card p-6 sm:p-10 mb-10 bg-[url('https://www.transparenttextures.com/patterns/p6.png')]">
           <h3 className="text-2xl font-black mb-2 flex items-center gap-3">
             <span className="p-2.5 bg-alkali-metal text-retro-stroke border-2 border-retro-stroke rounded-xl transform rotate-3">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" /></svg>
+              <MessageSquare className="w-6 h-6" />
             </span>
             Feedback &amp; Support
           </h3>
@@ -295,16 +304,16 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setFeedbackType('bug')}
-                  className={`flex-1 py-3 text-sm font-black transition-all ${feedbackType === 'bug' ? 'bg-nonmetal text-white border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}
+                  className={`flex-1 py-3 text-sm font-black transition-all flex items-center justify-center gap-2 ${feedbackType === 'bug' ? 'bg-nonmetal text-white border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}
                 >
-                  🐛 Bug Report
+                  <Bug className="w-4 h-4" /> Bug Report
                 </button>
                 <button
                   type="button"
                   onClick={() => setFeedbackType('feature')}
-                  className={`flex-1 py-3 text-sm font-black transition-all ${feedbackType === 'feature' ? 'bg-transition-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}
+                  className={`flex-1 py-3 text-sm font-black transition-all flex items-center justify-center gap-2 ${feedbackType === 'feature' ? 'bg-transition-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}
                 >
-                  ✨ Feature Request
+                  <Sparkles className="w-4 h-4" /> Feature Request
                 </button>
               </div>
 
@@ -359,14 +368,14 @@ export default function ProfilePage() {
           className="card flex items-center gap-5 p-6 group hover:-translate-y-1 transition-all duration-300 bg-[url('https://www.transparenttextures.com/patterns/p6.png')]"
         >
           <div className="w-16 h-16 bg-post-transition-metal text-retro-stroke border-2 border-retro-stroke rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>
+            <Users className="w-8 h-8" />
           </div>
           <div>
             <h3 className="font-black text-xl mb-1">Community Board</h3>
             <p className="text-sm font-bold opacity-80">Browse, upvote, and discuss ideas with other chemists.</p>
           </div>
           <div className="ml-auto w-12 h-12 rounded-full bg-white border-2 border-retro-stroke flex items-center justify-center group-hover:bg-retro-stroke group-hover:text-white transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg>
+            <ChevronRight className="w-6 h-6" />
           </div>
         </Link>
       </div>

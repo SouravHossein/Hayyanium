@@ -16,6 +16,7 @@ import {
   MissionType,
   BadgeId,
   DEFAULT_PLAYER_PROGRESS,
+  ZoneDefinition,
 } from '../../types/progressionTypes';
 import { ZONE_DEFINITIONS, buildMissionsForZone, ZONE_MAP } from '../../data/zones';
 import { ElementMastery } from '../../types/quizTypes';

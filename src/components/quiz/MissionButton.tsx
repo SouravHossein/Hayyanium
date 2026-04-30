@@ -3,13 +3,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { MissionDefinition, MissionType, ZoneProgress } from '@/types/progressionTypes';
+import { GraduationCap, PencilLine, Zap, RotateCcw, Skull, Check, Lock } from '@/components/icons';
 
-const MISSION_STYLES: Record<MissionType, { label: string; icon: string; color: string; activeBg: string }> = {
-  learn:    { label: 'Learn',    icon: '📖', color: 'text-blue-600 dark:text-blue-400',   activeBg: 'bg-blue-50 dark:bg-blue-900/30 border-blue-400' },
-  practice: { label: 'Practice', icon: '✏️', color: 'text-green-600 dark:text-green-400', activeBg: 'bg-green-50 dark:bg-green-900/30 border-green-400' },
-  speed:    { label: 'Speed',    icon: '⚡', color: 'text-amber-600 dark:text-amber-400', activeBg: 'bg-amber-50 dark:bg-amber-900/30 border-amber-400' },
-  recovery: { label: 'Recovery', icon: '💊', color: 'text-purple-600 dark:text-purple-400', activeBg: 'bg-purple-50 dark:bg-purple-900/30 border-purple-400' },
-  boss:     { label: 'BOSS',     icon: '💀', color: 'text-red-600 dark:text-red-400',     activeBg: 'bg-red-50 dark:bg-red-900/30 border-red-500' },
+const MISSION_STYLES: Record<MissionType, { label: string; icon: any; color: string; activeBg: string }> = {
+  learn: { label: 'Learn', icon: GraduationCap, color: 'text-blue-600 dark:text-blue-400', activeBg: 'bg-blue-50 dark:bg-blue-900/30 border-blue-400' },
+  practice: { label: 'Practice', icon: PencilLine, color: 'text-green-600 dark:text-green-400', activeBg: 'bg-green-50 dark:bg-green-900/30 border-green-400' },
+  speed: { label: 'Speed', icon: Zap, color: 'text-amber-600 dark:text-amber-400', activeBg: 'bg-amber-50 dark:bg-amber-900/30 border-amber-400' },
+  recovery: { label: 'Recovery', icon: RotateCcw, color: 'text-purple-600 dark:text-purple-400', activeBg: 'bg-purple-50 dark:bg-purple-900/30 border-purple-400' },
+  boss: { label: 'BOSS', icon: Skull, color: 'text-red-600 dark:text-red-400', activeBg: 'bg-red-50 dark:bg-red-900/30 border-red-500' },
 };
 
 interface MissionButtonProps {
@@ -43,9 +44,11 @@ export default function MissionButton({
         : `border-transparent hover:border-current hover:shadow-sm active:scale-95 ${style.color} ${visited ? style.activeBg + ' border-current/30' : 'bg-white dark:bg-gray-800'}`
       } ${className}`}
     >
-      <span className={locked ? 'grayscale' : ''}>{locked ? '🔒' : style.icon}</span>
+      <div className={locked ? 'grayscale' : ''}>
+        {locked ? <Lock className="w-4 h-4" /> : <style.icon className="w-4 h-4" />}
+      </div>
       <span>{style.label}</span>
-      {visited && !locked && <span className="ml-auto text-xs opacity-60">✓</span>}
+      {visited && !locked && <Check className="ml-auto w-3 h-3 opacity-60" />}
       {locked && bossLocked && (
         <span className="ml-auto text-[10px] opacity-60">75% coverage needed</span>
       )}

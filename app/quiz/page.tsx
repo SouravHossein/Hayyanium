@@ -22,12 +22,14 @@ import ZoneCard from '@/components/quiz/ZoneCard';
 import BossCard from '@/components/quiz/BossCard';
 import DailyMissionCard from '@/components/quiz/DailyMissionCard';
 
+import { Map, FlaskConical, Skull, Compass, ArrowLeft } from '@/components/icons';
+
 type Tab = 'story' | 'daily' | 'boss';
 
-const TABS: { id: Tab; label: string; emoji: string }[] = [
-  { id: 'story',  label: 'Story Path',    emoji: '🗺️' },
-  { id: 'daily',  label: 'Daily Lab',     emoji: '🧪' },
-  { id: 'boss',   label: 'Boss Battles',  emoji: '💀' },
+const TABS: { id: Tab; label: string; icon: any }[] = [
+  { id: 'story', label: 'Story Path', icon: Map },
+  { id: 'daily', label: 'Daily Lab', icon: FlaskConical },
+  { id: 'boss', label: 'Boss Battles', icon: Skull },
 ];
 
 export default function QuizAcademyPage() {
@@ -73,10 +75,17 @@ export default function QuizAcademyPage() {
 
   return (
     <div className="space-y-6 pb-8">
+      {/* Back button */}
+      <Link
+        href="/quiz/setup"
+        className="flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors w-fit"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to Quizzes
+      </Link>
 
       {/* ── Recommended Action Banner ─────────────────────────── */}
       <div className="rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 p-4 text-white flex items-center gap-3 shadow-lg shadow-blue-200 dark:shadow-blue-900">
-        <span className="text-2xl flex-shrink-0">🧭</span>
+        <Compass className="w-8 h-8 text-white flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold opacity-80 uppercase tracking-wider">Recommended</p>
           <p className="font-bold text-sm leading-snug">{recommendedAction}</p>
@@ -102,19 +111,19 @@ export default function QuizAcademyPage() {
       )}
 
       {/* ── Tab Navigation ────────────────────────────────────── */}
-      <div className="flex gap-1 rounded-2xl bg-gray-100 dark:bg-gray-800 p-1">
-        {TABS.map(t => (
+      <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl">
+        {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all
               ${tab === t.id
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm shadow-black/5'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
           >
-            <span>{t.emoji}</span>
-            <span className="hidden sm:inline">{t.label}</span>
+            <t.icon className={`w-4 h-4 ${tab === t.id ? 'text-blue-500' : 'opacity-60'}`} />
+            {t.label}
           </button>
         ))}
       </div>

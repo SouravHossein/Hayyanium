@@ -4,6 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { MissionResult, RewardUnlock } from '@/types/progressionTypes';
 import { XpEvent } from '@/types/progressionTypes';
+import { 
+  Sparkles, Rocket, Map, Lock, Trophy, 
+  Dumbbell, Star, GraduationCap, Medal, BadgeInfo 
+} from '@/components/icons';
 
 interface XpRewardPanelProps {
   missionResult: MissionResult;
@@ -62,7 +66,9 @@ export default function XpRewardPanel({ missionResult, rewards, xpEvents, totalX
       {/* Level-up banner */}
       {missionResult.leveledUp && (
         <div className="rounded-2xl border-2 border-purple-400 dark:border-purple-600 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/20 p-4 text-center">
-          <div className="text-3xl mb-1">🎉</div>
+          <div className="flex justify-center mb-1">
+            <Sparkles className="w-10 h-10 text-purple-500 fill-purple-500/20 animate-pulse" />
+          </div>
           <p className="font-black text-purple-700 dark:text-purple-300 text-lg">Level Up!</p>
           <p className="text-sm text-purple-600 dark:text-purple-400">You reached <strong>Level {missionResult.newLevel}</strong>!</p>
           {missionResult.newRank && (
@@ -76,7 +82,7 @@ export default function XpRewardPanel({ missionResult, rewards, xpEvents, totalX
         <div className="space-y-2">
           {featureRewards.map((r, i) => (
             <div key={i} className="flex items-center gap-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 px-4 py-3">
-              <span className="text-xl">🔓</span>
+              <Lock className="w-5 h-5 text-blue-500" />
               <div>
                 <p className="font-bold text-sm text-blue-700 dark:text-blue-300">{r.label}</p>
                 {r.description && <p className="text-xs text-blue-600 dark:text-blue-400">{r.description}</p>}
@@ -93,8 +99,8 @@ export default function XpRewardPanel({ missionResult, rewards, xpEvents, totalX
           <div className="flex flex-wrap gap-3">
             {badgeRewards.map((r, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow">
-                  🏅
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow">
+                  <Medal className="w-7 h-7" />
                 </div>
                 <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 text-center max-w-[56px] leading-tight">
                   {r.label.replace('Badge: ', '')}
@@ -108,7 +114,7 @@ export default function XpRewardPanel({ missionResult, rewards, xpEvents, totalX
       {/* Comeback elements */}
       {missionResult.comebackElements.length > 0 && (
         <div className="flex items-center gap-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 px-4 py-3">
-          <span className="text-xl">💪</span>
+          <Dumbbell className="w-6 h-6 text-green-600" />
           <div>
             <p className="font-bold text-sm text-green-700 dark:text-green-300">Comeback!</p>
             <p className="text-xs text-green-600 dark:text-green-400">
@@ -124,13 +130,13 @@ export default function XpRewardPanel({ missionResult, rewards, xpEvents, totalX
           href="/quiz"
           className="flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 dark:border-gray-700 py-3 font-bold text-sm text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 transition-all active:scale-95"
         >
-          🗺️ Academy
+          <Map className="w-4 h-4" /> Academy
         </Link>
         <Link
           href="/quiz/setup"
           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 py-3 font-bold text-sm text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900 hover:shadow-xl transition-all active:scale-95"
         >
-          🚀 New Quiz
+          <Rocket className="w-4 h-4" /> New Quiz
         </Link>
       </div>
     </div>

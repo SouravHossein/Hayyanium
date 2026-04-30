@@ -4,6 +4,35 @@ import React, { useState } from 'react';
 import { ZoneDefinition, ZoneProgress, MissionType } from '@/types/progressionTypes';
 import { buildMissionsForZone } from '@/data/zones';
 import MissionButton from './MissionButton';
+import { 
+  Zap, Flame, Droplet, FlaskConical, Leaf, Moon, Radio, 
+  CircleDot, Atom, BrainCircuit, Gem, 
+  ChevronDown, CheckCircle2 
+} from '@/components/icons';
+
+const ZONE_ICON_MAP: Record<string, any> = {
+  'period-1': Zap,
+  'period-2': Flame,
+  'period-3': Droplet,
+  'period-4': FlaskConical,
+  'period-5': Leaf,
+  'period-6': Moon,
+  'period-7': Radio,
+  'block-s':  CircleDot,
+  'block-p':  Atom,
+  'block-d':  BrainCircuit,
+  'block-f':  Gem,
+  'cat-alkali': Zap,
+  'cat-halogen': FlaskConical,
+  'cat-noble': Atom,
+  'cat-transition': BrainCircuit,
+};
+
+function ZoneIcon({ zoneId, cleared, className }: { zoneId: string; cleared: boolean; className?: string }) {
+  const Icon = ZONE_ICON_MAP[zoneId] || Atom;
+  if (cleared) return <CheckCircle2 className={`text-emerald-500 fill-emerald-500/20 ${className}`} />;
+  return <Icon className={className} />;
+}
 
 interface ZoneCardProps {
   zone: ZoneDefinition;
@@ -61,8 +90,8 @@ export default function ZoneCard({
               style={{ transition: 'stroke-dashoffset 0.6s ease' }}
             />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-lg">
-            {cleared ? '✅' : zone.icon}
+          <span className="absolute inset-0 flex items-center justify-center">
+            <ZoneIcon zoneId={zone.id} cleared={cleared} className="w-6 h-6" />
           </span>
         </div>
 
@@ -85,7 +114,7 @@ export default function ZoneCard({
         </div>
 
         {/* Expand chevron */}
-        <span className={`text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`}>▾</span>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Mission list */}

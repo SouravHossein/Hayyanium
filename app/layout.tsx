@@ -21,9 +21,17 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://hayyanium.vercel.app/"),
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon-192.svg",
-    apple: "/icon-192.svg",
-    shortcut: "/icon-192.svg",
+    icon: [
+      { url: "/favicons/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicons/icon-16.svg", sizes: "16x16", type: "image/svg+xml" },
+      { url: "/favicons/icon-32.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/favicons/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/favicons/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/favicons/icon-180.svg", sizes: "180x180", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicons/favicon.svg",
   },
   appleWebApp: {
     capable: true,
