@@ -9,6 +9,7 @@
 
 # Production build
 /build
+/dist
 
 # Logs
 npm-debug.log*
@@ -55,3 +56,5 @@ Thumbs.db
 client_secret.json
 .env.local
 .env
+public/sw.js
+public/workbox-*.js

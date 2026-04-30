@@ -180,7 +180,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
 
         {!ai && (
           <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/80 dark:bg-amber-950/40 dark:text-amber-200">
-            Add <code>VITE_GEMINI_API_KEY</code> in <code>.env.local</code> to enable AI roast, hype, and compound analysis features.
+            Add <code>NEXT_PUBLIC_GEMINI_API_KEY</code> in <code>.env.local</code> to enable AI roast, hype, and compound analysis features.
           </div>
         )}
 

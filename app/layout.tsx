@@ -20,6 +20,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://hayyanium.vercel.app/"),
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.svg",
+    apple: "/icon-192.svg",
+    shortcut: "/icon-192.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -57,7 +62,7 @@ export const metadata: Metadata = {
     url: "https://hayyanium.vercel.app/",
     images: [
       {
-        url: "/og-image.png",
+        url: "/hayyanium_linkedin_cover_1776623402624.png",
         width: 1200,
         height: 630,
         alt: "Hayyanium Dashboard",
@@ -70,7 +75,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hayyanium - Elements & 3D Models",
     description: "Explore the building blocks of the universe with our interactive 3D periodic table.",
-    images: ["/og-image.png"],
+    images: ["/hayyanium_linkedin_cover_1776623402624.png"],
     creator: "@sourav_hossein",
   },
   alternates: {

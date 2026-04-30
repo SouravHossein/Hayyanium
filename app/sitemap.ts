@@ -5,21 +5,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://hayyanium.vercel.app';
   const lastModified = new Date();
 
-  // Core routes
   const mainRoutes = [
-    '',
-    '/elements',
-    '/compounds',
-    '/trends',
-    '/history',
-  ].map((route) => ({
+    { route: '', priority: 1, changeFrequency: 'weekly' as const },
+    { route: '/community', priority: 0.7, changeFrequency: 'weekly' as const },
+    { route: '/quiz', priority: 0.8, changeFrequency: 'weekly' as const },
+    { route: '/quiz/setup', priority: 0.6, changeFrequency: 'monthly' as const },
+    { route: '/quiz/premium', priority: 0.4, changeFrequency: 'monthly' as const },
+    { route: '/timeline', priority: 0.8, changeFrequency: 'monthly' as const },
+  ].map(({ route, priority, changeFrequency }) => ({
     url: `${baseUrl}${route}`,
     lastModified,
-    changeFrequency: 'daily' as const,
-    priority: route === '' ? 1 : 0.8,
+    changeFrequency,
+    priority,
   }));
 
-  // Element specific routes
   const elementRoutes = allElementsData.map((element) => ({
     url: `${baseUrl}/element/${element.symbol}`,
     lastModified,
