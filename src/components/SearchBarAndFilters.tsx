@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ElementCategory, ElementData, Trend } from '../types';
 import { CATEGORY_EMOJIS } from '../constants';
-import { Cross, Trash, Trash2Icon } from 'lucide-react';
+import { Trash2Icon } from 'lucide-react';
 
 interface SearchBarAndFiltersProps {
   searchTerm: string;
@@ -106,25 +106,26 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
   const disabledClasses = controlsDisabled ? "opacity-60 cursor-not-allowed" : "";
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-2">
+    <div className="w-full max-w-7xl mx-auto px-1.5 sm:px-4 py-2">
       <div className="card overflow-hidden transition-all duration-300">
 
         {/* Main Header Area */}
-        <div className="p-2 lg:p-3 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+        <div className="p-2.5 lg:p-3 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
 
           {/* Search Section */}
-          <div className="flex flex-1 gap-2 " >
+          <div className="flex flex-1 gap-2 items-center">
             <input
               type="text"
               placeholder="Search by name, symbol, or atomic number..."
               value={searchTerm}
               onChange={handleSearchChange}
               disabled={controlsDisabled}
-              className={`w-full flex-1 pl-11 pr-4 py-1.5 font-bold placeholder:text-gray-400 ${disabledClasses}`}
+              className={`w-full min-h-11 flex-1 pl-4 pr-4 py-2.5 text-sm font-bold placeholder:text-gray-400 ${disabledClasses}`}
             />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`flex items-center gap-1.5 p-1.5 px-3 text-xs font-bold uppercase shrink-0 transition-all ${isMenuOpen ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              className={`min-h-11 min-w-11 rounded-lg border border-[var(--color-retro-stroke)]/25 flex items-center justify-center gap-1.5 px-3 text-xs font-bold uppercase shrink-0 transition-all ${isMenuOpen ? '!bg-[var(--color-alkali-metal)]' : 'bg-white/70 dark:bg-gray-800/60'}`}
+              aria-label="Toggle filters"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -133,14 +134,14 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             </button>
             <button
               onClick={() => onViewModeChange('grid')}
-              className={`p-1.5 transition-all ${viewMode === 'grid' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              className={`min-h-11 min-w-11 rounded-lg border border-[var(--color-retro-stroke)]/25 px-2.5 text-xs font-bold transition-all ${viewMode === 'grid' ? '!bg-[var(--color-alkali-metal)]' : 'bg-white/70 dark:bg-gray-800/60'}`}
               title="Grid View"
             >
               2D
             </button>
             <button
               onClick={() => onViewModeChange('list')}
-              className={`p-1.5 transition-all ${viewMode === 'list' ? '!bg-[var(--color-alkali-metal)]' : ''}`}
+              className={`min-h-11 min-w-11 rounded-lg border border-[var(--color-retro-stroke)]/25 px-2.5 text-xs font-bold transition-all ${viewMode === 'list' ? '!bg-[var(--color-alkali-metal)]' : 'bg-white/70 dark:bg-gray-800/60'}`}
               title="List View"
             >
               {/* <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg> */}
@@ -148,7 +149,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
             </button>
             <button
               onClick={() => onViewModeChange('3d')}
-              className={`p-1.5 text-xs transition-all ${viewMode === '3d' ? '!bg-[var(--color-actinide)]' : ''}`}
+              className={`min-h-11 min-w-11 rounded-lg border border-[var(--color-retro-stroke)]/25 px-2.5 text-xs font-bold transition-all ${viewMode === '3d' ? '!bg-[var(--color-actinide)]' : 'bg-white/70 dark:bg-gray-800/60'}`}
               title="3D View"
             >
               3D
@@ -169,7 +170,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
         )}
 
         {/* Filters Section - Collapsible */}
-        <div className={`${isMenuOpen ? 'max-h-[1000px] opacity-100 border-t' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20`}>
+        <div className={`${isMenuOpen ? 'max-h-[1200px] opacity-100 border-t' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-400 ease-out border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20`}>
           <div className="p-2 lg:p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
             {/* Category Filter */}
@@ -210,7 +211,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     value={dateFilter.min}
                     onChange={handleMinDateChange}
                     disabled={controlsDisabled}
-                    className={`w-full px-3 py-2 font-bold outline-none ${disabledClasses}`}
+                    className={`w-full min-h-11 px-3 py-2.5 font-bold outline-none ${disabledClasses}`}
                     placeholder="From"
                   />
                 </div>
@@ -221,7 +222,7 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
                     value={dateFilter.max}
                     onChange={handleMaxDateChange}
                     disabled={controlsDisabled}
-                    className={`w-full px-3 py-2 font-bold outline-none ${disabledClasses}`}
+                    className={`w-full min-h-11 px-3 py-2.5 font-bold outline-none ${disabledClasses}`}
                     placeholder="To"
                   />
                 </div>
@@ -248,8 +249,9 @@ const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
               <button
                 onClick={onClear}
                 disabled={controlsDisabled}
-                className="p-2 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
+                className="min-h-11 min-w-11 rounded-lg border border-[var(--color-retro-stroke)]/25 p-2 transition-all !text-[var(--color-nonmetal)] hover:!bg-[var(--color-nonmetal)] hover:!text-white"
                 title="Clear all filters"
+                aria-label="Clear all filters"
               >
                 < Trash2Icon className="h-6 w-6" />
               </button>

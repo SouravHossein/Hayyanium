@@ -25,10 +25,10 @@ const FORMATS: { value: QuizFormat; label: string; desc: string }[] = [
 
 const DIRECTIONS: { value: QuizDirection; label: string }[] = [
   { value: 'name-to-symbol', label: 'Name → Symbol' },
+  { value: 'symbol-to-name', label: 'Symbol → Name' },
+  { value: 'number-to-name', label: 'Atomic Number → Name' },
   { value: 'name-to-number', label: 'Name → Atomic Number' },
   { value: 'name-to-weight', label: 'Name → Atomic Weight' },
-  { value: 'number-to-name', label: 'Atomic Number → Name' },
-  { value: 'symbol-to-name', label: 'Symbol → Name' },
   { value: 'weight-to-name', label: 'Atomic Weight → Name' },
 ];
 
@@ -96,7 +96,7 @@ function QuizSetupContent() {
   })();
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-5 pb-[calc(5rem+env(safe-area-inset-bottom))]">
       <div>
         <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">Quiz Setup</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure your quiz and start learning</p>
@@ -123,10 +123,10 @@ function QuizSetupContent() {
       {/* Direction */}
       <section className="space-y-3">
         <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Question Direction</h2>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {DIRECTIONS.map(d => (
             <button key={d.value} onClick={() => updateConfig({ direction: d.value })}
-              className={`rounded-lg border px-3 py-2.5 text-sm font-semibold transition-all ${config.direction === d.value ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300 dark:hover:border-cyan-600'}`}>
+              className={`min-h-11 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-all ${config.direction === d.value ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300 dark:hover:border-cyan-600'}`}>
               {d.label}
             </button>
           ))}
@@ -139,7 +139,7 @@ function QuizSetupContent() {
         <div className="flex flex-wrap gap-2">
           {QUESTION_COUNTS.map(n => (
             <button key={n} onClick={() => updateConfig({ questionCount: n })}
-              className={`rounded-lg border px-4 py-2 text-sm font-bold transition-all ${config.questionCount === n ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
+              className={`min-h-10 rounded-lg border px-4 py-2 text-sm font-bold transition-all ${config.questionCount === n ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
               {n}
             </button>
           ))}
@@ -153,7 +153,7 @@ function QuizSetupContent() {
           <div className="flex flex-wrap gap-2">
             {(['all', 'favorites', 'weak'] as const).map(t => (
               <button key={t} onClick={() => updateConfig({ scope: { type: t } })}
-                className={`rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-all ${config.scope.type === t ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
+                className={`min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold capitalize transition-all ${config.scope.type === t ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
               {t === 'all' ? 'All 118' : t === 'favorites' ? <span className="inline-flex items-center gap-1"><Sparkles className="h-3.5 w-3.5" /> Favorites ({favorites.length})</span> : <span className="inline-flex items-center gap-1"><Flame className="h-3.5 w-3.5" /> Weak ({typeof window !== 'undefined' ? getWeakElements().length : 0})</span>}
               </button>
             ))}
@@ -194,10 +194,10 @@ function QuizSetupContent() {
       {/* Difficulty */}
       <section className="space-y-3">
         <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Difficulty</h2>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {(['easy','normal','hard'] as QuizDifficulty[]).map(d => (
             <button key={d} onClick={() => updateConfig({ difficulty: d })}
-              className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-bold capitalize transition-all ${config.difficulty === d ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
+              className={`min-h-11 rounded-lg border px-4 py-2.5 text-sm font-bold capitalize transition-all ${config.difficulty === d ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-cyan-300'}`}>
                 <span className="inline-flex items-center gap-2">
                   {d === 'easy' ? <Sparkles className="h-4 w-4" /> : d === 'normal' ? <Target className="h-4 w-4" /> : <Flame className="h-4 w-4" />}
                   {d === 'easy' ? 'Easy' : d === 'normal' ? 'Normal' : 'Hard'}
@@ -238,7 +238,7 @@ function QuizSetupContent() {
       </section>
 
       {/* Start button */}
-      <div className="pt-4 pb-8">
+      <div className="pt-3 pb-4 sticky bottom-0 bg-gradient-to-t from-white dark:from-gray-900 via-white/95 dark:via-gray-900/95 to-transparent">
         <button onClick={handleStart} disabled={scopeCount < 2}
           className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 text-lg font-extrabold text-white shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100">
           <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Start Quiz ({Math.min(config.questionCount, scopeCount)} questions)</span>

@@ -17,6 +17,7 @@ interface TableZoomWrapperProps {
   minScale?: number;
   maxScale?: number;
   initialScale?: number;
+  mobileBottomOffset?: number;
 }
 
 export interface TableZoomRef {
@@ -187,6 +188,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       minScale = 0.4,
       maxScale = 4,
       initialScale = 1,
+      mobileBottomOffset = 100,
     },
     ref,
   ) => {
@@ -548,7 +550,10 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           </div>
 
           {/* ── Mobile fixed toggle ── */}
-          <div className="sm:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+          <div
+            className="sm:hidden absolute left-1/2 -translate-x-1/2 z-[100]"
+            style={{ bottom: mobileBottomOffset }}
+          >
             <MobileZoomToggle
               activeStep={activeMobileStep}
               opacity={mobileControlOpacity}
@@ -640,7 +645,10 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
               </div>
 
               {/* Mobile fixed toggle */}
-              <div className="sm:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+              <div
+                className="sm:hidden absolute left-1/2 -translate-x-1/2 z-[100]"
+                style={{ bottom: mobileBottomOffset }}
+              >
                 <MobileZoomToggle
                   activeStep={activeMobileStep}
                   opacity={mobileControlOpacity}

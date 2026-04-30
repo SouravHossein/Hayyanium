@@ -8,9 +8,9 @@ import { ArrowRight, Atom, BookOpenText, ChartColumn, Flame, FlaskConical, Gamep
 
 const QUICK_MODES = [
   { label: 'Name → Symbol', direction: 'name-to-symbol', format: 'multiple-choice', icon: CircleDot, color: 'from-cyan-500 to-blue-500' },
+  { label: 'Symbol → Name', direction: 'symbol-to-name', format: 'text-input', icon: PencilLine, color: 'from-orange-500 to-red-500' },
   { label: 'Number → Name', direction: 'number-to-name', format: 'multiple-choice', icon: Target, color: 'from-purple-500 to-pink-500' },
   { label: 'Find on Table', direction: 'name-to-number', format: 'find-on-table', icon: Map, color: 'from-emerald-500 to-teal-500' },
-  { label: 'Symbol → Name', direction: 'symbol-to-name', format: 'text-input', icon: PencilLine, color: 'from-orange-500 to-red-500' },
 ];
 
 const BLOCK_SHORTCUTS = [

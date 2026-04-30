@@ -173,14 +173,13 @@ export default function CommunityPage() {
   const featureCount = posts.filter((p) => p.type === 'feature').length;
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 pb-24 font-display">
+    <div className="min-h-screen p-3 sm:p-8 pb-[calc(6.5rem+env(safe-area-inset-bottom))] font-display">
       <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8 gap-4 flex-wrap">
-          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity font-bold">
+        <header className="grid grid-cols-[1fr_auto] gap-3 mb-6 sm:mb-8 items-start">
+          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity font-bold min-h-11">
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Table</span>
           </Link>
-          <h1 className="text-2xl font-bold">Community Board</h1>
           <button
             onClick={() => {
               if (!user) {
@@ -189,11 +188,12 @@ export default function CommunityPage() {
               }
               setShowForm((v) => !v);
             }}
-            className="px-5 py-2.5 bg-lanthanide text-retro-stroke font-bold border-2 border-retro-stroke inline-flex items-center gap-2"
+            className="min-h-11 px-4 py-2 bg-lanthanide text-retro-stroke font-bold border-2 border-retro-stroke inline-flex items-center justify-center gap-2 text-sm"
           >
             <Plus className="w-4 h-4" />
-            {showForm ? 'Close Form' : 'New Post'}
+            {showForm ? 'Close' : 'New Post'}
           </button>
+          <h1 className="text-2xl font-bold col-span-2 leading-tight">Community Board</h1>
         </header>
 
         <section className="card p-6 sm:p-8 mb-8">
@@ -208,7 +208,7 @@ export default function CommunityPage() {
         </section>
 
         {showForm && (
-          <section className="card p-6 sm:p-8 mb-6">
+          <section className="card p-4 sm:p-8 mb-6">
             <h2 className="text-xl font-black mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
               Create New Post
@@ -222,10 +222,10 @@ export default function CommunityPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex p-1.5 rounded-xl border-2 border-retro-stroke bg-retro-bg-light">
-                  <button type="button" onClick={() => setNewType('bug')} className={`flex-1 py-3 text-sm font-black transition-all ${newType === 'bug' ? 'bg-nonmetal text-white border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
+                  <button type="button" onClick={() => setNewType('bug')} className={`flex-1 min-h-11 py-3 text-sm font-black transition-all ${newType === 'bug' ? 'bg-nonmetal text-white border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
                     Bug Report
                   </button>
-                  <button type="button" onClick={() => setNewType('feature')} className={`flex-1 py-3 text-sm font-black transition-all ${newType === 'feature' ? 'bg-transition-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
+                  <button type="button" onClick={() => setNewType('feature')} className={`flex-1 min-h-11 py-3 text-sm font-black transition-all ${newType === 'feature' ? 'bg-transition-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
                     Feature Request
                   </button>
                 </div>
@@ -237,7 +237,7 @@ export default function CommunityPage() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="Brief summary of your report..."
-                    className="w-full px-5 py-3 text-sm font-bold"
+                    className="w-full min-h-11 px-4 py-3 text-sm font-bold"
                   />
                 </div>
                 <div>
@@ -248,21 +248,21 @@ export default function CommunityPage() {
                     onChange={(e) => setNewDesc(e.target.value)}
                     placeholder="Describe the bug or feature in detail..."
                     rows={4}
-                    className="w-full px-5 py-3 text-sm font-bold resize-none"
+                    className="w-full min-h-28 px-4 py-3 text-sm font-bold resize-none"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 py-3 bg-lanthanide text-retro-stroke border-2 border-retro-stroke font-black text-sm disabled:opacity-50"
+                    className="min-h-11 py-3 bg-lanthanide text-retro-stroke border-2 border-retro-stroke font-black text-sm disabled:opacity-50"
                   >
                     {isSubmitting ? 'Posting...' : 'Submit Post'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="px-4 py-3 bg-white text-retro-stroke border-2 border-retro-stroke font-bold text-sm"
+                    className="min-h-11 px-4 py-3 bg-white text-retro-stroke border-2 border-retro-stroke font-bold text-sm"
                   >
                     Cancel
                   </button>

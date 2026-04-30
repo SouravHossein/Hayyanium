@@ -114,7 +114,7 @@ export default function QuizPlayPage() {
   const motionClass = appSettings?.reducedMotion ? '[&_*]:!transition-none [&_*]:!animate-none [&_*]:!duration-0' : '';
 
   return (
-    <div className={`max-w-2xl mx-auto space-y-6 ${fontClass} ${motionClass}`}>
+    <div className={`max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-[calc(5rem+env(safe-area-inset-bottom))] ${fontClass} ${motionClass}`}>
       {/* Progress */}
       <QuizProgressBar
         current={quizState.currentIndex}
@@ -126,7 +126,7 @@ export default function QuizPlayPage() {
       />
 
       {/* Question content */}
-      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
+      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 sm:p-8 shadow-sm">
         {currentQuestion.format === 'multiple-choice' && (
           <MultipleChoiceQuestion
             question={currentQuestion}
@@ -164,11 +164,11 @@ export default function QuizPlayPage() {
       </div>
 
       {/* Next / Skip buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-stretch">
         {isFeedback && (
           <button
             onClick={handleNext}
-            className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 min-h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-[1.02] active:scale-[0.98]"
           >
             <span className="inline-flex items-center justify-center gap-2">
               {quizState.currentIndex >= quizState.questions.length - 1 ? <Flag className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
@@ -180,7 +180,7 @@ export default function QuizPlayPage() {
         {!isFeedback && currentQuestion.format === 'multiple-choice' && (
           <button
             onClick={skipQuestion}
-            className="ml-auto rounded-xl border-2 border-gray-200 dark:border-gray-600 px-5 py-2.5 text-sm font-semibold text-gray-500 dark:text-gray-400 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            className="ml-auto min-h-12 rounded-xl border-2 border-gray-200 dark:border-gray-600 px-5 py-2.5 text-sm font-semibold text-gray-500 dark:text-gray-400 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50"
           >
             <span className="inline-flex items-center gap-2">Skip <ArrowRight className="h-4 w-4" /></span>
           </button>

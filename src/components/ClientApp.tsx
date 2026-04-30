@@ -106,6 +106,9 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
 
   // Touch drag state
   const touchDragElement = useRef<ElementData | null>(null);
+  const touchDragTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchDragArmedRef = useRef(false);
   const workbenchRef = useRef<HTMLDivElement | null>(null);
   const [touchDragActive, setTouchDragActive] = useState(false);
   const [touchPos, setTouchPos] = useState({ x: 0, y: 0 });
@@ -138,6 +141,14 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
 
     mediaQuery.addListener(syncViewport);
     return () => mediaQuery.removeListener(syncViewport);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (touchDragTimerRef.current) {
+        clearTimeout(touchDragTimerRef.current);
+      }
+    };
   }, []);
 
   const ai = useMemo(() => createGeminiClient(), []);
@@ -339,23 +350,50 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   const handleElementTouchStart = useCallback(
     (element: ElementData, e: React.TouchEvent) => {
       if (!isBuilderActive) return;
-      touchDragElement.current = element;
       const touch = e.touches[0];
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
       setTouchPos({ x: touch.clientX, y: touch.clientY });
-      setTouchDragActive(true);
+      touchDragArmedRef.current = false;
+      if (touchDragTimerRef.current) {
+        clearTimeout(touchDragTimerRef.current);
+      }
+      touchDragTimerRef.current = setTimeout(() => {
+        touchDragElement.current = element;
+        touchDragArmedRef.current = true;
+        setTouchDragActive(true);
+      }, 280);
     },
     [isBuilderActive],
   );
 
   const handleElementTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touchStartRef.current && !touchDragArmedRef.current) {
+      const dx = Math.abs(touch.clientX - touchStartRef.current.x);
+      const dy = Math.abs(touch.clientY - touchStartRef.current.y);
+      if (dx > 12 || dy > 12) {
+        if (touchDragTimerRef.current) {
+          clearTimeout(touchDragTimerRef.current);
+          touchDragTimerRef.current = null;
+        }
+      }
+      return;
+    }
     if (!touchDragElement.current) return;
     e.preventDefault();
-    const touch = e.touches[0];
     setTouchPos({ x: touch.clientX, y: touch.clientY });
   }, []);
 
   const handleElementTouchEnd = useCallback(
     (e: React.TouchEvent) => {
+      if (touchDragTimerRef.current) {
+        clearTimeout(touchDragTimerRef.current);
+        touchDragTimerRef.current = null;
+      }
+      if (!touchDragArmedRef.current) {
+        touchStartRef.current = null;
+        return;
+      }
       if (!touchDragElement.current) return;
       const touch = e.changedTouches[0];
 
@@ -366,6 +404,8 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
       }
 
       touchDragElement.current = null;
+      touchStartRef.current = null;
+      touchDragArmedRef.current = false;
       setTouchDragActive(false);
     },
     [handleAddToBuilder],
@@ -513,7 +553,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
   return (
     <>
       <div
-        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-20 md:pb-8 ${isBuilderActive ? "pb-48 md:pb-32" : ""
+        className={`min-h-screen font-sans text-gray-900 transition-all duration-300 dark:text-gray-100 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-8 ${isBuilderActive ? "pb-[calc(13rem+env(safe-area-inset-bottom))] md:pb-32" : ""
           } p-2 sm:p-4 overflow-x-hidden`}
       >
         <div className="mx-auto max-w-screen-2xl">
@@ -664,7 +704,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
             >
               <section
                 aria-label="Filters and controls"
-                className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md sticky top-0 z-30 py-4 px-6 border-b border-gray-200 dark:border-gray-700"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-30 py-2.5 sm:py-4 px-2 sm:px-6 border-b border-gray-200 dark:border-gray-700"
               >
                 <SearchBarAndFilters
                   searchTerm={searchTerm}
@@ -687,7 +727,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
               {/* Touch drag hint on mobile */}
               {isBuilderActive && (
-                <div className="md:hidden flex items-center gap-2 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-xl px-4 py-2 my-2 text-xs text-cyan-700 dark:text-cyan-300">
+                <div className="md:hidden sticky top-[88px] z-20 flex items-center gap-2 bg-cyan-50/95 dark:bg-cyan-900/35 border border-cyan-200 dark:border-cyan-800 rounded-xl px-3 py-2 my-2 text-xs text-cyan-700 dark:text-cyan-300">
                   <svg
                     className="w-4 h-4 shrink-0"
                     fill="none"
@@ -747,7 +787,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
 
               <section
                 aria-label="Periodic table view"
-                className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-12rem)]"
+                className="relative border border-gray-200 dark:border-gray-700 rounded-2xl overflow-auto bg-gray-50/50 dark:bg-gray-900/50 custom-scrollbar max-h-[calc(100vh-14.5rem)] sm:max-h-[calc(100vh-13rem)] lg:max-h-[calc(100vh-12rem)]"
               >
                 {viewMode === "list" ? (
                   <ElementList
@@ -773,6 +813,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                         ? "spreadsheet"
                         : "transform"
                     }
+                    mobileBottomOffset={isBuilderActive ? 156 : 108}
                   >
                     {(_scale, detailLevel) => (
                       <>
@@ -944,7 +985,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               >
                 <Drawer.Portal>
                   <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] lg:hidden" />
-                  <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl">
+                  <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[101] flex flex-col rounded-t-[32px] bg-white dark:bg-gray-800 lg:hidden h-[96vh] outline-none shadow-2xl pb-[env(safe-area-inset-bottom)]">
                     <Drawer.Title className="sr-only">
                       Element Details
                     </Drawer.Title>

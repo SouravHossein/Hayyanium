@@ -113,12 +113,12 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       {/* Mobile drag handle indicator */}
       {/* <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-1 lg:hidden"></div> */}
 
-      <button onClick={onClose} aria-label="Close element details" className="sticky top-4 right-4 float-right text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors z-10 mr-4">
+      <button onClick={onClose} aria-label="Close element details" className="sticky top-2 sm:top-4 right-3 sm:right-4 float-right text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors z-10 mr-2 sm:mr-4 rounded-full bg-white/90 dark:bg-gray-900/70 p-1">
         <X className="h-8 w-8" />
       </button>
 
       {/* Header */}
-      <div className={`${colorClass} ${textColorClass} p-6 rounded-t-3xl lg:rounded-t-lg mt-2 lg:mt-0`}>
+      <div className={`${colorClass} ${textColorClass} p-5 sm:p-6 rounded-t-3xl lg:rounded-t-lg mt-2 lg:mt-0`}>
         <div className="flex justify-between items-start">
           <div>
             <h2 id="element-panel-title" className="text-4xl font-extrabold">{element.name} ({element.symbol})</h2>
@@ -129,21 +129,21 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <p className="mb-4 text-gray-600 dark:text-gray-300 italic">{element.summary}</p>
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-5">
+          <button onClick={() => onToggleFavorite(element.atomicNumber)} className={`min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold transition-colors inline-flex items-center gap-2 ${isFavorite ? 'bg-yellow-400 dark:bg-yellow-500 text-gray-900' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
             <Star className="h-4 w-4" />
             <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
           </button>
-          <button onClick={handleCopySummary} className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors inline-flex items-center gap-2">
+          <button onClick={handleCopySummary} className="min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold bg-cyan-500 hover:bg-cyan-600 text-white dark:bg-cyan-600 dark:hover:bg-cyan-500 transition-colors inline-flex items-center gap-2">
             <Copy className="h-4 w-4" /> Copy Summary
           </button>
           <button
             onClick={() => onAddToCompare(element)}
             disabled={isInCompare || isCompareFull}
-            className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInCompare
+            className={`min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInCompare
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
@@ -154,7 +154,7 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
           <button
             onClick={() => onAddToBuilder(element)}
             disabled={isInBuilder || isBuilderFull}
-            className={`flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInBuilder
+            className={`min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${isInBuilder
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
@@ -165,14 +165,14 @@ const ElementPanel: React.FC<ElementPanelProps> = ({ element, isFavorite, onClos
           <button
             onClick={() => generateAiMessage('roast')}
             disabled={!ai || isGeneratingMessage}
-            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
+            className="min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors inline-flex items-center gap-2 disabled:opacity-50 col-span-1 sm:col-auto"
           >
             <span className="inline-flex items-center gap-2"><Flame className="h-4 w-4" /> Roast</span>
           </button>
           <button
             onClick={() => generateAiMessage('hype')}
             disabled={!ai || isGeneratingMessage}
-            className="flex-1 sm:flex-none justify-center px-4 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors flex items-center space-x-2 disabled:opacity-50"
+            className="min-h-11 justify-center px-3 py-2 rounded-md text-sm font-semibold bg-purple-500 hover:bg-purple-600 text-white transition-colors inline-flex items-center gap-2 disabled:opacity-50 col-span-1 sm:col-auto"
           >
             <span className="inline-flex items-center gap-2"><Rocket className="h-4 w-4" /> Hype</span>
           </button>

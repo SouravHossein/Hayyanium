@@ -45,7 +45,7 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
   const maxCol = 18;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {/* Prompt */}
       <div className="text-center space-y-1">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{question.promptLabel}</p>
@@ -55,7 +55,7 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
       {/* Hint button */}
       {!showFeedback && !hintRevealed && (
         <div className="flex justify-center">
-          <button onClick={onRevealHint} className="rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 inline-flex items-center gap-2"><Lightbulb className="h-4 w-4" /> Hint</button>
+          <button onClick={onRevealHint} className="min-h-10 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 inline-flex items-center gap-2"><Lightbulb className="h-4 w-4" /> Hint</button>
         </div>
       )}
       {hintRevealed && (
@@ -64,7 +64,7 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
 
       {/* Periodic Table Grid */}
       <div className="overflow-x-auto pb-2 -mx-2 px-2">
-        <div className="inline-grid gap-[2px] sm:gap-1" style={{ gridTemplateColumns: `repeat(${maxCol}, minmax(0, 1fr))`, minWidth: '600px' }}>
+        <div className="inline-grid gap-[2px] sm:gap-1" style={{ gridTemplateColumns: `repeat(${maxCol}, minmax(0, 1fr))`, minWidth: '640px' }}>
           {allElementsData.map((el) => {
             const style = getCellStyle(el);
             const row = el.ypos;
@@ -80,8 +80,8 @@ export default function FindOnTableQuestion({ question, onAnswer, disabled, show
                   gridRow: row,
                   gridColumn: col,
                   backgroundColor: style.color,
-                  minWidth: '28px',
-                  minHeight: '28px',
+                  minWidth: '32px',
+                  minHeight: '32px',
                 }}
                 title={`${el.name} (${el.symbol})`}
                 aria-label={`${el.name}, atomic number ${el.atomicNumber}`}

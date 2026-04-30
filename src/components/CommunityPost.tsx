@@ -58,8 +58,8 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
   };
 
   return (
-    <div className="card p-5 relative">
-      <div className="flex items-start justify-between gap-3 mb-4">
+    <div className="card p-4 sm:p-5 relative overflow-visible">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
           <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-retro-stroke bg-white">
             {post.author_avatar_url ? (
@@ -76,7 +76,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
           <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${typeConf.className}`}>
             {typeConf.label}
           </span>
@@ -91,7 +91,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
       <h3 className="font-black text-base mb-1 leading-snug">{post.title}</h3>
       <p className="text-sm font-bold opacity-80 leading-relaxed">{post.description}</p>
 
-      <div className="flex items-center justify-between mt-4 pt-3 border-t-2 border-retro-stroke">
+      <div className="flex items-end justify-between mt-4 pt-3 border-t-2 border-retro-stroke gap-3">
         <span className="text-xs font-bold opacity-70">{timeAgo(post.created_at)}</span>
 
         <div className="flex items-center gap-2">
@@ -99,13 +99,13 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
             <div className="relative">
               <button
                 onClick={() => setShowBadgeMenu((v) => !v)}
-                className="text-xs font-bold px-2.5 py-1.5 bg-alkaline-earth-metal text-retro-stroke border-2 border-retro-stroke"
+                className="min-h-9 text-xs font-bold px-2.5 py-1.5 bg-alkaline-earth-metal text-retro-stroke border-2 border-retro-stroke"
                 title="Set developer badge"
               >
                 Badge
               </button>
               {showBadgeMenu && (
-                <div className="absolute bottom-full right-0 mb-2 z-50 bg-white border-2 border-retro-stroke rounded-xl overflow-hidden min-w-[140px]">
+                <div className="absolute bottom-full right-0 mb-2 z-50 bg-white border-2 border-retro-stroke rounded-xl overflow-hidden min-w-[152px] max-h-56 overflow-y-auto shadow-xl">
                   {(Object.keys(BADGE_CONFIG) as NonNullable<BadgeType>[]).map((key) => (
                     <button
                       key={key}
@@ -136,7 +136,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
           <div className="flex flex-col items-center">
             <button
               onClick={() => onUpvote(post.id, post.user_has_upvoted ?? false)}
-              className={`flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-black border-2 border-retro-stroke ${post.user_has_upvoted ? 'bg-lanthanide text-retro-stroke' : 'bg-white text-retro-stroke'}`}
+              className={`min-h-10 min-w-16 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-black border-2 border-retro-stroke ${post.user_has_upvoted ? 'bg-lanthanide text-retro-stroke' : 'bg-white text-retro-stroke'}`}
             >
               <ArrowBigUp className={`w-4 h-4 ${post.user_has_upvoted ? 'text-retro-stroke' : ''}`} />
               <span>{post.upvotes}</span>

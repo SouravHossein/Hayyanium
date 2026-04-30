@@ -40,9 +40,9 @@ const FORMATS: { value: QuizFormat; label: string; desc: string }[] = [
 
 const DIRECTIONS: { value: QuizDirection; label: string }[] = [
   { value: 'name-to-symbol', label: 'Name → Symbol' },
-  { value: 'number-to-name', label: 'Atomic Number → Name' },
   { value: 'symbol-to-name', label: 'Symbol → Name' },
   { value: 'name-to-number', label: 'Name → Atomic Number' },
+  { value: 'number-to-name', label: 'Atomic Number → Name' },
   { value: 'name-to-weight', label: 'Name → Atomic Weight' },
   { value: 'weight-to-name', label: 'Atomic Weight → Name' },
 ];

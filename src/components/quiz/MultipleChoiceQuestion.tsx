@@ -72,7 +72,7 @@ export default function MultipleChoiceQuestion({
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Question prompt */}
       <div className="text-center space-y-2">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -85,13 +85,13 @@ export default function MultipleChoiceQuestion({
       </div>
 
       {/* Options grid */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:gap-3 sm:grid-cols-2">
         {question.options.map((option, index) => (
           <button
             key={option.id}
             onClick={() => handleSelect(option)}
             disabled={disabled}
-            className={`relative flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all duration-300 cursor-pointer ${getOptionStyle(option)} ${
+            className={`relative min-h-14 flex items-center gap-3 rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all duration-300 cursor-pointer ${getOptionStyle(option)} ${
               disabled && !showFeedback ? 'pointer-events-none' : ''
             }`}
             aria-label={`Option ${optionLetters[index]}: ${option.label}`}
