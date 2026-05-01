@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import JsonLd from "@/components/JsonLd";
 import MainNav from "@/components/MainNav";
+import CommunityBanner from "@/components/CommunityBanner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense } from "react";
 
@@ -112,6 +113,9 @@ export default function RootLayout({
         <JsonLd />
         <AuthProvider>
           <ThemeProvider>
+            <Suspense fallback={null}>
+              <CommunityBanner />
+            </Suspense>
             {children}
             <Suspense fallback={null}>
               <MainNav />

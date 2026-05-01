@@ -196,17 +196,6 @@ export default function CommunityPage() {
           <h1 className="text-2xl font-bold col-span-2 leading-tight">Community Board</h1>
         </header>
 
-        <section className="card p-6 sm:p-8 mb-8">
-          <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
-            This board belongs to the people using Hayyanium every day. Share bug reports, request features, and upvote the ideas that would make the app better for everyone.
-          </p>
-          <div className="flex gap-3 flex-wrap">
-            <span className="text-sm font-black bg-actinide text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Users className="w-4 h-4" /> {posts.length} Posts</span>
-            <span className="text-sm font-black bg-nonmetal text-white border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Bug className="w-4 h-4" /> {bugCount} Bugs</span>
-            <span className="text-sm font-black bg-transition-metal text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Sparkles className="w-4 h-4" /> {featureCount} Features</span>
-          </div>
-        </section>
-
         {showForm && (
           <section className="card p-4 sm:p-8 mb-6">
             <h2 className="text-xl font-black mb-4 flex items-center gap-2">
@@ -271,7 +260,17 @@ export default function CommunityPage() {
             )}
           </section>
         )}
-
+        
+        <section className="card p-6 sm:p-8 mb-8">
+          <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
+            This board belongs to the people using Hayyanium every day. Share bug reports, request features, and upvote the ideas that would make the app better for everyone.
+          </p>
+          <div className="flex gap-3 flex-wrap">
+            <span className="text-sm font-black bg-actinide text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Users className="w-4 h-4" /> {posts.length} Posts</span>
+            <span className="text-sm font-black bg-nonmetal text-white border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Bug className="w-4 h-4" /> {bugCount} Bugs</span>
+            <span className="text-sm font-black bg-transition-metal text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Sparkles className="w-4 h-4" /> {featureCount} Features</span>
+          </div>
+        </section>
         <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
           <div className="flex p-1 rounded-xl border-2 border-retro-stroke bg-retro-bg-light gap-1">
             {(['all', 'bug', 'feature'] as FilterType[]).map((f) => (

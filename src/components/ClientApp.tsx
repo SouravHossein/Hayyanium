@@ -573,6 +573,76 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               Hayyanium
             </h1>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
+              <button
+                onClick={() => setIsBuilderActive(!isBuilderActive)}
+                className={`flex items-center gap-3 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all ${isBuilderActive ? "!bg-cyan-500 !text-white" : ""
+                  }`}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full border border-[var(--color-retro-stroke)] ${isBuilderActive ? "bg-white animate-pulse" : "bg-gray-400"}`}
+                ></div>
+                <span>Builder</span>
+              </button>
+              <Link
+                href="/timeline"
+                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
+                aria-label="Open historical timeline"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-[var(--color-alkali-metal)]"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>Timeline</span>
+              </Link>
+
+              <Link
+                href="/quiz"
+                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-actinide)]"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" />
+                </svg>
+                <span>Quiz</span>
+              </Link>
+
+
+              <Link
+                href="/community"
+                className="retro-btn relative flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)] group overflow-hidden"
+              >
+                {/* Attention-seeking background shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+
+                <div className="relative">
+                  <img
+                    src="/favicons/animatedCommunityIcon.gif"
+                    alt="Community"
+                    className="h-10 w-10 object-contain transition-transform group-hover:scale-110"
+                  />
+                  {/* Notification Dot / Pulse */}
+                </div>
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="relative z-10 text-sm">Community</span>
+                  <span className="relative z-10 text-[9px] opacity-70 font-normal normal-case">any bugs or suggestions?</span>
+                  <span className="absolute z-999 -top-1 -right-1 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                  </span>
+                </div>
+              </Link>
+
               <div className="flex items-center gap-2">
                 {user ? (
                   <Link
@@ -615,61 +685,6 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 )}
               </div>
 
-              <Link
-                href="/timeline"
-                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
-                aria-label="Open historical timeline"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-[var(--color-alkali-metal)]"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span>Timeline</span>
-              </Link>
-              <Link
-                href="/community"
-                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                </svg>
-                <span>Community</span>
-              </Link>
-              <Link
-                href="/quiz"
-                className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-actinide)]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" />
-                </svg>
-                <span>Quiz</span>
-              </Link>
-              <button
-                onClick={() => setIsBuilderActive(!isBuilderActive)}
-                className={`flex items-center gap-3 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all ${isBuilderActive ? "!bg-cyan-500 !text-white" : ""
-                  }`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full border border-[var(--color-retro-stroke)] ${isBuilderActive ? "bg-white animate-pulse" : "bg-gray-400"}`}
-                ></div>
-                <span>Builder</span>
-              </button>
               <ThemeToggleButton />
             </div>
           </header>
