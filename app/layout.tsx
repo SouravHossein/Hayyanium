@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import JsonLd from "@/components/JsonLd";
 import MainNav from "@/components/MainNav";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Suspense } from "react";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
@@ -70,10 +72,10 @@ export const metadata: Metadata = {
     url: "https://hayyanium.vercel.app/",
     images: [
       {
-        url: "/hayyanium_linkedin_cover_1776623402624.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Hayyanium Dashboard",
+        alt: "Hayyanium - Interactive Periodic Table",
       },
     ],
     siteName: "Hayyanium",
@@ -83,7 +85,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hayyanium - Elements & 3D Models",
     description: "Explore the building blocks of the universe with our interactive 3D periodic table.",
-    images: ["/hayyanium_linkedin_cover_1776623402624.png"],
+    images: ["/og-image.png"],
     creator: "@sourav_hossein",
   },
   alternates: {
@@ -93,9 +95,6 @@ export const metadata: Metadata = {
     google: "jSf0-zlaS8N6NhW9JibN7ARfDUvPtgPxJEC8V2CyyLQ",
   },
 };
-
-import { AuthProvider } from "@/contexts/AuthContext";
-import { Suspense } from "react";
 
 export default function RootLayout({
   children,
