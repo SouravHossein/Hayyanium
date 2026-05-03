@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TableDetailLevel, TableZoomMode } from './zoomTypes';
-import { Fullscreen, Maximize, Maximize2 } from 'lucide-react';
+import { Fullscreen, Maximize2, Minus, Plus } from 'lucide-react';
 
 interface TableZoomWrapperProps {
   children: (scale: number, detailLevel: TableDetailLevel) => React.ReactNode;
@@ -31,9 +31,11 @@ const SPREADSHEET_MAX_SCALE = 3;
 const BASE_CELL_SIZE = 56;
 const BASE_GAP_SIZE = 4;
 const BASE_LABEL_SIZE = 34;
+const PHONE_MEDIA_QUERY = '(max-width: 640px)';
 
 const lerp = (from: number, to: number, alpha: number) => from + (to - from) * alpha;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const softenGrowth = (scale: number, factor: number) => (scale <= 1 ? scale : 1 + (scale - 1) * factor);
 
 const getDetailLevelWithHysteresis = (
   current: TableDetailLevel,
@@ -64,10 +66,6 @@ const isInteractiveTarget = (target: EventTarget | null) => {
     ),
   );
 };
-
-
-
-
 
 // Zoom preset steps for the mobile stepper
 const ZOOM_STEPS = [
@@ -127,28 +125,29 @@ const MobileZoomToggle = ({
   onToggle: () => void;
   isVisible: boolean;
 }) => {
-  const activeConfig = ZOOM_STEPS.find((step) => step.key === activeStep) ?? ZOOM_STEPS[0];
-  const ActiveIcon = activeConfig.Icon;
+  const nextStep = activeStep === 'fit' ? 'med' : 'fit';
+  const nextConfig = ZOOM_STEPS.find((step) => step.key === nextStep) ?? ZOOM_STEPS[0];
+  const NextIcon = nextConfig.Icon;
 
   return (
     <button
       onClick={onToggle}
-      aria-label={`Zoom level: ${activeConfig.label}. Tap to switch.`}
+      aria-label={`Zoom to ${nextConfig.label}`}
+      title={`Zoom to ${nextConfig.label}`}
       data-no-pan="true"
       style={{
-        height: 42,
-        padding: '0 16px',
-        borderRadius: '21px',
-        border: '1px solid rgba(255,255,255,0.2)',
-        background: 'rgba(15,23,42,0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.24), inset 0 1px 1px rgba(255,255,255,0.1)',
-        color: '#fff',
+        height: 44,
+        width: 44,
+        borderRadius: '9999px',
+        border: '1px solid rgba(148,163,184,0.28)',
+        background: 'rgba(15,23,42,0.88)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        boxShadow: '0 6px 18px rgba(15,23,42,0.18)',
+        color: '#e2e8f0',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '8px',
         opacity: isVisible ? opacity : 0.6,
         transition: 'opacity 300ms cubic-bezier(0.4, 0, 0.2, 1), transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(10px) scale(0.95)',
@@ -157,26 +156,76 @@ const MobileZoomToggle = ({
         zIndex: 100,
       }}
     >
-      <ActiveIcon size={18} strokeWidth={2.5} className="text-cyan-400" />
-      <span style={{
-        fontSize: '13px',
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        textTransform: 'uppercase'
-      }}>
-        {activeConfig.label}
-      </span>
-      <div style={{
-        width: 1,
-        height: 12,
-        background: 'rgba(255,255,255,0.2)',
-        marginLeft: 2,
-        marginRight: 2
-      }} />
-      <span style={{ fontSize: '11px', fontWeight: 600, opacity: 0.6 }}>
-        TAP
-      </span>
+      <NextIcon size={20} strokeWidth={2.3} />
     </button>
+  );
+};
+
+const DesktopZoomControls = ({
+  isSpreadsheetMode,
+  currentStep,
+  scale,
+  onZoomIn,
+  onZoomOut,
+  onSetFit,
+  onSetMedium,
+  showModeToggle = false,
+}: {
+  isSpreadsheetMode: boolean;
+  currentStep: ZoomStepKey;
+  scale: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onSetFit: () => void;
+  onSetMedium: () => void;
+  showModeToggle?: boolean;
+}) => {
+  const toggleLabel = currentStep === 'fit' ? 'Zoom to medium' : 'Zoom to fit';
+  const ToggleIcon = currentStep === 'fit' ? Maximize2 : Fullscreen;
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 hidden sm:flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/92 p-1 shadow-sm backdrop-blur-sm dark:border-slate-800/80 dark:bg-slate-950/90">
+      <button
+        onClick={onZoomOut}
+        className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        title="Zoom out"
+        aria-label="Zoom out"
+      >
+        <Minus size={16} strokeWidth={2.4} />
+      </button>
+      {showModeToggle ? (
+        <button
+          onClick={currentStep === 'fit' ? onSetMedium : onSetFit}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-cyan-700 transition-colors hover:bg-cyan-50 hover:text-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-cyan-300 dark:hover:bg-cyan-950/40 dark:hover:text-cyan-200"
+          title={toggleLabel}
+          aria-label={toggleLabel}
+        >
+          <ToggleIcon size={16} strokeWidth={2.4} />
+        </button>
+      ) : null}
+      {isSpreadsheetMode ? (
+        <button
+          onClick={onZoomIn}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          title="Zoom in"
+          aria-label="Zoom in"
+        >
+          <Plus size={16} strokeWidth={2.4} />
+        </button>
+      ) : (
+        <button
+          onClick={onZoomIn}
+          className="inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          title="Zoom in"
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+      )}
+      <span className="hidden lg:inline-flex min-w-14 justify-center rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        {Math.round(scale * 100)}%
+      </span>
+    </div>
   );
 };
 
@@ -202,6 +251,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
     const [dynamicMinScale, setDynamicMinScale] = useState(minScale);
     const [detailLevel, setDetailLevel] = useState<TableDetailLevel>(detailLevelFromScale(initialScale));
     const [isDragging, setIsDragging] = useState(false);
+    const [isPhoneViewport, setIsPhoneViewport] = useState(false);
 
     // Toast visibility
     const [toastVisible, setToastVisible] = useState(false);
@@ -324,6 +374,22 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
 
       return () => observer.disconnect();
     }, [mode, recalcDynamicMinScale]);
+
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+
+      const mediaQuery = window.matchMedia(PHONE_MEDIA_QUERY);
+      const syncViewport = () => setIsPhoneViewport(mediaQuery.matches);
+
+      syncViewport();
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', syncViewport);
+        return () => mediaQuery.removeEventListener('change', syncViewport);
+      }
+
+      mediaQuery.addListener(syncViewport);
+      return () => mediaQuery.removeListener(syncViewport);
+    }, []);
 
     useEffect(() => {
       if (mode !== 'spreadsheet') return;
@@ -477,9 +543,9 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
       () =>
         ({
           '--table-zoom': `${currentScale}`,
-          '--table-cell-size': `${BASE_CELL_SIZE * currentScale}px`,
-          '--table-gap-size': `${Math.max(1, BASE_GAP_SIZE * currentScale)}px`,
-          '--table-label-size': `${Math.max(18, BASE_LABEL_SIZE * currentScale)}px`,
+          '--table-cell-size': `${BASE_CELL_SIZE * softenGrowth(currentScale, 0.72)}px`,
+          '--table-gap-size': `${Math.max(1, BASE_GAP_SIZE * softenGrowth(currentScale, 0.5))}px`,
+          '--table-label-size': `${Math.max(18, BASE_LABEL_SIZE * softenGrowth(currentScale, 0.68))}px`,
         }) as React.CSSProperties,
       [currentScale],
     );
@@ -491,40 +557,16 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           {/* ── Zoom percentage toast (center, both mobile & desktop) ── */}
           <ZoomToast scale={currentScale} visible={toastVisible} />
 
-          {/* ── Desktop controls (hidden on mobile) ── */}
-          <div className="hidden sm:flex absolute bottom-6 right-6 border-none z-50 flex-col gap-2 items-end">
-            <div className=" flex flex-col  gap-1">
-              <button
-                onClick={() => updateTargetScale(targetScaleRef.current * 1.12)}
-                className="retro-btn px-2 text-xl font-bold"
-                title="Zoom In (+)"
-              >
-                +
-              </button>
-              <button
-                onClick={() => updateTargetScale(targetScaleRef.current / 1.12)}
-                className="retro-btn px-2 text-xl font-bold"
-                title="Zoom Out (-)"
-              >
-                -
-              </button>
-            </div>            <div className="card flex items-center gap-1 p-1">
-              <button
-                onClick={() => updateTargetScale(fitScale)}
-                className="retro-btn px-2 py-1 text-[10px] font-bold"
-                title="Fit Width"
-              >
-                <Fullscreen />
-              </button>
-              <button
-                onClick={() => updateTargetScale(mediumScale)}
-                className="retro-btn px-2 py-1 text-[10px] font-bold"
-                title="Medium"
-              >
-                <Maximize2 />
-              </button>
-            </div>
-          </div>
+          <DesktopZoomControls
+            isSpreadsheetMode
+            currentStep={activeMobileStep}
+            scale={currentScale}
+            onZoomIn={() => updateTargetScale(targetScaleRef.current * 1.12)}
+            onZoomOut={() => updateTargetScale(targetScaleRef.current / 1.12)}
+            onSetFit={() => updateTargetScale(fitScale)}
+            onSetMedium={() => updateTargetScale(mediumScale)}
+            showModeToggle
+          />
 
           {/* ── Scrollable viewport ── */}
           <div
@@ -551,7 +593,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
 
           {/* ── Mobile fixed toggle ── */}
           <div
-            className="sm:hidden absolute left-1/2 -translate-x-1/2 z-[100]"
+            className="fixed right-4 z-[100] sm:hidden"
             style={{ bottom: mobileBottomOffset }}
           >
             <MobileZoomToggle
@@ -577,6 +619,19 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
           maxScale={maxScale}
           centerOnInit
           limitToBounds
+          panning={{
+            disabled: !isPhoneViewport,
+            velocityDisabled: false,
+            lockAxisX: false,
+            lockAxisY: false,
+            allowLeftClickPan: false,
+            allowMiddleClickPan: false,
+            allowRightClickPan: false,
+          }}
+          pinch={{
+            disabled: !isPhoneViewport,
+            allowPanning: isPhoneViewport,
+          }}
           onZoom={(api) => {
             setCurrentScale(api.state.scale);
             setDetailLevel(detailLevelFromScale(api.state.scale));
@@ -617,36 +672,19 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
         >
           {({ zoomIn, zoomOut, resetTransform, state: { scale } }) => (
             <>
-              {/* Desktop controls */}
-              <div className="hidden sm:flex absolute bottom-6 right-6 z-50 flex-col gap-2 items-end">
-                <div className="card flex flex-col p-1 gap-1">
-                  <button
-                    onClick={() => { zoomIn(0.2); flashToast(); }}
-                    className="retro-btn px-4 py-2 font-bold"
-                    title="Zoom In"
-                  >
-                    {/* <ZoomInIcon /> */}+
-                  </button>
-                  <button
-                    onClick={() => { zoomOut(0.2); flashToast(); }}
-                    className="retro-btn px-4 py-2 font-bold"
-                    title="Zoom Out"
-                  >
-                    {/* <ZoomOutIcon /> */}-
-                  </button>
-                </div>
-                <button
-                  onClick={() => resetTransform()}
-                  className="retro-btn px-4 py-2 text-xs font-bold w-full"
-                  title="Reset View"
-                >
-                  {Math.round(scale * 100)}%
-                </button>
-              </div>
+              <DesktopZoomControls
+                isSpreadsheetMode={false}
+                currentStep={activeMobileStep}
+                scale={scale}
+                onZoomIn={() => { zoomIn(0.2); flashToast(); }}
+                onZoomOut={() => { zoomOut(0.2); flashToast(); }}
+                onSetFit={() => { resetTransform(); flashToast(); }}
+                onSetMedium={() => { resetTransform(); flashToast(); }}
+              />
 
               {/* Mobile fixed toggle */}
               <div
-                className="sm:hidden absolute left-1/2 -translate-x-1/2 z-[100]"
+                className="fixed right-4 z-[100] sm:hidden"
                 style={{ bottom: mobileBottomOffset }}
               >
                 <MobileZoomToggle
@@ -659,7 +697,7 @@ const TableZoomWrapper = forwardRef<TableZoomRef, TableZoomWrapperProps>(
 
               <TransformComponent
                 wrapperStyle={{ width: '100%', height: '100%' }}
-                contentStyle={{ width: 'max-content', height: 'max-content', padding: '100px' }}
+                contentStyle={{ width: 'max-content', height: 'max-content', padding: '96px 72px' }}
               >
                 {children(scale, detailLevelFromScale(scale))}
               </TransformComponent>

@@ -4,9 +4,10 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import JsonLd from "@/components/JsonLd";
 import MainNav from "@/components/MainNav";
-import CommunityBanner from "@/components/CommunityBanner";
+// import CommunityBanner from "@/components/CommunityBanner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense } from "react";
+import { I18nProvider } from "@/i18n/I18nProvider";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
@@ -111,17 +112,19 @@ export default function RootLayout({
       </head>
       <body className={`${spaceGrotesk.variable} ${syne.variable}`} suppressHydrationWarning>
         <JsonLd />
-        <AuthProvider>
-          <ThemeProvider>
-            <Suspense fallback={null}>
-              <CommunityBanner />
-            </Suspense>
-            {children}
-            <Suspense fallback={null}>
-              <MainNav />
-            </Suspense>
-          </ThemeProvider>
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <Suspense fallback={null}>
+                {/* <CommunityBanner /> */}
+              </Suspense>
+              {children}
+              <Suspense fallback={null}>
+                <MainNav />
+              </Suspense>
+            </ThemeProvider>
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );

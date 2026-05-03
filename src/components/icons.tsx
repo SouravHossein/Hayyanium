@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowLeft,
   ArrowRight,
+  ArrowBigUp,
   Atom,
   Award,
   BadgeInfo,
@@ -59,12 +60,14 @@ import {
   Leaf,
   Moon,
   Radio,
+  Trash2,
 } from 'lucide-react';
 
 export {
   Activity,
   ArrowLeft,
   ArrowRight,
+  ArrowBigUp,
   Atom,
   Award,
   BadgeInfo,
@@ -122,4 +125,5 @@ export {
   Leaf,
   Moon,
   Radio,
+  Trash2,
 };

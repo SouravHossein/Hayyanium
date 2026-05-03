@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Megaphone, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import Link from 'next/link';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function CommunityBanner() {
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     const isDismissed = localStorage.getItem('hayyanium-community-banner-dismissed');
@@ -15,6 +17,8 @@ export default function CommunityBanner() {
   }, []);
 
   if (!isVisible) return null;
+
+  const titleAccent = t("banner.community_title_accent").trim();
 
   return (
     <div className="relative isolate flex items-center gap-x-6 overflow-hidden bg-gray-50 px-6 py-2.5 sm:px-3.5 sm:before:flex-1 dark:bg-gray-900 border-b border-[var(--color-retro-stroke)]">
@@ -34,20 +38,23 @@ export default function CommunityBanner() {
         <p className="text-sm leading-6 text-gray-900 dark:text-white flex items-center gap-2">
           <img
             src="/favicons/animatedCommunityIcon.gif"
-            alt="React"
+            alt={t("nav.community")}
             className="h-10 w-10 object-contain"
           />
-          <strong className="font-semibold">Community Launch! <span className="text-cyan-500 ml-1">নতুন কমিউনিটি লঞ্চ!</span></strong>
+          <strong className="font-semibold">
+            {t("banner.community_title")}
+            {titleAccent ? <span className="text-cyan-500 ml-1">{titleAccent}</span> : null}
+          </strong>
           <svg viewBox="0 0 2 2" className="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true">
             <circle cx={1} cy={1} r={1} />
           </svg>
-          Join our first reaction lounge to report bugs and suggest features.
+          {t("banner.community_body")}
         </p>
         <Link
           href="/community"
           className="flex-none rounded-full bg-gray-900 px-3.5 py-1 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
         >
-          Explore now <span aria-hidden="true">&rarr;</span>
+          {t("banner.community_cta")} <span aria-hidden="true">&rarr;</span>
         </Link>
       </div>
       <div className="flex flex-1 justify-end">
@@ -59,7 +66,7 @@ export default function CommunityBanner() {
             localStorage.setItem('hayyanium-community-banner-dismissed', 'true');
           }}
         >
-          <span className="sr-only">Dismiss</span>
+          <span className="sr-only">{t("banner.dismiss")}</span>
           <X className="h-5 w-5 text-gray-900 dark:text-white" aria-hidden="true" />
         </button>
       </div>

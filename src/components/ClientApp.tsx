@@ -37,6 +37,8 @@ import Scene3D from "./3d/Scene3D";
 import SkeletonLoader from "./ui/SkeletonLoader";
 import TableZoomWrapper, { TableZoomRef } from "./table/TableZoomWrapper";
 import { applyStreakFreezeIfNeeded } from "../lib/quiz/progressionStorage";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const ElementPanel = dynamic(() => import("./ElementPanel"), { ssr: false });
 const ComparisonModal = dynamic(() => import("./ComparisonModal"), {
@@ -55,6 +57,7 @@ interface ClientAppProps {
 }
 
 const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
+  const { t } = useI18n();
   const [allElements, setAllElements] =
     useState<ElementData[]>(initialElements);
   const [activeElement, setActiveElement] = useState<ElementData | null>(null);
@@ -581,12 +584,12 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 <div
                   className={`w-2 h-2 rounded-full border border-[var(--color-retro-stroke)] ${isBuilderActive ? "bg-white animate-pulse" : "bg-gray-400"}`}
                 ></div>
-                <span>Builder</span>
+                <span>{t("nav.builder")}</span>
               </button>
               <Link
                 href="/timeline"
                 className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)]"
-                aria-label="Open historical timeline"
+                aria-label={t("nav.timeline")}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -600,7 +603,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Timeline</span>
+                <span>{t("nav.timeline")}</span>
               </Link>
 
               <Link
@@ -614,7 +617,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 >
                   <path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" />
                 </svg>
-                <span>Quiz</span>
+                <span>{t("nav.quiz")}</span>
               </Link>
 
 
@@ -623,23 +626,23 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 className="retro-btn relative flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-transition-metal)] group overflow-hidden"
               >
                 {/* Attention-seeking background shimmer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+                {/* <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" /> */}
 
                 <div className="relative">
                   <img
                     src="/favicons/animatedCommunityIcon.gif"
-                    alt="Community"
+                    alt={t("nav.community")}
                     className="h-10 w-10 object-contain transition-transform group-hover:scale-110"
                   />
-                  {/* Notification Dot / Pulse */}
                 </div>
+                  {/* Notification Dot / Pulse */}
                 <div className="flex flex-col items-start leading-tight">
-                  <span className="relative z-10 text-sm">Community</span>
-                  <span className="relative z-10 text-[9px] opacity-70 font-normal normal-case">any bugs or suggestions?</span>
-                  <span className="absolute z-999 -top-1 -right-1 flex h-2.5 w-2.5">
+                  <span className="relative z-10 text-sm">{t("nav.community")}</span>
+                  <span className="relative z-10 text-[9px] opacity-70 font-normal normal-case">{t("nav.community_hint")}</span>
+                  {/* <span className="absolute z-999 -top-1 -right-1 flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-                  </span>
+                  </span> */}
                 </div>
               </Link>
 
@@ -660,7 +663,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                         {user.email?.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <span>Profile</span>
+                    <span>{t("nav.profile")}</span>
                   </Link>
                 ) : (
                   <button
@@ -680,11 +683,12 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    <span>Sign In</span>
+                    <span>{t("common.sign_in")}</span>
                   </button>
                 )}
               </div>
 
+              <LanguageSwitcher />
               <ThemeToggleButton />
             </div>
           </header>
@@ -699,7 +703,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs"
-                  aria-label="Sign In"
+                  aria-label={t("common.sign_in")}
                 >
                   <svg
                     className="h-5 w-5"
@@ -714,9 +718,10 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <span className="text-xs">Sign In</span>
+                  <span className="text-xs">{t("common.sign_in")}</span>
                 </button>
               ) : ""}
+              <LanguageSwitcher />
               <ThemeToggleButton />
             </div>
           </header>
@@ -911,11 +916,11 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="mb-1 text-xs font-semibold uppercase tracking-[0.3em] opacity-60">
-                    Your voice
+                    {t("home.community_kicker")}
                   </p>
-                  <h3 className="font-black text-xl mb-1">Community Board</h3>
+                  <h3 className="font-black text-xl mb-1">{t("home.community_title")}</h3>
                   <p className="text-sm font-bold opacity-80 leading-relaxed">
-                    Share bug reports, suggest features, and shape the next version of Hayyanium. If something feels off or something could be better, this is your place to say it.
+                    {t("home.community_body")}
                   </p>
                 </div>
                 <div className="ml-auto self-end w-12 h-12 rounded-full bg-white border-2 border-retro-stroke flex items-center justify-center group-hover:bg-retro-stroke group-hover:text-white transition-colors sm:self-auto">

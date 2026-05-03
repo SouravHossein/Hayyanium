@@ -7,15 +7,43 @@ import { LayoutEngine, LayoutResult, LayoutPosition } from './types';
  */
 export const circularLayout: LayoutEngine = (elements: ElementData[]): LayoutResult => {
   const positions = new Map<number, LayoutPosition>();
-  const size = 900;
+  const canvasPadding = 220;
+  const size = 900 + canvasPadding * 2;
   const cx = size / 2;
   const cy = size / 2;
   const ringSpacing = 50;
   const cellSize = 25;
+  const totalSlots = 32;
+
+  const slotWeights = Array.from({ length: totalSlots }, (_, index) => {
+    const slot = index + 1;
+
+    if (slot === 1 || slot === 32) return 1.95;
+    if (slot === 2 || slot === 31) return 1.15;
+    if (slot >= 3 && slot <= 17) return 0.42; // f-block compression + group 3 anchor
+    if (slot >= 18 && slot <= 26) return 0.6; // d-block compression
+    if (slot >= 27 && slot <= 30) return 1.12;
+    return 1.32; // groups 13-18 get more breathing room overall
+  });
+
+  const totalWeight = slotWeights.reduce((sum, weight) => sum + weight, 0);
+  const slotAngles = new Map<number, number>();
+  let runningWeight = 0;
+
+  slotWeights.forEach((weight, index) => {
+    const slot = index + 1;
+    const centerWeight = runningWeight + weight / 2;
+    slotAngles.set(slot, centerWeight / totalWeight);
+    runningWeight += weight;
+  });
+
+  const getAngleForSlot = (slot: number) => {
+    const normalized = slotAngles.get(slot) ?? 0;
+    return -(normalized * Math.PI * 2) - Math.PI / 2;
+  };
 
   elements.forEach((el) => {
     let period = el.period;
-    let groupAngle: number;
     let logicalGroup: number;
 
     if (el.category === 'lanthanide') {
@@ -35,8 +63,8 @@ export const circularLayout: LayoutEngine = (elements: ElementData[]): LayoutRes
       }
     }
 
-    // Spread 32 logical groups over full circle, starting from top and flowing LEFT
-    groupAngle = -(((logicalGroup - 1) / 32) * Math.PI * 2) - Math.PI / 2;
+    // Compress the f-block so the main sectors can breathe a little more.
+    const groupAngle = getAngleForSlot(logicalGroup);
 
     const r = period * ringSpacing;
     const x = cx + r * Math.cos(groupAngle) - cellSize / 2;

@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client';
 import AuthModal from '@/components/AuthModal';
 import { CommunityPost, CommunityPostData } from '@/components/CommunityPost';
 import { ArrowLeft, Plus, Sparkles, Bug, Settings, Users } from '@/components/icons';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type FilterType = 'all' | 'bug' | 'feature';
 type SortType = 'top' | 'new';
@@ -23,6 +25,7 @@ type PublicProfile = {
 export default function CommunityPage() {
   const { user } = useAuth();
   const supabase = createClient();
+  const { t } = useI18n();
   const isDeveloper = !!user && !!DEVELOPER_EMAIL && user.email === DEVELOPER_EMAIL;
 
   const [posts, setPosts] = useState<CommunityPostData[]>([]);
@@ -44,10 +47,10 @@ export default function CommunityPage() {
     }
 
     return {
-      author_name: user.user_metadata?.full_name || user.email || 'Community contributor',
+      author_name: user.user_metadata?.full_name || user.email || t("post.community_contributor"),
       author_avatar_url: user.user_metadata?.avatar_url || null,
     };
-  }, [user]);
+  }, [t, user]);
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -140,6 +143,20 @@ export default function CommunityPage() {
     await supabase.from('community_posts').update({ badge }).eq('id', postId);
   };
 
+  const handleDelete = async (postId: string) => {
+    // Optimistic update
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+    const { error } = await supabase.from('community_posts').delete().eq('id', postId);
+    
+    if (error) {
+      console.error('Error deleting post:', error);
+      // Rollback if error
+      fetchPosts();
+      alert(t("community.post_error"));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newDesc) return;
@@ -165,7 +182,7 @@ export default function CommunityPage() {
         fetchPosts();
       }, 2000);
     } else {
-      alert('Error posting. Please try again.');
+      alert(t("community.post_error"));
     }
   };
 
@@ -178,64 +195,67 @@ export default function CommunityPage() {
         <header className="grid grid-cols-[1fr_auto] gap-3 mb-6 sm:mb-8 items-start">
           <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity font-bold min-h-11">
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Table</span>
+            <span>{t("common.back_to_table")}</span>
           </Link>
-          <button
-            onClick={() => {
-              if (!user) {
-                setIsAuthModalOpen(true);
-                return;
-              }
-              setShowForm((v) => !v);
-            }}
-            className="min-h-11 px-4 py-2 bg-lanthanide text-retro-stroke font-bold border-2 border-retro-stroke inline-flex items-center justify-center gap-2 text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            {showForm ? 'Close' : 'New Post'}
-          </button>
-          <h1 className="text-2xl font-bold col-span-2 leading-tight">Community Board</h1>
+          <div className="flex items-center justify-end gap-2">
+            <LanguageSwitcher />
+            <button
+              onClick={() => {
+                if (!user) {
+                  setIsAuthModalOpen(true);
+                  return;
+                }
+                setShowForm((v) => !v);
+              }}
+              className="min-h-11 px-4 py-2 bg-lanthanide text-retro-stroke font-bold border-2 border-retro-stroke inline-flex items-center justify-center gap-2 text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              {showForm ? t("common.close") : t("common.new_post")}
+            </button>
+          </div>
+          <h1 className="text-2xl font-bold col-span-2 leading-tight">{t("community.title")}</h1>
         </header>
 
         {showForm && (
           <section className="card p-4 sm:p-8 mb-6">
             <h2 className="text-xl font-black mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              Create New Post
+              {t("community.create_new_post")}
             </h2>
 
             {submitSuccess ? (
               <div className="bg-actinide text-retro-stroke p-6 rounded-xl text-center border-2 border-retro-stroke">
-                <p className="font-black text-lg">Posted successfully!</p>
-                <p className="text-sm mt-1">Your post is now live.</p>
+                <p className="font-black text-lg">{t("community.posted_successfully")}</p>
+                <p className="text-sm mt-1">{t("community.posted_live")}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex p-1.5 rounded-xl border-2 border-retro-stroke bg-retro-bg-light">
                   <button type="button" onClick={() => setNewType('bug')} className={`flex-1 min-h-11 py-3 text-sm font-black transition-all ${newType === 'bug' ? 'bg-nonmetal text-white border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
-                    Bug Report
+                    {t("community.type_bug_report")}
                   </button>
                   <button type="button" onClick={() => setNewType('feature')} className={`flex-1 min-h-11 py-3 text-sm font-black transition-all ${newType === 'feature' ? 'bg-transition-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-60 hover:opacity-100'}`}>
-                    Feature Request
+                    {t("community.type_feature_request")}
                   </button>
                 </div>
                 <div>
-                  <label className="block text-sm font-black mb-1">Title</label>
+                  <label className="block text-sm font-black mb-1">{t("community.field_title")}</label>
                   <input
                     required
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="Brief summary of your report..."
+                    placeholder={t("community.field_title_placeholder")}
                     className="w-full min-h-11 px-4 py-3 text-sm font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-black mb-1">Description</label>
+                  <label className="block text-sm font-black mb-1">{t("community.field_description")}</label>
                   <textarea
                     required
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
-                    placeholder="Describe the bug or feature in detail..."
+                    placeholder={t("community.field_description_placeholder")}
                     rows={4}
                     className="w-full min-h-28 px-4 py-3 text-sm font-bold resize-none"
                   />
@@ -246,14 +266,14 @@ export default function CommunityPage() {
                     disabled={isSubmitting}
                     className="min-h-11 py-3 bg-lanthanide text-retro-stroke border-2 border-retro-stroke font-black text-sm disabled:opacity-50"
                   >
-                    {isSubmitting ? 'Posting...' : 'Submit Post'}
+                    {isSubmitting ? t("community.posting") : t("community.submit_post")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
                     className="min-h-11 px-4 py-3 bg-white text-retro-stroke border-2 border-retro-stroke font-bold text-sm"
                   >
-                    Cancel
+                    {t("common.cancel")}
                   </button>
                 </div>
               </form>
@@ -263,12 +283,12 @@ export default function CommunityPage() {
         
         <section className="card p-6 sm:p-8 mb-8">
           <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
-            This board belongs to the people using Hayyanium every day. Share bug reports, request features, and upvote the ideas that would make the app better for everyone.
+            {t("community.board_intro")}
           </p>
           <div className="flex gap-3 flex-wrap">
-            <span className="text-sm font-black bg-actinide text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Users className="w-4 h-4" /> {posts.length} Posts</span>
-            <span className="text-sm font-black bg-nonmetal text-white border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Bug className="w-4 h-4" /> {bugCount} Bugs</span>
-            <span className="text-sm font-black bg-transition-metal text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Sparkles className="w-4 h-4" /> {featureCount} Features</span>
+            <span className="text-sm font-black bg-actinide text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Users className="w-4 h-4" /> {posts.length} {t("community.stats_posts")}</span>
+            <span className="text-sm font-black bg-nonmetal text-white border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Bug className="w-4 h-4" /> {bugCount} {t("community.stats_bugs")}</span>
+            <span className="text-sm font-black bg-transition-metal text-retro-stroke border-2 border-retro-stroke px-3 py-1 rounded-full inline-flex items-center gap-2"><Sparkles className="w-4 h-4" /> {featureCount} {t("community.stats_features")}</span>
           </div>
         </section>
         <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
@@ -279,7 +299,7 @@ export default function CommunityPage() {
                 onClick={() => setFilterType(f)}
                 className={`px-3 py-1.5 text-sm rounded-lg font-bold transition-all capitalize ${filterType === f ? 'bg-actinide text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-70 hover:opacity-100'}`}
               >
-                {f === 'all' ? 'All' : f === 'bug' ? 'Bugs' : 'Features'}
+                {f === 'all' ? t("community.filter_all") : f === 'bug' ? t("community.filter_bugs") : t("community.filter_features")}
               </button>
             ))}
           </div>
@@ -290,7 +310,7 @@ export default function CommunityPage() {
                 onClick={() => setSortBy(s)}
                 className={`px-3 py-1.5 text-sm rounded-lg font-bold transition-all ${sortBy === s ? 'bg-alkaline-earth-metal text-retro-stroke border-2 border-retro-stroke' : '!border-transparent !shadow-none !bg-transparent opacity-70 hover:opacity-100'}`}
               >
-                {s === 'top' ? 'Top' : 'New'}
+                {s === 'top' ? t("community.sort_top") : t("community.sort_new")}
               </button>
             ))}
           </div>
@@ -298,7 +318,7 @@ export default function CommunityPage() {
 
         {isDeveloper && (
           <div className="card p-4 mb-5 bg-alkaline-earth-metal">
-            <span className="text-sm font-bold">Developer mode active. You can badge posts using the Badge button on each card.</span>
+            <span className="text-sm font-bold">{t("community.developer_mode_active")}</span>
           </div>
         )}
 
@@ -315,9 +335,9 @@ export default function CommunityPage() {
           </div>
         ) : posts.length === 0 ? (
           <div className="card p-10 text-center">
-            <h3 className="text-lg font-black mb-2">No posts yet</h3>
+            <h3 className="text-lg font-black mb-2">{t("community.empty_title")}</h3>
             <p className="text-sm font-bold opacity-80 mb-5 leading-relaxed">
-              This space starts with you. Be the first to share a bug report or feature request, and help set the direction for the app.
+              {t("community.empty_body")}
             </p>
             <button
               onClick={() => {
@@ -330,7 +350,7 @@ export default function CommunityPage() {
               className="inline-flex items-center gap-2 bg-lanthanide text-retro-stroke px-5 py-2.5 border-2 border-retro-stroke font-bold text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-              Create First Post
+              {t("community.empty_cta")}
             </button>
           </div>
         ) : (
@@ -340,8 +360,10 @@ export default function CommunityPage() {
                 key={post.id}
                 post={post}
                 isDeveloper={isDeveloper}
+                currentUserId={user?.id}
                 onUpvote={handleUpvote}
                 onBadge={handleBadge}
+                onDelete={handleDelete}
               />
             ))}
           </div>

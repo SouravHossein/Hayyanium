@@ -141,7 +141,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({
         {/* Period Labels */}
         {Array.from({ length: 7 }, (_, i) => i + 1).map(periodNumber => (
             <button key={`period-${periodNumber}`}
-                 className="text-center text-gray-500 dark:text-gray-400 flex items-center justify-end pr-2 cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                 className="text-center text-gray-500 dark:text-gray-400 flex items-center justify-center cursor-pointer rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
                  style={{
                    gridRowStart: periodNumber + 1,
                    gridColumnStart: 1,

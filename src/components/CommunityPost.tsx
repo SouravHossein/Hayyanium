@@ -1,7 +1,8 @@
 "use client";
 
-import { ArrowBigUp } from 'lucide-react';
+import { ArrowBigUp, Trash2 } from '@/components/icons';
 import React, { useState } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
 
 type PostType = 'bug' | 'feature';
 type BadgeType = 'confirmed' | 'planned' | 'wont_fix' | 'done' | null;
@@ -24,37 +25,43 @@ export interface CommunityPostData {
 interface CommunityPostProps {
   post: CommunityPostData;
   isDeveloper: boolean;
+  currentUserId?: string | null;
   onUpvote: (postId: string, hasUpvoted: boolean) => void;
   onBadge: (postId: string, badge: BadgeType) => void;
+  onDelete: (postId: string) => void;
 }
 
-const BADGE_CONFIG: Record<NonNullable<BadgeType>, { label: string; className: string }> = {
-  confirmed: { label: 'Confirmed', className: 'bg-actinide text-retro-stroke' },
-  planned: { label: 'Planned', className: 'bg-transition-metal text-retro-stroke' },
-  wont_fix: { label: "Won\'t Fix", className: 'bg-nonmetal text-white' },
-  done: { label: 'Done', className: 'bg-lanthanide text-retro-stroke' },
+const BADGE_CONFIG: Record<
+  NonNullable<BadgeType>,
+  { labelKey: "post.badge_confirmed" | "post.badge_planned" | "post.badge_wont_fix" | "post.badge_done"; className: string }
+> = {
+  confirmed: { labelKey: 'post.badge_confirmed', className: 'bg-actinide text-retro-stroke' },
+  planned: { labelKey: 'post.badge_planned', className: 'bg-transition-metal text-retro-stroke' },
+  wont_fix: { labelKey: "post.badge_wont_fix", className: 'bg-nonmetal text-white' },
+  done: { labelKey: 'post.badge_done', className: 'bg-lanthanide text-retro-stroke' },
 };
 
-const TYPE_CONFIG: Record<PostType, { label: string; className: string }> = {
-  bug: { label: 'Bug', className: 'bg-nonmetal text-white' },
-  feature: { label: 'Feature', className: 'bg-alkaline-earth-metal text-retro-stroke' },
+const TYPE_CONFIG: Record<PostType, { labelKey: "post.type_bug" | "post.type_feature"; className: string }> = {
+  bug: { labelKey: 'post.type_bug', className: 'bg-nonmetal text-white' },
+  feature: { labelKey: 'post.type_feature', className: 'bg-alkaline-earth-metal text-retro-stroke' },
 };
 
-export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper, onUpvote, onBadge }) => {
+export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper, currentUserId, onUpvote, onBadge, onDelete }) => {
+  const { t } = useI18n();
   const [showBadgeMenu, setShowBadgeMenu] = useState(false);
   const typeConf = TYPE_CONFIG[post.type];
   const badgeConf = post.badge ? BADGE_CONFIG[post.badge] : null;
-  const authorName = post.author_name || 'Community contributor';
+  const authorName = post.author_name || t("post.community_contributor");
   const authorInitial = authorName.trim().charAt(0).toUpperCase() || '?';
 
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return t("post.just_now");
+    if (mins < 60) return t("post.minutes_ago", { n: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24) return t("post.hours_ago", { n: hrs });
+    return t("post.days_ago", { n: Math.floor(hrs / 24) });
   };
 
   return (
@@ -71,18 +78,18 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-black uppercase tracking-[0.28em] opacity-60">Posted by</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] opacity-60">{t("post.posted_by")}</p>
             <h4 className="truncate text-sm font-black">{authorName}</h4>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
           <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${typeConf.className}`}>
-            {typeConf.label}
+            {t(typeConf.labelKey)}
           </span>
           {badgeConf && (
             <span className={`inline-flex items-center text-xs font-black px-2.5 py-1 rounded-full border-2 border-retro-stroke ${badgeConf.className}`}>
-              {badgeConf.label}
+              {t(badgeConf.labelKey)}
             </span>
           )}
         </div>
@@ -100,9 +107,9 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
               <button
                 onClick={() => setShowBadgeMenu((v) => !v)}
                 className="min-h-9 text-xs font-bold px-2.5 py-1.5 bg-alkaline-earth-metal text-retro-stroke border-2 border-retro-stroke"
-                title="Set developer badge"
+                title={t("post.badge_title")}
               >
-                Badge
+                {t("post.badge_button")}
               </button>
               {showBadgeMenu && (
                 <div className="absolute bottom-full right-0 mb-2 z-50 bg-white border-2 border-retro-stroke rounded-xl overflow-hidden min-w-[152px] max-h-56 overflow-y-auto shadow-xl">
@@ -115,7 +122,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
                       }}
                       className={`w-full text-left px-3 py-2 text-sm font-bold hover:opacity-80 transition-opacity ${post.badge === key ? 'opacity-60' : ''}`}
                     >
-                      {BADGE_CONFIG[key].label}
+                      {t(BADGE_CONFIG[key].labelKey)}
                     </button>
                   ))}
                   {post.badge && (
@@ -126,22 +133,35 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post, isDeveloper,
                       }}
                       className="w-full text-left px-3 py-2 text-sm font-bold bg-nonmetal text-white"
                     >
-                      Remove Badge
+                      {t("post.remove_badge")}
                     </button>
                   )}
                 </div>
               )}
             </div>
           )}
+          {(isDeveloper || (currentUserId && post.user_id === currentUserId)) && (
+            <button
+              onClick={() => {
+                if (window.confirm(t("post.delete_confirm"))) {
+                  onDelete(post.id);
+                }
+              }}
+              className="min-h-9 flex items-center justify-center px-2.5 py-1.5 bg-nonmetal text-white border-2 border-retro-stroke hover:opacity-80 transition-opacity"
+              title={t("post.delete_button")}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
           <div className="flex flex-col items-center">
             <button
               onClick={() => onUpvote(post.id, post.user_has_upvoted ?? false)}
               className={`min-h-10 min-w-16 flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-black border-2 border-retro-stroke ${post.user_has_upvoted ? 'bg-lanthanide text-retro-stroke' : 'bg-white text-retro-stroke'}`}
-            >
-              <ArrowBigUp className={`w-4 h-4 ${post.user_has_upvoted ? 'text-retro-stroke' : ''}`} />
+              >
+                <ArrowBigUp className={`w-4 h-4 ${post.user_has_upvoted ? 'text-retro-stroke' : ''}`} />
               <span>{post.upvotes}</span>
             </button>
-            <span className="font-bold text-[10px] mt-1 opacity-70">Upvote</span>
+            <span className="font-bold text-[10px] mt-1 opacity-70">{t("post.upvote_label")}</span>
           </div>
         </div>
       </div>

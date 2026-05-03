@@ -5,20 +5,23 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Clock3, Home, Plus, Sparkles, UserCircle2, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useI18n } from '@/i18n/I18nProvider';
 
 const MAIN_ITEMS = [
-  { href: '/', label: 'Table', icon: Home },
-  { href: '/?builder=1', label: 'Builder', icon: Plus, exactPath: '/' },
-  { href: '/timeline', label: 'Timeline', icon: Clock3 },
-  { href: '/community', label: 'Community', icon: Users },
-  { href: '/quiz', label: 'Quiz', icon: Sparkles },
-  { href: '/profile', label: 'Profile', icon: UserCircle2 },
+  { id: 'table', href: '/', labelKey: 'nav.table', icon: Home },
+  { id: 'builder', href: '/?builder=1', labelKey: 'nav.builder', icon: Plus, exactPath: '/' },
+  { id: 'timeline', href: '/timeline', labelKey: 'nav.timeline', icon: Clock3 },
+  { id: 'community', href: '/community', labelKey: 'nav.community', icon: Users },
+  { id: 'quiz', href: '/quiz', labelKey: 'nav.quiz', icon: Sparkles },
+  { id: 'profile', href: '/profile', labelKey: 'nav.profile', icon: UserCircle2 },
 ] as const;
 
 export default function MainNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const isBuilderActive = pathname === '/' && searchParams.get('builder') === '1';
   const isActivePath = (href: string) => {
@@ -38,16 +41,18 @@ export default function MainNav() {
         borderTop: '1px solid ButtonBorder',
       }}
     >
+
       <div className="grid grid-cols-6 items-stretch px-1 py-2">
         {MAIN_ITEMS.map((item) => {
           const isActive = isActivePath(item.href);
           const profileAvatar = user?.user_metadata?.avatar_url;
+          const label = t(item.labelKey);
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              aria-label={item.label}
+              aria-label={label}
               className="flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 transition-all relative"
               style={{
                 backgroundColor: isActive ? 'Highlight' : 'transparent',
@@ -56,16 +61,16 @@ export default function MainNav() {
               }}
             >
               <div className="relative">
-                {item.label === 'Profile' && profileAvatar ? (
+                {item.id === 'profile' && profileAvatar ? (
                   <img
                     src={profileAvatar}
-                    alt="Profile"
+                    alt={t("nav.profile")}
                     className="h-5 w-5 rounded-full object-cover"
                   />
-                ) : item.label === 'Community' ? (
+                ) : item.id === 'community' ? (
                   <img
                     src="/favicons/animatedCommunityIcon.gif"
-                    alt="Community"
+                    alt={t("nav.community")}
                     className="h-10 w-10 object-contain"
                   />
                 ) : (
@@ -73,18 +78,18 @@ export default function MainNav() {
                 )}
 
                 {/* Attention-seeking pulse for Community link */}
-                {item.label === 'Community' && (
+                {/* {item.id === 'community' && (
                   <span className="absolute -top-1 -right-1 flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                   </span>
-                )}
+                )} */}
               </div>
               <div className="flex flex-col items-center leading-none gap-0.5">
-                <span className="text-[9px] font-semibold">{item.label}</span>
-                {item.label === 'Community' && (
-                  <span className="text-[9px] opacity-70 font-normal">Advice Us</span>
-                )}
+                <span className="text-[9px] font-semibold">{label}</span>
+                {/* {item.id === 'community' && (
+                  <span className="text-[9px] opacity-70 font-normal">{t("nav.advice_us")}</span>
+                )} */}
               </div>
             </Link>
           );

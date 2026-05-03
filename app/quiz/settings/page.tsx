@@ -46,14 +46,12 @@ export default function QuizSettingsPage() {
       <button
         type="button"
         onClick={() => onChange(!value)}
-        className={`relative h-8 w-16 shrink-0 border-2 border-[var(--color-retro-stroke)] transition-colors ${
-          value ? 'bg-[var(--color-actinide)]' : 'bg-[var(--color-retro-bg)]'
-        }`}
+        className={`relative h-8 w-16 shrink-0 border-2 border-[var(--color-retro-stroke)] transition-colors ${value ? 'bg-[var(--color-actinide)]' : 'bg-[var(--color-retro-bg)]'
+          }`}
       >
         <div
-          className={`absolute top-0.5 h-6 w-6 border-2 border-[var(--color-retro-stroke)] bg-white transition-transform ${
-            value ? 'translate-x-8' : 'translate-x-0.5'
-          }`}
+          className={`absolute top-0.5 h-6 w-6 border-2 border-[var(--color-retro-stroke)] bg-white transition-transform ${value ? 'translate-x-8' : 'translate-x-0.5'
+            }`}
         />
       </button>
     </div>
@@ -84,12 +82,12 @@ export default function QuizSettingsPage() {
             value={settings.soundEnabled}
             onChange={(v) => update({ soundEnabled: v })}
           />
-          <Toggle
+          {/* <Toggle
             label="Vibration"
             desc="Haptic feedback on supported devices"
             value={settings.vibrationEnabled}
             onChange={(v) => update({ vibrationEnabled: v })}
-          />
+          /> */}
         </div>
       </section>
 
@@ -148,9 +146,8 @@ export default function QuizSettingsPage() {
                 <button
                   key={n}
                   onClick={() => update({ defaultOptionCount: n })}
-                  className={`retro-btn flex-1 py-2 text-lg font-black ${
-                    settings.defaultOptionCount === n ? 'bg-[var(--color-actinide)]' : 'bg-white'
-                  }`}
+                  className={`retro-btn flex-1 py-2 text-lg font-black ${settings.defaultOptionCount === n ? 'bg-[var(--color-actinide)]' : 'bg-white'
+                    }`}
                 >
                   {n}
                 </button>
@@ -193,9 +190,8 @@ export default function QuizSettingsPage() {
               <button
                 key={s}
                 onClick={() => update({ fontSize: s })}
-                className={`retro-btn flex-1 py-2 text-lg font-black capitalize ${
-                  settings.fontSize === s ? 'bg-[var(--color-actinide)]' : 'bg-white'
-                }`}
+                className={`retro-btn flex-1 py-2 text-lg font-black capitalize ${settings.fontSize === s ? 'bg-[var(--color-actinide)]' : 'bg-white'
+                  }`}
               >
                 {s}
               </button>
