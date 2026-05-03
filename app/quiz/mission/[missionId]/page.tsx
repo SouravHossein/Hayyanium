@@ -86,6 +86,7 @@ function MissionBridgeContent() {
         zoneId: mission.zoneId,
         missionType: mission.type,
         xpReward: mission.xpReward,
+        difficulty: config.difficulty,
       }));
     }
 

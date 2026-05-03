@@ -49,48 +49,38 @@ export default function BossCard({ zone, zoneProgress, playerLevel }: BossCardPr
   }
 
   // Locked
+  const needsLevel = playerLevel < 5;
   const needsCoverage = coveragePct < 75;
   const needsMastery = masteryScore < 65;
-  const needsLevel = playerLevel < 5;
 
   return (
-    <div className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-4 flex flex-col items-center gap-2 text-center opacity-70">
+    <div className="card p-4 flex flex-col items-center gap-3 text-center bg-gray-50/50 dark:bg-gray-900/20 opacity-80 border-dashed">
       <div className="relative">
-        <Skull className="w-10 h-10 text-gray-400 grayscale" />
-        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-0.5 border border-gray-200 dark:border-gray-700">
-          <Lock className="w-3 h-3 text-gray-400" />
+        <Skull className="w-10 h-10 text-gray-400 grayscale opacity-40" />
+        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 rounded-full p-1 border-2 border-gray-300 dark:border-gray-600">
+          <Lock className="w-2.5 h-2.5 text-gray-400" />
         </div>
       </div>
-      <div className="font-bold text-sm text-gray-600 dark:text-gray-400">{zone.label}</div>
-      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold">
-        🔒 LOCKED
-      </span>
-      <div className="text-[10px] text-gray-400 dark:text-gray-500 space-y-0.5">
-        {needsLevel && <p>Reach Level 5</p>}
-        {needsCoverage && <p>Coverage: {coveragePct}% / 75%</p>}
-        {needsMastery && !needsCoverage && <p>Mastery: {masteryScore}% / 65%</p>}
+      
+      <div className="space-y-0.5">
+        <div className="font-black text-xs text-gray-500 uppercase tracking-wider">{zone.label}</div>
+        <div className="text-[10px] font-bold text-gray-400 uppercase">Status: Locked</div>
       </div>
-      {/* Mini progress bars */}
-      {!needsLevel && (
-        <div className="w-full space-y-1 mt-1">
-          <div>
-            <div className="flex justify-between text-[9px] text-gray-400 mb-0.5">
-              <span>Coverage</span><span>{coveragePct}%</span>
-            </div>
-            <div className="h-1 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div className="h-full bg-cyan-400 transition-all" style={{ width: `${Math.min(coveragePct, 100)}%` }} />
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-[9px] text-gray-400 mb-0.5">
-              <span>Mastery</span><span>{masteryScore}%</span>
-            </div>
-            <div className="h-1 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div className="h-full bg-purple-400 transition-all" style={{ width: `${Math.min(masteryScore, 100)}%` }} />
-            </div>
-          </div>
+
+      <div className="w-full space-y-1.5 pt-2 border-t border-gray-200 dark:border-gray-800">
+        <div className={`flex items-center justify-between text-[10px] font-bold ${needsLevel ? 'text-gray-400' : 'text-emerald-500'}`}>
+          <span>Player Lv.5</span>
+          {needsLevel ? <span>{playerLevel}/5</span> : <CheckCircle2 className="w-3 h-3" />}
         </div>
-      )}
+        <div className={`flex items-center justify-between text-[10px] font-bold ${needsCoverage ? 'text-gray-400' : 'text-emerald-500'}`}>
+          <span>Coverage 75%</span>
+          {needsCoverage ? <span>{coveragePct}%</span> : <CheckCircle2 className="w-3 h-3" />}
+        </div>
+        <div className={`flex items-center justify-between text-[10px] font-bold ${needsMastery ? 'text-gray-400' : 'text-emerald-500'}`}>
+          <span>Mastery 65%</span>
+          {needsMastery ? <span>{masteryScore}%</span> : <CheckCircle2 className="w-3 h-3" />}
+        </div>
+      </div>
     </div>
   );
 }

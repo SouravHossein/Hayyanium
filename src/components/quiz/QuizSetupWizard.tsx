@@ -314,8 +314,21 @@ export default function QuizSetupWizard() {
       <div className="sticky bottom-0 z-40 -mx-4 sm:mx-0 px-4 sm:px-0 pb-[env(safe-area-inset-bottom)]">
         <div className="rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-white/90 dark:bg-gray-900/70 backdrop-blur p-3 shadow-lg">
           {step === 1 && !canContinueFromScope && (
-            <div className="mb-2 text-xs font-bold text-amber-700 dark:text-amber-300">
-              Need at least 2 elements in scope to continue.
+            <div className="mb-3 rounded-xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-900/20 p-3">
+              <div className="text-xs font-black text-amber-800 dark:text-amber-200">
+                {config.scope.type === 'weak' 
+                  ? "No weak elements found! Practice more to identify your weak spots."
+                  : config.scope.type === 'favorites'
+                  ? "No favorites found! Star some elements on the table first."
+                  : "Scope is too narrow (need 2+ elements)."}
+              </div>
+              <button
+                type="button"
+                onClick={() => updateConfig({ scope: { type: 'all' } })}
+                className="mt-2 text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 hover:underline"
+              >
+                Switch to All Elements →
+              </button>
             </div>
           )}
           <div className="flex items-center justify-between gap-3">

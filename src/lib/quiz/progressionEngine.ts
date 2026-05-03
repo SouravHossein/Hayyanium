@@ -72,6 +72,7 @@ export interface XpCalculationInput {
   comebackElements: number;      // count weak elements recovered
   sameZonePlaysToday: number;    // for diminishing returns
   accuracy: number;              // 0-100
+  difficulty?: 'easy' | 'normal' | 'hard';
 }
 
 export function calculateXp(input: XpCalculationInput): { total: number; events: XpEvent[] } {
@@ -110,6 +111,19 @@ export function calculateXp(input: XpCalculationInput): { total: number; events:
 
   // Compute raw total
   const rawTotal = events.reduce((sum, e) => sum + e.amount, 0);
+
+  // Difficulty Multiplier
+  let difficultyMult = 1.0;
+  if (input.difficulty === 'hard') difficultyMult = 1.5;
+  if (input.difficulty === 'easy') difficultyMult = 0.75;
+
+  if (difficultyMult !== 1.0) {
+    events.push({ 
+      source: 'mission-complete' as any, 
+      amount: Math.round(rawTotal * (difficultyMult - 1)), 
+      label: `${input.difficulty} mode bonus` 
+    });
+  }
 
   // Diminishing returns for easy-mission spam (>2 same zone plays today)
   let multiplier = 1;

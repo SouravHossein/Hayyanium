@@ -111,6 +111,16 @@
     transform: translate(2px, 2px);
     box-shadow: 0px 0px 0px var(--shadow-color);
   }
+
+  /* Boss Battle Arena Mode */
+  .boss-battle-active {
+    --bg-primary: #1a0b0b !important;
+    --text-primary: #fecaca !important; /* text-red-200 */
+    --card-bg: #2d1010 !important;
+    --stroke-color: #7f1d1d !important; /* border-red-900 */
+    --shadow-color: #450a0a !important; /* shadow-red-950 */
+    background-image: radial-gradient(circle at center, #3d0a0a 0%, #1a0b0b 100%) !important;
+  }
 }
 
 @layer utilities {

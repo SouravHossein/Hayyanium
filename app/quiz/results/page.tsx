@@ -16,6 +16,7 @@ interface StoredMissionContext {
   zoneId: string;
   missionType: string;
   xpReward: number;
+  difficulty?: 'easy' | 'normal' | 'hard';
 }
 
 export default function QuizResultsPage() {
@@ -59,17 +60,37 @@ export default function QuizResultsPage() {
         ctx.zoneId,
         ctx.missionType as any,
         ctx.xpReward,
+        ctx.difficulty,
       );
 
       setMissionResult(mr);
       setRewards(rw);
 
-      // Build xp events for display (simplified)
+      // Build xp events for display (matching progressionEngine logic)
       const evts: XpEvent[] = [];
       const baseXp = result.correctCount * 10;
       evts.push({ source: 'correct-answer', amount: baseXp, label: `${result.correctCount} correct answers` });
-      if (result.bestStreak >= 3) evts.push({ source: 'streak-bonus', amount: result.bestStreak * 5, label: `${result.bestStreak}× streak bonus` });
-      if (mr.comebackElements.length > 0) evts.push({ source: 'comeback', amount: mr.comebackElements.length * 15, label: `${mr.comebackElements.length} elements recovered` });
+      
+      if (result.bestStreak >= 3) {
+        evts.push({ source: 'streak-bonus', amount: result.bestStreak * 5, label: `${result.bestStreak}× streak bonus` });
+      }
+      
+      if (mr.comebackElements.length > 0) {
+        evts.push({ source: 'comeback', amount: mr.comebackElements.length * 15, label: `${mr.comebackElements.length} elements recovered` });
+      }
+
+      // Add difficulty bonus event
+      const rawTotal = baseXp + (result.bestStreak >= 3 ? result.bestStreak * 5 : 0) + (mr.comebackElements.length * 15);
+      const diff = ctx.difficulty ?? 'easy';
+      const mult = diff === 'hard' ? 1.5 : diff === 'normal' ? 1.0 : 0.75;
+      if (mult !== 1.0) {
+        evts.push({ 
+          source: 'mission-complete' as any, 
+          amount: Math.round(rawTotal * (mult - 1)), 
+          label: `${diff} mode bonus` 
+        });
+      }
+
       setXpEvents(evts);
 
       sessionStorage.removeItem('hayyanium_active_mission');

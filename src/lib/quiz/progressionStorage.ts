@@ -219,6 +219,7 @@ export function applyMissionResult(
   zoneId: string,
   missionType: MissionType,
   missionXpReward: number,
+  difficulty?: 'easy' | 'normal' | 'hard',
 ): { missionResult: MissionResult; rewards: RewardUnlock[] } {
   /* ── Load current state ─────────────────────────────────────── */
   let progress = getPlayerProgress();
@@ -258,6 +259,7 @@ export function applyMissionResult(
     comebackElements: comebackElements.length,
     sameZonePlaysToday,
     accuracy: quizResult.accuracy,
+    difficulty,
   });
 
   /* ── Apply XP and check level-up ──────────────────────────── */
