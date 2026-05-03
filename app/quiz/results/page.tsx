@@ -70,11 +70,11 @@ export default function QuizResultsPage() {
       const evts: XpEvent[] = [];
       const baseXp = result.correctCount * 10;
       evts.push({ source: 'correct-answer', amount: baseXp, label: `${result.correctCount} correct answers` });
-      
+
       if (result.bestStreak >= 3) {
         evts.push({ source: 'streak-bonus', amount: result.bestStreak * 5, label: `${result.bestStreak}× streak bonus` });
       }
-      
+
       if (mr.comebackElements.length > 0) {
         evts.push({ source: 'comeback', amount: mr.comebackElements.length * 15, label: `${mr.comebackElements.length} elements recovered` });
       }
@@ -84,10 +84,10 @@ export default function QuizResultsPage() {
       const diff = ctx.difficulty ?? 'easy';
       const mult = diff === 'hard' ? 1.5 : diff === 'normal' ? 1.0 : 0.75;
       if (mult !== 1.0) {
-        evts.push({ 
-          source: 'mission-complete' as any, 
-          amount: Math.round(rawTotal * (mult - 1)), 
-          label: `${diff} mode bonus` 
+        evts.push({
+          source: 'mission-complete' as any,
+          amount: Math.round(rawTotal * (mult - 1)),
+          label: `${diff} mode bonus`
         });
       }
 
@@ -140,7 +140,8 @@ export default function QuizResultsPage() {
         />
       </div>
 
-      {/* XP reward panel (only if mission context was present) */}
+      {/* XP reward panel (Commented out for refinement) */}
+      {/* 
       {missionResult && (
         <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
           <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -154,8 +155,10 @@ export default function QuizResultsPage() {
           />
         </div>
       )}
+      */}
 
-      {/* Weak elements revenge CTA */}
+      {/* Weak elements revenge CTA (Commented out for refinement) */}
+      {/* 
       {result.weakElements.length >= 3 && (
         <div className="rounded-2xl border-2 border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 p-5 flex items-start gap-4">
           <span className="text-2xl flex-shrink-0">💊</span>
@@ -173,16 +176,17 @@ export default function QuizResultsPage() {
           </div>
         </div>
       )}
+      */}
 
       {/* Academy return */}
-      <div className="text-center">
+      {/* <div className="text-center">
         <Link
           href="/quiz"
           className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
         >
           🗺️ Back to Quiz Academy
         </Link>
-      </div>
+      </div> */}
 
       {/* Answer review */}
       {showReview && (
@@ -194,13 +198,12 @@ export default function QuizResultsPage() {
             return (
               <div
                 key={answer.questionId}
-                className={`rounded-xl border-2 p-4 ${
-                  answer.isCorrect
+                className={`rounded-xl border-2 p-4 ${answer.isCorrect
                     ? 'border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/50 dark:bg-emerald-900/10'
                     : answer.skipped
                       ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
                       : 'border-red-200 dark:border-red-700/50 bg-red-50/50 dark:bg-red-900/10'
-                }`}
+                  }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">

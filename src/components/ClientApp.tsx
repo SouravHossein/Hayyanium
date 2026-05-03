@@ -115,6 +115,11 @@ const AppContent: React.FC<ClientAppProps> = ({ initialElements }) => {
   );
   const { discovered, discover } = useDiscovery();
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Touch drag state
   const touchDragElement = useRef<ElementData | null>(null);
@@ -607,7 +612,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               </Link>
 
               <Link
-                href="/quiz"
+                href="/quiz/setup"
                 className="retro-btn flex items-center gap-2 px-4 py-2 font-bold uppercase tracking-wider text-sm transition-all text-[var(--color-actinide)]"
               >
                 <svg
@@ -635,7 +640,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
                     className="h-10 w-10 object-contain transition-transform group-hover:scale-110"
                   />
                 </div>
-                  {/* Notification Dot / Pulse */}
+                {/* Notification Dot / Pulse */}
                 <div className="flex flex-col items-start leading-tight">
                   <span className="relative z-10 text-sm">{t("nav.community")}</span>
                   <span className="relative z-10 text-[9px] opacity-70 font-normal normal-case">{t("nav.community_hint")}</span>
@@ -699,7 +704,7 @@ Respond ONLY with a JSON object. For the lewisStructure, use element symbols, do
               Hayyanium
             </h1>
             <div className="flex items-center gap-2">
-              {!user ? (
+              {mounted && !user ? (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 font-bold uppercase text-xs"

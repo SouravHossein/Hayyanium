@@ -13,7 +13,7 @@ const MAIN_ITEMS = [
   { id: 'builder', href: '/?builder=1', labelKey: 'nav.builder', icon: Plus, exactPath: '/' },
   { id: 'timeline', href: '/timeline', labelKey: 'nav.timeline', icon: Clock3 },
   { id: 'community', href: '/community', labelKey: 'nav.community', icon: Users },
-  { id: 'quiz', href: '/quiz', labelKey: 'nav.quiz', icon: Sparkles },
+  { id: 'quiz', href: '/quiz/setup', labelKey: 'nav.quiz', icon: Sparkles },
   { id: 'profile', href: '/profile', labelKey: 'nav.profile', icon: UserCircle2 },
 ] as const;
 
@@ -22,6 +22,11 @@ export default function MainNav() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { t } = useI18n();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isBuilderActive = pathname === '/' && searchParams.get('builder') === '1';
   const isActivePath = (href: string) => {
@@ -61,7 +66,7 @@ export default function MainNav() {
               }}
             >
               <div className="relative">
-                {item.id === 'profile' && profileAvatar ? (
+                {mounted && item.id === 'profile' && profileAvatar ? (
                   <img
                     src={profileAvatar}
                     alt={t("nav.profile")}

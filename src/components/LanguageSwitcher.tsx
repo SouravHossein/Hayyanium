@@ -6,6 +6,13 @@ import type { Locale } from "@/i18n/locales";
 
 export default function LanguageSwitcher({ className }: { className?: string }) {
   const { locale, setLocale, t } = useI18n();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const set = (next: Locale) => setLocale(next);
 

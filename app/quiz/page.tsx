@@ -42,6 +42,10 @@ export default function QuizAcademyPage() {
   const [streak, setStreak] = useState({ current: 0, longest: 0 });
 
   useEffect(() => {
+    router.replace('/quiz/setup');
+  }, [router]);
+
+  useEffect(() => {
     setMounted(true);
     const p = getPlayerProgress();
     const zp = getAllZoneProgress();
@@ -96,6 +100,7 @@ export default function QuizAcademyPage() {
       </Link>
 
       {/* ── Recommended Action Banner ─────────────────────────── */}
+      {/* 
       <div className="card bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-5 flex items-center gap-4 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
           <Compass className="w-24 h-24" />
@@ -114,6 +119,7 @@ export default function QuizAcademyPage() {
           EXPLORE
         </Link>
       </div>
+      */}
 
       {/* ── Quick Start & XP Overview ─────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -133,6 +139,7 @@ export default function QuizAcademyPage() {
         </button>
 
         {/* XP Overview */}
+        {/* 
         {progress && (
           <div className="card p-4">
             <PlayerXpBar
@@ -143,9 +150,11 @@ export default function QuizAcademyPage() {
             />
           </div>
         )}
+        */}
       </div>
 
       {/* ── Tab Navigation ────────────────────────────────────── */}
+      {/* 
       <div className="flex gap-2 bg-black/5 dark:bg-white/5 p-2 rounded-2xl border-2 border-[var(--color-retro-stroke)]">
         {TABS.map((t) => (
           <button
@@ -162,8 +171,10 @@ export default function QuizAcademyPage() {
           </button>
         ))}
       </div>
+      */}
 
       {/* ── Story Path Tab ────────────────────────────────────── */}
+      {/* 
       {tab === 'story' && progress && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -173,7 +184,6 @@ export default function QuizAcademyPage() {
             </span>
           </div>
 
-          {/* Period zones first, then blocks, then categories */}
           {(['period', 'block', 'category'] as const).map(scopeType => {
             const zones = ZONE_DEFINITIONS.filter(z => z.scopeType === scopeType);
             const sectionLabel = scopeType === 'period' ? '📅 Period Tracks'
@@ -196,8 +206,10 @@ export default function QuizAcademyPage() {
           })}
         </div>
       )}
+      */}
 
       {/* ── Daily Lab Tab ──────────────────────────────────────── */}
+      {/* 
       {tab === 'daily' && daily && progress && (
         <div>
           <DailyMissionCard
@@ -207,8 +219,10 @@ export default function QuizAcademyPage() {
           />
         </div>
       )}
+      */}
 
       {/* ── Boss Battles Tab ───────────────────────────────────── */}
+      {/* 
       {tab === 'boss' && progress && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -220,7 +234,6 @@ export default function QuizAcademyPage() {
             )}
           </div>
 
-          {/* Grid of boss cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {ZONE_DEFINITIONS.map(zone => (
               <BossCard
@@ -233,6 +246,7 @@ export default function QuizAcademyPage() {
           </div>
         </div>
       )}
+      */}
 
       {/* ── Laboratory Tools ────────────────────────────────────── */}
       <div className="card p-5 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800/30">

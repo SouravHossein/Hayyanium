@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { BookOpenText, ChartColumn, FlaskConical, House, Settings, Sparkles } from '@/components/icons';
 
 const NAV_ITEMS = [
-  { href: '/quiz', label: 'Game', icon: House },
+  // { href: '/quiz', label: 'Game', icon: House },
   { href: '/quiz/setup', label: 'Quiz', icon: FlaskConical },
   { href: '/quiz/history', label: 'History', icon: ChartColumn },
   { href: '/quiz/settings', label: 'Settings', icon: Settings },
@@ -48,7 +48,7 @@ export function QuizSidebar() {
   return (
     <nav className="hidden md:flex flex-col gap-1 w-56 shrink-0 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-gray-700 h-fit sticky top-24">
       <div className="mb-3">
-        <Link href="/quiz" className="text-lg font-extrabold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-cyan-400 dark:to-blue-500">
+        <Link href="/quiz/setup" className="text-lg font-extrabold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-cyan-400 dark:to-blue-500">
           Hayyanium Quiz
         </Link>
       </div>

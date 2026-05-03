@@ -3,6 +3,13 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeToggleButton = () => {
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="p-2 w-10 h-10" />; // Placeholder to avoid layout shift
 
   return (
     <button

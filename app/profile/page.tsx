@@ -155,83 +155,14 @@ export default function ProfilePage() {
             </div>
           )}
         </section>
-        {/* ── RPG Identity Card ── */}
+        {/* ── RPG Identity Card (Commented out for refinement) ── */}
+        {/* 
         {rpgProgress && (
           <section className="card p-6 sm:p-8 mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black flex items-center gap-2">
-                <FlaskConical className="w-6 h-6 text-cyan-500" /> {t("profile.quiz_academy")}
-              </h3>
-              <Link href="/quiz" className="text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">{t("profile.view_academy")} <ChevronRight className="w-4 h-4" /></Link>
-            </div>
-
-            {/* XP bar */}
-            <PlayerXpBar
-              xp={rpgProgress.playerXp}
-              level={rpgProgress.playerLevel}
-              rank={rpgProgress.playerRank}
-              animate={false}
-            />
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-3 mt-5">
-              <div className="text-center rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 py-3">
-                <div className="text-2xl font-black text-orange-600 dark:text-orange-400 flex items-center justify-center gap-2">
-                  <Flame className="w-6 h-6 fill-orange-500" /> {localStreak.current}
-                </div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t("profile.day_streak")}</div>
-              </div>
-              <div className="text-center rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 py-3">
-                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
-                  <Skull className="w-6 h-6 fill-emerald-500/20" /> {Object.values(allZp).filter(z => z.bossCleared).length}
-                </div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t("profile.bosses_cleared")}</div>
-              </div>
-              <div className="text-center rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 py-3">
-                <div className="text-2xl font-black text-purple-600 dark:text-purple-400 flex items-center justify-center gap-2">
-                  <Medal className="w-6 h-6 fill-purple-500/20" /> {rpgProgress.earnedBadges.length}
-                </div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t("profile.badges")}</div>
-              </div>
-            </div>
-
-            {/* Zone progress mini-grid */}
-            <div className="mt-5">
-              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{t("profile.zone_progress")}</p>
-              <div className="grid grid-cols-5 sm:grid-cols-7 gap-1.5">
-                {ZONE_DEFINITIONS.slice(0, 14).map(zone => {
-                  const zp = allZp[zone.id];
-                  const pct = zp ? Math.round((zp.coverageCount / zone.totalElements) * 100) : 0;
-                  return (
-                    <Link
-                      key={zone.id}
-                      href={`/quiz?zone=${zone.id}`}
-                      title={t("profile.zone_coverage_tooltip", { label: zone.label, pct })}
-                      className="group relative flex flex-col items-center gap-0.5"
-                    >
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base relative overflow-hidden border border-gray-200 dark:border-gray-700 group-hover:scale-110 transition-transform">
-                        <div
-                          className="absolute bottom-0 left-0 right-0 bg-cyan-400/40 dark:bg-cyan-500/30 transition-all"
-                          style={{ height: `${pct}%` }}
-                        />
-                        <span className="relative z-10">{zone.icon}</span>
-                      </div>
-                      {zp?.bossCleared && <span className="text-[8px]">✅</span>}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Badges */}
-            {rpgProgress.earnedBadges.length > 0 && (
-              <div className="mt-5">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{t("profile.badges_earned")}</p>
-                <BadgeDisplay badges={rpgProgress.earnedBadges} size="sm" />
-              </div>
-            )}
+            ...
           </section>
         )}
+        */}
 
 
 

@@ -14,7 +14,7 @@ export default function QuizLayout({ children }: { children: React.ReactNode }) 
         {/* Top bar */}
         <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-            <a href="/quiz" className="text-lg font-extrabold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-cyan-400 dark:to-blue-500">
+            <a href="/quiz/setup" className="text-lg font-extrabold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-cyan-400 dark:to-blue-500">
               Hayyanium Quiz
             </a>
             <a href="/" className="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 px-3 py-1.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all">
